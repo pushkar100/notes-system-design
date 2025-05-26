@@ -5,6 +5,7 @@
 ## Who is a software architect
 
 > Developers know what CAN be done
+
 > Architects know what **SHOULD** be done
 
 An architect makes sure the software design implements the requirements of the system. He is less interested in the implementation details such as the best loops to use, performing I/O efficiently, libraries to use to perform an operation, and so on.
