@@ -1,3 +1,9 @@
+# Software Architecture of Large Scale Systems
+
+[Course link](https://www.udemy.com/course/software-architecture-design-of-modern-large-scale-systems)
+
+
+
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
 - [Software Architecture of Large Scale Systems](#software-architecture-of-large-scale-systems)
@@ -86,12 +92,6 @@
 
 <!-- TOC end -->
 
-<!-- TOC --><a name="software-architecture-of-large-scale-systems"></a>
-# Software Architecture of Large Scale Systems
-
-[Course link](https://www.udemy.com/course/software-architecture-design-of-modern-large-scale-systems)
-
-<!-- TOC --><a name="definition-of-software-architecture"></a>
 ## Definition of software architecture
 
 > Software Architecture of a system is a high-level description of the **system's structure**, its **different components**, and **how those components communicate with each other** to fulfil the system's requirements and constraints.
