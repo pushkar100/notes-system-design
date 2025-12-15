@@ -1,9 +1,9 @@
 <!-- TOC --><a name="networking-primer"></a>
-# Networking Primer
+# Networking Concepts and Basics
 
 <!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 
-- [Networking Primer](#networking-primer)
+- [Networking Concepts and Basics](#networking-concepts-and-basics)
    * [Networking layers](#networking-layers)
       + [OSI Model ](#osi-model)
       + [TCP/IP model](#tcpip-model)
