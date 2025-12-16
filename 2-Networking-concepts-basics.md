@@ -1728,15 +1728,17 @@ Client connects to 93.184.216.34
 Client wants to visit: www.example.com
 
 **Step 1**: Check Local Cache
-- Client/Browser checks its local DNS cache for the domain.
+- If request originates from the browser, it checks its cache for a lookup
+- If browser did not find a match in its cache (or we did not use a browser), the **client OS** checks its local DNS cache for the domain.
 - If cached → return IP immediately.
 - If not cached → proceed to recursive resolver.
 
 **Step 2**: Recursive Resolver
 - The recursive resolver (ISP or public DNS) handles the query.
-- Its job: find the IP by asking the DNS hierarchy.
+- It too checks its own cache for the IP. If not found, it checks higher up the hierarchy
+	- Its job: find the IP by asking the DNS hierarchy.
 
-**Step 3**: Query Root Server
+**Step 3**: Query Root Server (13 of them exist globally)
 - Resolver asks a root server:
 - “Where can I find .com domains?”
 - Root server doesn’t know the IP, but points resolver to the TLD server for .com.
@@ -1759,6 +1761,7 @@ Client wants to visit: www.example.com
 - Recursive resolver ***caches*** the response (based on TTL) for future requests.
 - Sends the IP back to the client.
 - Client connects to `93.184.216.34`.
+	- *Response is usually cached* at ISP (recursive resolver, your OS, and your browser (if it applies))
 
 <!-- TOC --><a name="types-of-dns-requests"></a>
 ### Types of DNS requests
