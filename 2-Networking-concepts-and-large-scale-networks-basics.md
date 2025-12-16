@@ -1,53 +1,6 @@
 <!-- TOC --><a name="networking-concepts-and-basics"></a>
-# Networking Concepts and Basics
+# Networking Concepts and Large Scale Networks Basics
 
-- [Networking Concepts and Basics](#networking-concepts-and-basics)
-   * [Networking layers](#networking-layers)
-      + [OSI Model ](#osi-model)
-      + [TCP/IP model](#tcpip-model)
-   * [Transport layer protocols](#transport-layer-protocols)
-      + [TCP — Transmission Control Protocol](#tcp-transmission-control-protocol)
-         - [Head-of-Line (HOL) Blocking (TCP-level)](#head-of-line-hol-blocking-tcp-level)
-      + [User Datagram Protocol](#user-datagram-protocol)
-   * [Transport Layer Security](#transport-layer-security)
-      + [Understanding  TLS](#understanding-tls)
-   * [Application layer protocols](#application-layer-protocols)
-      + [Hypertext Transfer Protocol](#hypertext-transfer-protocol)
-         - [HTTP 1.1](#http-11)
-         - [HTTP 2](#http-2)
-         - [HOL differences between HTTP 1 and HTTP 2](#hol-differences-between-http-1-and-http-2)
-         - [HTTP 3](#http-3)
-         - [Domain sharding](#domain-sharding)
-         - [HTTPS](#https)
-         - [HTTP optimisations](#http-optimisations)
-      + [HTTP header basics](#http-header-basics)
-         - [Common ***request*** headers](#common-request-headers)
-         - [Common ***response*** headers](#common-response-headers)
-         - [Headers for ***caching***](#headers-for-caching)
-         - [Headers for ***security***](#headers-for-security)
-   * [Server and CDN caching](#server-and-cdn-caching)
-   * [Server push](#server-push)
-   * [Server-Sent Events](#server-sent-events)
-   * [WebSockets](#websockets)
-   * [WebRTC](#webrtc)
-   * [MAC address](#mac-address)
-   * [IP address](#ip-address)
-      + [IPv4 vs IPv6](#ipv4-vs-ipv6)
-      + [Public vs private IPs](#public-vs-private-ips)
-   * [NAT](#nat)
-   * [Subnetting](#subnetting)
-   * [CIDR](#cidr)
-   * [DNS](#dns)
-      + [Types of DNS and DNS components](#types-of-dns-and-dns-components)
-      + [DNS request flow and hierarchy](#dns-request-flow-and-hierarchy)
-      + [Types of DNS requests](#types-of-dns-requests)
-      + [DNS caching](#dns-caching)
-   * [Load balancers](#load-balancers)
-   * [API gateways](#api-gateways)
-   * [Proxy and reverse proxy](#proxy-and-reverse-proxy)
-   * [Cryptography](#cryptography)
-      + [RSA](#rsa)
-   * [Service mesh](#service-mesh)
 
 <!-- TOC --><a name="networking-layers"></a>
 ## Networking layers
@@ -1792,6 +1745,18 @@ Where does caching occur? It occurs in 3 places:
 
 When does the cache get invalidated?
 - **Time-To-Live (TTL)**: This attribute to the cached lookup determines when the cache should be invalidated so that fresh request do actually hit the DNS. It helps avoid stale lookups. Ex: If server IP has changed but we still use the old one indefinitely, it is a problem!
+
+### DNS in large scale systems
+
+1. It ensures "high availability":
+  1. DNS can act as a load balancer (a primitive one though)
+  2. Anycast DNS: Instead of a single DNS, we use multiple geographically distributed DNSes. Why? Ensures users get the response from the closest DNS -- also the fastest!
+2. DNS failover strategies: Use a primary and a secondary DNS (Fault tolerance?)
+3. DNS routing to CDNs: DNS can route requests to the nearest CDN for faster loading -- mainly for static assets that need to load quickly and they don't change frequently
+4. **DNS security risks**:
+  1. DNS poisoning: This is hacking the "address book" of the internet so that when a user types a legitimate website name (like https://www.google.com/search?q=google.com), they are secretly redirected to a fake malicious site (**Analogy**: It’s like a prankster breaking into the phone company’s database and swapping your bank's phone number with their own; when you dial the bank, you unknowingly talk to the scammer). **Solution**: The most effective solution is to implement **DNSSEC** (Domain Name System Security Extensions), which adds cryptographic signatures to DNS records so that computers can verify the data actually came from the authoritative source and was not faked. 
+  3. Cache poisoning: This involves tricking a system (like a browser or server) into storing a fake or malicious file, which it then automatically serves to other users thinking it is the real version (Analogy: It’s like someone slipping a fake answer key into a teacher's desk; the teacher (the cache) confidently hands out the wrong answers to every student who asks, spreading the error automatically). **Solution**: configure your cache to treat requests with different inputs (like headers) as completely different pages so that the previous page's cache is not affected
+  5. DDOS attacks (Distributed Denial of Service): This is an attack where thousands of hijacked computers flood a target server with junk traffic to crash it or make it unusable for real people (Analogy: It’s like a group of 500 people crowding into a small coffee shop and refusing to buy anything, making it impossible for actual customers to enter or get served). **Note**: **CDNs** help avoid DDOS attacks on DNS and your company servers
 
 <!-- TOC --><a name="load-balancers"></a>
 ## Load balancers
