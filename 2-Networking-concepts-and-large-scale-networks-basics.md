@@ -1,11 +1,34 @@
-<!-- TOC --><a name="networking-concepts-and-basics"></a>
 # Networking Concepts and Large Scale Networks Basics
 
+## Table of contents
 
-<!-- TOC --><a name="networking-layers"></a>
+- [Networking Concepts and Large Scale Networks Basics](#networking-concepts-and-large-scale-networks-basics)
+  - [Networking layers](#networking-layers)
+  - [Transport layer protocols and issues](#transport-layer-protocols-and-issues)
+  - [Transport Layer Security](#transport-layer-security)
+  - [Application layer and protocols](#application-layer-and-protocols)
+  - [Server side caching vs  CDN caching](#server-side-caching-vs--cdn-caching)
+  - [Polling](#polling)
+  - [Server push](#server-push)
+  - [Server-Sent Events](#server-sent-events)
+  - [WebSockets](#websockets)
+  - [WebRTC](#webrtc)
+  - [MAC address](#mac-address)
+  - [IP address](#ip-address)
+  - [NAT](#nat)
+  - [Subnetting](#subnetting)
+  - [CIDR](#cidr)
+  - [DNS](#dns)
+  - [Load balancers](#load-balancers)
+  - [API gateways](#api-gateways)
+  - [Proxy and reverse proxy](#proxy-and-reverse-proxy)
+  - [Cryptography](#cryptography)
+  - [Service mesh](#service-mesh)
+  - [Client Server model](#client-server-model)
+  - [Beyond REST APIs](#beyond-rest-apis)
+
 ## Networking layers
 
-<!-- TOC --><a name="osi-model"></a>
 ### OSI Model 
 
 **OSI model is 7 layers**
@@ -41,7 +64,6 @@ L2: Local delivery (MAC)
 L1: Bits on wire
 ```
 
-<!-- TOC --><a name="tcpip-model"></a>
 ### TCP/IP model
 
 TCP/IP is an alternative model to the OSI model and is only **4 layers**
@@ -64,8 +86,7 @@ Internet     → IP
 Link         → Ethernet, WiFi
 ```
 
-<!-- TOC --><a name="transport-layer-protocols"></a>
-## Transport layer protocols
+## Transport layer protocols and issues
 
 Transport layer protocols provide end-to-end communication between processes, handling reliability, ordering, flow control, and congestion (e.g., TCP) or fast best-effort delivery (e.g., UDP).
 
@@ -76,11 +97,11 @@ Transport layer protocols provide end-to-end communication between processes, ha
 
 Core idea: **Reliable, ordered, congestion-aware communication**
 
-Use TCP when:
+**Use TCP when**:
 1. You cannot lose data
 2. Order matters
 
-Example use cases (TCP at the transport layer will support the below application later protocols):
+**Example use cases** (TCP at the transport layer will support the below application later protocols):
 * HTTP/1, HTTP/2 traffic
 * HTTPS traffic
 * Database connections
@@ -94,7 +115,30 @@ Example use cases (TCP at the transport layer will support the below application
 **Drawbacks**:
 * ❌ Slower than UDP (*3 reasons*: Higher latency, HOL blocking, Connection setup cost)
 
-**TCP 3-way handshake**: **Opening a connection**
+**TCP/IP (Quick clarity)**
+* IP → Addressing + routing
+* TCP → Reliability + order
+
+IP doesn’t care if packets arrive. TCP does.
+
+**Questions on TCP**:
+
+> Q: Why is TCP slower than UDP?
+A: TCP adds reliability, ordering, congestion control, and handshake overhead.
+
+> Q: Why does HTTP/2 still use TCP?
+A: To reuse existing infrastructure and reliability, while fixing HOL at application level.
+
+**Enterprise Tools using TCP**
+1. Nginx
+2. Envoy
+3. HAProxy
+4. Databases (Postgres, MySQL)
+5. REST APIs
+
+#### TCP 3-way handshake
+
+TCP 3 way handshake is used for **Opening a connection**
 1. Client → Server : SYN
 2. Server → Client : SYN + ACK
 3. Client → Server : ACK
@@ -129,14 +173,16 @@ Server → Client: SYN-ACK, seq = y, ack = x + 1
 Client → Server: ACK, ack = y + 1
 ```
 
-Why they must be different
+**Why they must be different?**
 1. TCP is full-duplex (data flows independently in both directions)
 2. Each direction needs its own sequence space for ordering, retransmissions, and loss detection
 3. Prevents confusion between old and new connections (especially after crashes)
 
 > A 2-way handshake can’t confirm bidirectional readiness or protect against delayed/duplicate packets, leading to half-open or bogus connections. The third ACK is what proves “I heard you hear me."
 
-**TCP 4-way handshake**: **Terminating a connection**
+#### TCP 4-way handshake
+
+TCP 4-way handshake is used for **Terminating a connection**
 
 TCP 4-way handshake (connection termination):
 > FIN – “I’m done sending data.”
@@ -167,15 +213,16 @@ Client                                Server
   |------------------------------------- |
 ```
 
-Why termination needs 4 steps:
+**Why termination needs 4 steps?**
 * TCP is full-duplex — each direction closes independently
 * One side may finish sending earlier than the other
 * Clean shutdown without data loss
 
 > TCP uses a 4-way handshake for teardown because each side must independently close its send channel.
 
-<!-- TOC --><a name="head-of-line-hol-blocking-tcp-level"></a>
-#### Head-of-Line (HOL) Blocking (TCP-level)
+### Head-of-Line HOL Blocking 
+
+**HOL occurs in TCP connections**
 
 *Problem*: TCP delivers data in **order**.
 
@@ -188,37 +235,18 @@ Packet 3 → WAITING ❌ (even if received)
 
 So *everything waits.*
 
-This hurts:
-1. HTTP/1.1
-2. Mobile / lossy networks
+This:
+1. Hurts the HTTP/1.1 protocol (One TCP connection per request -- entire connection is blocked)
+2. Leads to lossy networks
 
-The fix for H.O.L blocking: You can’t fix Head-of-Line (HoL) blocking inside TCP — it’s a fundamental property of in-order, reliable delivery. Alternatives:
+**The fix for H.O.L blocking**: ***You can’t fix Head-of-Line (HoL) blocking inside TCP — it’s a fundamental property of in-order, reliable delivery.*** 
+
+**Alternative fixes**:
 * Use multiple TCP connections: Parallel connections reduce the blast radius of one lost packet (HTTP/1.1 browsers used this trick)
 * Application-level multiplexing: Move stream management above TCP so one stalled stream doesn’t block others (HTTP/2 tried this, but still suffers from TCP-level HoL)
 * Use QUIC (UDP-based) ✅ real solution: Runs over UDP, has multiple independent streams, packet loss in one stream doesn’t block others (HTTP/3)
 * Reduce packet loss (mitigation, not cure)
 
-**TCP/IP (Quick clarity)**
-* IP → Addressing + routing
-* TCP → Reliability + order
-
-IP doesn’t care if packets arrive. TCP does.
-
-**Questions on TCP**:
-Q: Why is TCP slower than UDP?
-A: TCP adds reliability, ordering, congestion control, and handshake overhead.
-
-Q: Why does HTTP/2 still use TCP?
-A: To reuse existing infrastructure and reliability, while fixing HOL at application level.
-
-**Enterprise Tools using TCP**
-1. Nginx
-2. Envoy
-3. HAProxy
-4. Databases (Postgres, MySQL)
-5. REST APIs
-
-<!-- TOC --><a name="user-datagram-protocol"></a>
 ### User Datagram Protocol
 
 Core idea: **Fast, connectionless, best-effort delivery**
@@ -230,13 +258,13 @@ No:
 
 Just fire-and-forget.
 
-**UDP characteristics**:
+**UDP characteristics**
 - ❌ No guarantee of delivery
 - ❌ No order
 - ❌ No congestion control
 - ✅ Very low latency
 
-**Where UDP is used**:
+**Where UDP is used**
 | Use Case	| Why UDP |
 | -- | -- |
 | Video streaming |	Losing a frame is okay |
@@ -245,14 +273,14 @@ Just fire-and-forget.
 | DNS	| Small, fast |
 | QUIC / HTTP/3	| Custom reliability |
 
-**UDP flow**:
+**UDP flow**
 ```
 Client ---> Packet ---> Server
 Client ---> Packet ---> Server
 (no ACKs)
 ```
 
-**Examples of UDP usage**:
+**Examples of UDP usage**
 1. QUIC (used in HTTP/3)
 2. WebRTC (Cloudflare, Google)
 3. DNS servers
@@ -260,17 +288,17 @@ Client ---> Packet ---> Server
 
 > “UDP pushes complexity to the application layer.”
 
-**UDP pros**:
+**UDP pros**
 * Very fast
 * No handshake
 * Great for real-time
 
-**UDP cons**:
+**UDP cons**
 * Unreliable
 * Harder to implement correctly
 * Firewalls sometimes block UDP
 
-**Questions**:
+**Questions**
 
 > Q: Why not use UDP everywhere?
 A: Most applications need reliability and ordering, which UDP doesn’t provide.
@@ -278,7 +306,7 @@ A: Most applications need reliability and ordering, which UDP doesn’t provide.
 > Q: Why is QUIC built on UDP?
 A: UDP allows "custom reliability" without TCP’s HOL blocking.
 
-**TCP vs UDP comparison**:
+**TCP vs UDP comparison**
 | Feature     | TCP      | UDP           |
 | ----------- | -------- | ------------- |
 | Reliability | Yes      | No            |
@@ -288,9 +316,9 @@ A: UDP allows "custom reliability" without TCP’s HOL blocking.
 | Use cases   | APIs, DB | Video, gaming |
 
 
-**Head-of-Line (HoL) Blocking: HTTP/2 vs HTTP/3**
+### Head-of-Line blocking in HTTP 2 vs HTTP 3
 
-- HTTP/2:
+- **HTTP/2**
 	- Multiplexes many streams over a single TCP connection
 	- Fixes application-layer HoL (one slow request doesn’t block others at HTTP level)
 	- ❌ Still suffers from TCP HoL
@@ -300,14 +328,14 @@ A: UDP allows "custom reliability" without TCP’s HOL blocking.
 
 Result: Loss in one stream pauses every stream
 
-- HTTP/3
+- **HTTP/3**
 	- Runs on QUIC (over UDP)
 	- Each stream has independent ordering and retransmission
 	- ❌ No TCP → no transport-layer HoL
 
 Result: Loss in one stream blocks only that stream
 
-**"Streams" explained**:
+**"Streams" explained**
 > A stream is a logical, independent, bidirectional sequence of bytes representing one request–response pair, multiplexed over a single connection.
 
 Key points:
@@ -317,7 +345,7 @@ Key points:
 
 Think of streams like ***multiple conversations happening over one phone call***.
 
-**H.O.L blocking in TCP connections**:
+**H.O.L blocking in TCP connections**
 ```
 Single TCP Connection
 ┌───────────────────────────────────────────┐
@@ -343,7 +371,7 @@ Stream 3: ❌ blocked
 Stream 4: ❌ blocked
 ```
 
-**No H.O.L blocking in UDP connection**:
+**No H.O.L blocking in UDP connection**
 ```
 QUIC Connection (UDP)
 ┌───────────────────────────────────────────┐
@@ -361,12 +389,10 @@ Stream 2: ✅ continues
 Stream 3: ✅ continues
 ```
 
-<!-- TOC --><a name="transport-layer-security"></a>
 ## Transport Layer Security
 
 TLS stands for Transport Layer Security
 
-<!-- TOC --><a name="understanding-tls"></a>
 ### Understanding  TLS
 
 **Problem without TLS:**
@@ -428,7 +454,7 @@ Steps:
 
 From now on, all application data is encrypted.
 
-TLS handshake steps:
+**TLS handshake steps**
 1. Verify server identity 
 2. Agree on encryption keys 
 3. Start secure communication
@@ -448,7 +474,7 @@ Client                         Server
   | === Encrypted Data ======= |
 ```
 
-Important detail (but simple)
+**Important detail (but simple)**
 * Asymmetric crypto → used only during handshake
 * Symmetric crypto → used for actual data (faster)
 
@@ -470,19 +496,19 @@ Example in TLS:
 
 > The owner (server) generates and keeps the private key secret, and shares the public key with anyone who wants to communicate securely.
 
-**What is a TLS certificate or cert?**:
+#### TLS certificate or cert
 
 > A TLS certificate ***proves*** the server’s identity and ***provides the public key*** needed to establish a secure encrypted session.
 
 What a TLS Certificate Is: A TLS certificate is a digital identity card for a server (or sometimes a client) that proves it is who it claims to be.
 
-Key points:
+**Key points**
 1. Authenticates the server – Ensures you are really talking to the legitimate website/server.
 2. Contains a public key – Used by the client to set up encryption for the session.
 3. Signed by a trusted Certificate Authority (CA) – The CA vouches that the server’s identity is valid.
 4. Optional info – Domain name, organization, expiration date, etc.
 
-Analogy:
+**Analogy**
 - Think of it like a passport for websites:
 - Shows your identity (domain)
 - Verified by a trusted authority (CA)
@@ -490,11 +516,11 @@ Analogy:
 
 If invalid:🚨 “Your connection is not private”
 
-**Trusted authority**:
+**Trusted authority**
 
 A trusted authority (CA) is an entity that *verifies and vouches for a server’s identity*, allowing clients to trust its TLS certificate.
 
-Here are some well-known **Certificate Authorities (CAs)**:
+Here are some well-known **Certificate Authorities (CAs)**
 - GlobalSign
 - DigiCert (includes Symantec, Thawte, GeoTrust)
 - Let's Encrypt (free, automated)
@@ -503,7 +529,7 @@ Here are some well-known **Certificate Authorities (CAs)**:
 
 These are entities browsers and operating systems trust to verify website identities
 
-**TLS 1.2 vs TLS 1.3**
+#### TLS 1.2 vs TLS 1.3
 | Feature       | TLS 1.2 | TLS 1.3 |
 | ------------- | ------- | ------- |
 | Handshake RTT | 2       | 1       |
@@ -513,7 +539,8 @@ These are entities browsers and operating systems trust to verify website identi
 
 > “TLS 1.3 reduces handshake latency by one round trip.”
 
-**Drawbacks of TLS**:
+#### Drawbacks of TLS
+
 - TLS adds:
 	- Handshake latency
 	- CPU cost (encryption)
@@ -521,7 +548,7 @@ These are entities browsers and operating systems trust to verify website identi
 	- Mobile
 	- High-QPS APIs
 
-**TLS optimizations**
+#### TLS optimizations
 
 1. 1️⃣ TLS Session Resumption
 	- Reuse previous session keys.
@@ -537,7 +564,7 @@ These are entities browsers and operating systems trust to verify website identi
 
 > “0-RTT trades some security for latency.”
 
-**Problem with the "O-RTT" optimisation**:
+**Problem with the "O-RTT" optimisation**
 
 A replay attack is when an attacker records a valid message and sends it again later to trick the server.
 
@@ -589,7 +616,7 @@ Broken down:
 - Sequence numbers are in order – ensures no previous message is accepted again.
 - Handshake completed successfully – both client and server have authenticated each other and agreed on encryption parameters.
 
-**TLS Pros & Cons**
+#### TLS Pros & Cons
 
 Pros
 - Secure
@@ -617,7 +644,7 @@ Cons
 - Istio
 - Let’s Encrypt
 
-**TLS termination**
+#### TLS termination
 
 Why TLS is terminated at a **CDN** or **Load Balancer**
 
@@ -656,10 +683,8 @@ Why TLS is terminated at a **CDN** or **Load Balancer**
 +---------------------+
 ```
 
-<!-- TOC --><a name="application-layer-protocols"></a>
-## Application layer protocols
+## Application layer and protocols
 
-<!-- TOC --><a name="hypertext-transfer-protocol"></a>
 ### Hypertext Transfer Protocol
 
 HTTP is:
@@ -679,6 +704,10 @@ HTTP/1.1 200 OK
 Content-Type: text/html
 ...
 ```
+
+**Note**: 
+- HTTP port used is `80`
+- HTTPS port used is `443`
 
 **HTTP 1.1 vs 2 vs 3**
 
@@ -721,7 +750,7 @@ Analogy: Think of a single TCP/QUIC connection as a highway, and each stream as 
 
 Analogy: Each request is a separate single-lane road. Cars (requests) wait for the previous car to finish before the next can go (unless you open multiple TCP connections).
 
-Characteristics:
+**Characteristics**
 - Important: ***TCP connection per request (or pipelining with limitations)***
 - No true multiplexing
 - Head-of-Line blocking is severe at TCP layer
@@ -737,11 +766,10 @@ Client              Server
   |<-- Resp3 --------- |
 ```
 
-Problems:
+**Problems**
 1. Sequential; slow for many small resources
 2. Multiple TCP connections needed → overhead
 
-<!-- TOC --><a name="http-2"></a>
 #### HTTP 2
 
 Analogy: One multi-lane highway over a single TCP connection.
@@ -768,7 +796,6 @@ Key idea:
 - Multiple requests multiplexed
 - Loss of a single TCP packet blocks all streams → still some HoL
 
-<!-- TOC --><a name="hol-differences-between-http-1-and-http-2"></a>
 #### HOL differences between HTTP 1 and HTTP 2
 
 **HTTP/1.1 HoL (application-level HoL)**
@@ -844,12 +871,11 @@ Result
 | TCP-layer HoL      | ❌ Yes               | ❌ Still exists     |
 | Packet loss impact | Blocks next request | Blocks all streams |
 
-<!-- TOC --><a name="http-3"></a>
-#### HTTP 3
+#### HTTP 3 and QUIC
 
 Analogy: Multi-lane highway with independent lanes, each lane has its own toll booth and traffic light. Packet loss in one lane doesn’t block others.
 
-Characteristics:
+Characteristics
 - ***Runs over QUIC (UDP)***
 - ***Multiplexed streams*** with  ***independent ordering***
 - ***No transport-layer HoL***
@@ -917,23 +943,21 @@ App (HTTP/3)
 - UDP is widely allowed through firewalls
 - ***QUIC in user space → faster innovation***
 
-<!-- TOC --><a name="domain-sharding"></a>
-#### Domain sharding
+### Domain sharding
 
 Domain Sharding is a ***concept, not a protocol***: 
 - Splitting requests across multiple subdomains to increase parallel downloads.
 - Example: `assets1.example.com`, `assets2.example.com`
 - Old hack from HTTP/1.1 era because only ~6 connections per domain.
 
-Drawback today:
+**Drawback today**
 - With HTTP/2 multiplexing → domain sharding can hurt performance.
 
 **Note**: Do not domain shard in today's day and age (HTTP 2+ world)
 
-<!-- TOC --><a name="https"></a>
-#### HTTPS
+### HTTPS
 
-TLS + HTTP interplay
+HTTPS = TLS + HTTP interplay
 
 - ***Browsers force HTTP/2 over TLS (except local or special cases).***
 - `TLS handshake + TCP handshake cost → mitigated by connection reuse, HSTS, 0-RTT.`
@@ -945,32 +969,31 @@ Clean explanation:
 
 In one line: **`HTTPS = HTTP + TLS (secure HTTP)`**
 
-✅ Pros of HTTPS
+✅ **Pros of HTTPS**
 - Security: Encrypts data, preventing eavesdropping and tampering
 - Authentication: Verifies server identity via certificates
 - Trust & SEO: Required by browsers; improves user trust and search ranking
 - Modern features: Enables HTTP/2, HTTP/3, service workers, etc.
 
-❌ Cons of HTTPS
+❌ **Cons of HTTPS**
 - Slight performance overhead: TLS handshake and encryption (mostly negligible today)
 - Operational complexity: Certificate issuance, renewal, and management
 - TLS termination concerns: Encryption often ends at CDN/LB, not always end-to-end
 
 **HTTPS: Mandatory vs Optional** 
 
-Mandatory when:
+**Mandatory when**:
 - Login, payments, personal or sensitive data
 - Authentication (cookies, tokens)
 - Public internet or modern browser features
 
-Optional (rare cases):
+**Optional (rare cases)**:
 - Public, read-only content
 - Trusted internal networks
 
 *Rule of thumb: If it’s on the internet or involves users → use HTTPS.*
 
-<!-- TOC --><a name="http-optimisations"></a>
-#### HTTP optimisations
+### HTTP optimisations
 
 **4**	major optimisations for HTTP network:
 
@@ -995,7 +1018,6 @@ A: To avoid TCP HOL blocking and allow 0-RTT connections.
 > Q: Difference between HTTP and HTTPS?
 A: HTTPS = HTTP over TLS (encrypted, authenticated, integrity-protected).
 
-<!-- TOC --><a name="http-header-basics"></a>
 ### HTTP header basics
 
 > HTTP headers carry metadata that control authentication, content type, caching, and security for requests and responses.
@@ -1120,17 +1142,28 @@ How `X-Frame-Options` helps
 
 > Clickjacking tricks users into clicking hidden or disguised elements, often to perform actions without their consent.
 
-<!-- TOC --><a name="server-and-cdn-caching"></a>
-## Server and CDN caching
+## Server side caching vs  CDN caching
 
-**Server side caching**
+### Server side caching
+
+**Server side caching**: Provides a lot of benefits in terms of ***reducing latency***!
+
 | Type               | Example Tools              | Notes                                     |
 | ------------------ | -------------------------- | ----------------------------------------- |
 | In-memory          | Redis, Memcached           | Very fast, small TTL                      |
 | HTTP reverse proxy | Varnish, Nginx             | Can cache full pages or partial responses |
 | Application-level  | Django cache, Spring cache | Cache objects, queries                    |
 
-**CDNs**
+### CDNs
+
+`CDNs = Content Delivery Networks`
+
+**Problem without CDNs**
+- High latency (*Even with server side caching*, the request still needs to reach a "geographically distant" server)
+- Overloaded origin servers (Every request reaches the origin servers)
+- Bandwidth constraints and slow load times
+
+**CDNs** (edge servers): Globally distributed network of servers working together to deliver content
 1. Servers close to users
 2. Serve static assets (images, JS, CSS) or even dynamic pages
 3. Reduce latency, improve availability
@@ -1145,15 +1178,146 @@ Browser
 Origin Server
 ```
 
-Popular CDNs
+**Popular CDNs**
 - Cloudflare
 - Akamai
 - Fastly
 - AWS CloudFront
 
-Tip: CDNs also handle TLS termination for HTTPS.
+***Tip: CDNs also handle TLS termination for HTTPS.***
 
-**Asset compression**
+**Benefits of CDNs**
+- Reduce latency
+- Enhance content availability
+- Improve load handling
+- Security
+
+#### Cache invalidation strategies
+
+*Cache invalidation* is the process of removing or updating data in the cache when the original data in the database changes. It is famously difficult because you must ensure users don't see "stale" (old) data while maintaining high performance
+
+***Write strategies***:
+1. ***Write-Through (The "Safety First" Strategy):*** The application writes data to both the cache and the database at the same time. The write is only considered "success" when both are updated
+	- Pros: Data is always consistent. Nothing is ever stale.
+	- Cons: Write latency is higher (you have to wait for two writes).
+	- Best For: Critical data that cannot be stale (e.g., financial balances, game scores)
+```
+(1) Write Request
+User -----------------> +-------------+
+                        | Application |
+                        +-------------+
+                               |
+          +--------------------+--------------------+
+          |                                         |
+          | (2a) Update directly                    | (2b) Update directly
+          v                                         v
+    +-----------+                             +------------+
+    |   Cache   | <----(Wait for both)------> |  Database  |
+    +-----------+                             +------------+
+          |                                         |
+          +--------------------+--------------------+
+                               |
+                        (3) Acknowledgment
+User <-----------------(Once 2a & 2b are finished)
+```
+2. ***Write-Around (The "Don't Clutter" Strategy):*** The application writes data directly to the database, skipping the cache entirely. The cache is only populated when someone actively reads that data (***this pairs well with the "Cache-Aside" read strategy***)
+	- Pros: Keeps the cache clean. Prevents **"cache flooding**" where you write data that is never read again (e.g., archival logs)
+	- Cons: The very first person to read the new data will have a slower experience (`Cache Miss --> Read DB`)
+	- Best For: Data written once and read rarely, or big data blobs (logs, backup files)
+```
+(1) Write Request
+User -----------------> +-------------+
+                        | Application |
+                        +-------------+
+                               |
+                               | [ Cache is bypassed / ignored ]
+                               |
+                               | (2) Write directly
+                               v
+                        +------------+
+                        |  Database  |
+                        +------------+
+                               |
+      (3) Acknowledgment       |
+User <-------------------------+
+```
+3. ***Write-Back (The "Speed Demon" Strategy):*** The application writes data only to the cache and immediately confirms "success" to the user. A background process (asynchronously) syncs that data to the database later
+	- Pros: Extremely fast writes. Good for write-heavy workloads.
+	- Cons: High Risk. If the cache server crashes before syncing, that data is lost forever
+	- Best For: Non-critical heavy writes (e.g., analytics counters, video view counts, "likes" on a post)
+```
+(1) Write Request
+User -----------------> +-------------+
+                        | Application |
+                        +-------------+
+                               |
+                               | (2) Fast Update & Mark "Dirty"
+                               v
+      (3) FAST Ack      +-----------+
+User <----------------- |   Cache   |
+                        +-----------+
+                               |
+                               | (4) Asynchronous Sync
+                               |     (Done later in background)
+                               v
+                        +------------+
+                        |  Database  |
+                        +------------+
+```
+
+***Special Mention***: ***TTL i.e Time-To-Live*** This is a ***passive strategy*** used alongside the ones above. You simply set a **timer** on every cache item (e.g., "expire in 5 minutes")
+- How it works: Regardless of what happens, the data is deleted after time T
+- Use Case: The ultimate safety net. If your invalidation code fails, the data will eventually fix itself when the timer runs out.
+
+***A Note on "Delete vs. Update" in cache invalidation***:
+
+When you change data in the DB, should you *Update* the cache value or *Delete* it? Guideline: **Prefer delete**.
+
+Why? If you try to update the cache, *two simultaneous updates might race each other,* leaving you with a mess. If you just delete the key, the next read will simply fetch the fresh, correct version from the DB.
+
+***Read strategies***:
+1. ***Cache-Aside (Lazy Loading):*** This is the most common approach where the **Application is in charge**. The application first checks the cache; if the data is missing ("cache miss"), the application itself must query the database, return the result to the user, and then write that data back to the cache for next time. It is called "lazy" because data is only loaded into the cache when someone actually asks for it
+```
+(1) Get Data?
+User ----------------> +-------------+
+                       | Application | <---(2) Check Cache (Miss)----> +-------+
+                       +-------------+                                 | Cache |
+                              |                                        +-------+
+                              | (3) Read from DB
+                              v
+                       +------------+
+                       |  Database  |
+                       +------------+
+                              |
+                              | (4) App gets data, returns to User,
+                              |      AND updates Cache manually.
+                              v
+                       (Back to App -> Cache)
+```
+2. ***Read-Through:*** In this strategy, **the Cache is in charge**. The application treats the cache as the main data store and never talks to the database directly. If the cache doesn't have the data, the cache software/library (using a configured plugin) automatically connects to the database, fetches the data, saves it, and then hands it to the application.
+```
+(1) Get Data?             (2) Miss? Cache fetches from DB automatically
+User ----------------> +-------+ -------------------------------------> +--------+
+                       | Cache |                                        |   DB   |
+                       +-------+ <------------------------------------- +--------+
+                           |            (3) DB returns data to Cache,
+                           |                Cache saves it, then sends to User.
+                           v
+                     (4) Data to User
+```
+
+***Common cache read and write strategy pairs***:
+- `Cache-Aside + Write-Around` (The "Efficient" Pair)
+	- How it works: You read data only when needed (Cache-Aside), and you write data directly to the database, skipping the cache (Write-Around)
+	- Why: It prevents **"Cache Pollution"**. You don't fill your cache with data that was just written but might never be read again (e.g., archival logs). The cache stays reserved for "hot" data that is actively requested.
+- `Read-Through + Write-Through` (The "Consistent" Pair)
+	- How it works: The application treats the cache as the main data store. The cache is responsible for fetching missing data (Read-Through) and saving new data (Write-Through) to the database.
+	- Why: It guarantees **"Data Consistency"**. Because the cache handles all movement in and out of the database, your application never sees stale data. It also simplifies your code—the app logic never touches the DB directly.
+- `Read-Through + Write-Back` (The "High-Performance" Pair)
+	- How it works: The application reads/writes everything to the cache. The cache lazily syncs updates to the DB later (Write-Back)
+	- Why: It offers Maximum Speed. Both reads and writes happen at memory speed. You accept the risk of data loss (if the cache crashes before syncing) in exchange for the lowest possible latency.
+
+#### Asset compression in the cache
 
 Why? **Reduce payload size → faster downloads**
 
@@ -1188,42 +1352,120 @@ A: ETag = hash/version identifier, Last-Modified = timestamp. ETag more precise,
 > Q: Why not cache everything forever?
 A: Dynamic content changes → must have TTL or invalidation strategy.
 
+## Polling
+
+Polling is a technique where the client (like a web browser) repeatedly asks the server for new data. Since HTTP is a "request-response" protocol, the server cannot push data to the client on its own; the client must ask for it
+
+### Short Polling (The "Nagging" Approach)
+
+- Short polling is like a child in the backseat constantly asking, "Are we there yet?" 
+- The ***client sends a request at fixed intervals*** (e.g., every 5 seconds). 
+- The server responds immediately, usually with "No new data" (empty response) or "Yes, here is the data." 
+- This is simple to implement but wasteful; it consumes bandwidth and server resources even when nothing is happening, creating unnecessary traffic.
+- Use Case: Real-time Dashboards (like a sports score tracker or stock ticker) where data changes constantly, so the "waste" of asking repeatedly is minimal because there is almost always something new to report
+
+### Long polling 
+
+- Long Polling (The "Hanging" Approach): Long polling is like saying, "Tell me when we get there," and then waiting for an answer
+- The client sends a request, but the server does not respond immediately. Instead, the ***server holds the connection open*** and "hangs" until new data actually becomes available
+- Once data arrives, the server sends the response, closing the connection
+- The client immediately opens a new request to wait for the next update. This reduces empty requests but keeps server connections tied up for longer
+- Use Case: Chat Applications (like WhatsApp Web) or Notification Systems. You want the message the instant it arrives, but you don't want to spam the server every second when no one is talking
+
+```
+SHORT POLLING                        LONG POLLING
+  (Fixed Interval Checks)             (Wait for Data, then Reply)
+
+Client             Server            Client             Server
+  |                  |                 |                  |
+  |--- Request 1 --->| (Check)         |--- Request 1 --->| (Holds...)
+  |<-- "Nothing" ----|                 |                  |
+  |                  |                 |                  |
+  |    (Wait 5s)     |                 |                  |
+  |                  |                 |                  |
+  |--- Request 2 --->| (Check)         |                  | * New Data!
+  |<-- "Nothing" ----|                 |                  |
+  |                  |                 |<---- "Data" -----|
+  |    (Wait 5s)     |                 |                  |
+  |                  |                 |--- Request 2 --->| (Holds...)
+  |                  | * New Data!     |                  |
+  |--- Request 3 --->| (Check)         |                  |
+  |<---- "Data" -----|                 |                  |
+  |                  |                 |                  |
+```
+
+**Long vs short polling**
+
+Short Polling:
+- Speed: **Slow**. You always wait for the next "check" interval to see new data.
+- Cost: **High CPU & Bandwidth**. Wastes resources answering "No new data" thousands of times.
+- Best When: **Data changes constantly** (e.g., every second), so every check is useful.
+
+Long Polling:
+- Speed: **Fast**. You get data the instant it arrives.
+- Cost: **High Memory**. The server must hold thousands of idle connections open, eating up RAM.
+- Best When: **Data changes sporadically** (e.g., chat), so you don't want to spam requests.
+
+Summary: Short Polling is **"Chatty"** (wasteful network calls). Long Polling is **"Heavy"** (wasteful server memory).
+
+**Long polling vs Websockets: When to use what?**
+- Use *websockets*:
+	- **High frequency, bi-directional data exchange**
+	- **Low latency is critical** (Ex: gaming, chat)
+	- Ex: Slack uses websockets for chat
+	- Ex: Stock exchanges required websockets for real time data
+- Use *long-polling*:
+	- **Websockets** are **not supported** or are **overkill**
+	- **Periodic updates** are sufficient (Ex: Notifications)
+	- Ex: Twitter uses long polling for notifications
+	- Ex: IoT devices using long polling for intermittent updates
+
+### Comparison of polling with other mechanisms
+
+| Feature | Short Polling | Long Polling | WebSockets | Server-Sent Events (SSE) | HTTP/2 Server Push |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Communication Direction** | **Unidirectional**<br>(Client requests, Server responds) | **Unidirectional**<br>(Client requests, Server waits) | **Bidirectional**<br>(Full-duplex; both send at will) | **Unidirectional**<br>(Server streams to Client) | **Unidirectional**<br>(Server sends resources to Client) |
+| **Initiator** | **Client** initiates every check. | **Client** initiates; Server holds connection. | **Client** initiates handshake; then either party sends. | **Client** initiates connection; Server pushes updates. | **Server** predicts need and pushes alongside response. |
+| **Connection Persistence** | **None**<br>(New connection every request) | **Short/Medium**<br>(Closes after data received; re-opens) | **Persistent**<br>(Single connection stays open) | **Persistent**<br>(Single connection stays open) | **Transient**<br>(Tied to a specific request cycle) |
+| **Data Format** | Standard HTTP (JSON, XML) | Standard HTTP (JSON, XML) | Binary or Text (Custom protocols) | Text only (UTF-8) | Binary (HTTP Frames) |
+| **Resource Efficiency** | **Low**<br>(High overhead; many empty responses) | **Medium**<br>(Reduces empty responses, but frequent re-connects) | **High**<br>(Minimal overhead after handshake) | **High**<br>(Standard HTTP compression) | **High**<br>(Uses idle bandwidth) |
+| **Primary Use Case** | Legacy systems or rarely changing data. | Simple notifications where WebSocket is overkill. | High-frequency apps (Games, Chat). | Live feeds (News, Stock Tickers). | Pre-loading web assets (CSS/JS). |
+
 <!-- TOC --><a name="server-push"></a>
 ## Server push
 
 It is an *HTTP/2 feature*
 
-Concept: Server proactively sends resources to the client before requested
+**Concept**: Server proactively sends resources to the client before requested
 
-Benefit: Reduces round-trips for critical assets
+**Benefit**: Reduces round-trips for critical assets
 
 ```
 Client → Server : GET /index.html
 Server → Client : HTML + CSS + JS (pushed)
 ```
 
-Pros
+**Pros**
 - Faster page load
 - Fewer round trips
 
-Cons
+**Cons**
 - Can push unnecessary data → waste bandwidth
 - Hard to control caching
 
-Enterprise Tools
+**Enterprise Tools**
 - Nginx, Apache HTTP/2
 - CDNs (Cloudflare, Fastly)
 
-<!-- TOC --><a name="server-sent-events"></a>
 ## Server-Sent Events
 
 SSE stands for Server-Sent Events
 
-Concept: Browser opens one-way, long-lived connection
+**Concept**: Browser opens one-way, long-lived connection
 
-How it works: Server pushes text/event-stream updates
+**How it works**: Server pushes text/event-stream updates
 
-Use case: live notifications, stock tickers
+**Use case:** live notifications, stock tickers
 
 ```
 Browser → Server : GET /events (HTTP)
@@ -1231,27 +1473,26 @@ Server → Browser : event1
 Server → Browser : event2
 ```
 
-Pros
+**Pros**
 - Simple (HTTP-based)
 - Auto-reconnect built-in
 - Works with existing proxies
 
-Cons
+**Cons**
 - One-way only
 - Less control than WebSocket
 - Limited browser support on older versions
 
-Enterprise Tools
+**Enterprise Tools**
 - Node.js `EventSource` API
 - Spring `SSEEmitter`
 - Django `Channels`
 
-<!-- TOC --><a name="websockets"></a>
 ## WebSockets
 
-Concept: Full-duplex, persistent TCP connection
+**Concept**: Full-duplex, persistent TCP connection
 
-Benefit: Low-latency, real-time communication
+**Benefit**: Low-latency, real-time communication
 
 ```
 Client ↔ WebSocket Server
@@ -1259,22 +1500,22 @@ Client ↔ WebSocket Server
 Bidirectional messages
 ```
 
-Use Cases
+**Use Cases**
 - Chat apps
 - Multiplayer games
 - Collaborative editing
 
-Pros
+**Pros**
 - Full-duplex
 - Low-latency
 - Works over TCP
 
-Cons
+**Cons**
 - More complex to scale
 - Needs connection management
 - Firewalls/proxies sometimes block
 
-Enterprise Tools
+**Enterprise Tools**
 - `Socket.IO` (Node.js)
 - `SignalR` (.NET)
 - AWS `AppSync` / API Gateway WebSockets
@@ -1291,20 +1532,228 @@ Client                               Server
   |                                   |
 ```
 
-Key points:
+**Key points**
 - Starts as a normal HTTP request (Upgrade: websocket)
 - Server responds with `101` Switching Protocols
 - After handshake, bi-directional messages flow ***without*** HTTP overhead
 
+### Websocket handshake process
 
-**Server push vs SSE vs Web sockets**
+1. Client starts with normal HTTP (Browser/app sends an HTTP request to the server but later it asks to upgrade the connection)
+2. Client requests an upgrade. Sends headers like `Upgrade: websocket`, `Connection: Upgrade`, `Sec-WebSocket-Key (random value)`
+3. Server agrees (or rejects): If server supports WebSockets, responds with `HTTP 101 Switching` Protocols. Sends back `Sec-WebSocket-Accept`
+4. Connection is upgraded: HTTP is now gone. A persistent, full-duplex WebSocket connection is established
+5. Real-time data starts flowing: Client and server can now send messages anytime. *No request–response cycle anymore*
+
+```
+Client (Browser/App)                         Server
+       |                                        |
+       |  --- HTTP PHASE ---                    |
+       |                                        |
+       | (1) Starts as normal HTTP Request      |
+       | (2) Asks to "Upgrade" with Headers     |
+       | -------------------------------------> |
+       |     GET / HTTP/1.1                     |
+       |     Host: server.com                   |
+       |     Connection: Upgrade                |
+       |     Upgrade: websocket                 |
+       |     Sec-WebSocket-Key: [Random String] |
+       |                                        |
+       |                                        |
+       | (3) Server Agrees (Switching Protos)   |
+       | <------------------------------------- |
+       |     HTTP/1.1 101 Switching Protocols   |
+       |     Connection: Upgrade                |
+       |     Upgrade: websocket                 |
+       |     Sec-WebSocket-Accept: [Hashed Key] |
+       |                                        |
+       |                                        |
+========================================================
+  (4) CONNECTION UPGRADED! (HTTP protocol ends here)
+      Persistent, Full-Duplex TCP connection opens
+========================================================
+       |                                        |
+       |  --- WEBSOCKET PHASE ---               |
+       |                                        |
+       | (5) Real-time Data Flow starts         |
+       |     (No request-response needed)       |
+       |                                        |
+       | <---------- [Message Data] ----------> |
+       |                                        |
+       | ----------- [Client Message] --------> |
+       |                                        |
+       | <---------- [Server Message] --------- |
+       |                                        |
+       | <---------- [Server Message] --------- |
+       |                                        |
+       v                                        v
+```
+
+### Websockets and load balancers
+
+*Do websockets need load balancers?* **Yes**, absolutely—but they are *much harder to load balance than standard HTTP traffic*
+
+The Problem: WebSockets are "Sticky"
+- Standard HTTP requests are *stateless*. You can send Request #1 to Server A and Request #2 to Server B, and it doesn't matter.
+
+*WebSockets are **stateful***: Once a client creates a connection with Server A, that connection stays open. If the Load Balancer sends a packet from that client to Server B, the connection breaks because Server B knows nothing about the handshake.
+
+The Solution: **Sticky Sessions** (Session Affinity)
+- To make WebSockets work with a Load Balancer, you must enable Sticky Sessions. This forces the Load Balancer to remember: "This client (IP `1.2.3.4`) is talking to Server A. Do not send them anywhere else."
+
+```
++----------------+
+| Client Browser |
++----------------+
+       |
+       | (1) Initial Handshake Request (HTTP Upgrade)
+       |
+       v
++-------------------------------------------------------------+
+|                      LOAD BALANCER                          |
+|-------------------------------------------------------------|
+| [ Logic: New connection. Select available server (e.g., S1).|
+|   **Action: Create Sticky Record (Client IP <-> Server 1)**]|
++-------------------------------------------------------------+
+       |
+       | (2) Forward Handshake only to selected server
+       |
+       v                                 (Other servers ignored)
++------------+                           +------------+
+|  Server 1  |                           |  Server 2  |
++------------+                           +------------+
+       |
+       | (3) Server 1 agrees (HTTP 101 Switching Protocols)
+       |
+       v
++-------------------------------------------------------------+
+|                      LOAD BALANCER                          |
+|-------------------------------------------------------------|
+| [ Logic: Pass response back to client. ]                    |
++-------------------------------------------------------------+
+       |
+       v
++----------------+
+| Client Browser |
++----------------+
+
+===============================================================
+   *** CONNECTION UPGRADED: PERSISTENT TUNNEL ESTABLISHED ***
+===============================================================
+
++----------------+
+| Client Browser |
++----------------+
+       |
+       | (4) Real-time WebSocket Data Frame sent
+       |
+       v
++-------------------------------------------------------------+
+|                      LOAD BALANCER                          |
+|-------------------------------------------------------------|
+| [ **Sticky Logic:** Check record. Client IP maps to Server 1.]|
+| [ Action: Route data straight through persistent pipe to S1]|
++-------------------------------------------------------------+
+       |
+       | (5) Data travels mapped pipe (Bypassing re-balancing)
+       |
+       v
++------------+                           +------------+
+|  Server 1  | <=== (Tunnel Locked) ===> |  Server 2  | (X)
++------------+                           +------------+
+```
+
+### Challenges scaling websockets in a distributed system
+
+Here are the four main headaches of scaling WebSockets:
+1. **Memory Hog (Stateful Connections):** Unlike HTTP requests which finish and leave, WebSocket connections stay open forever. A server runs out of RAM and File Descriptors (connection slots) long before it runs out of CPU
+```
+        HTTP SERVER (Stateless)               WEBSOCKET SERVER (Stateful)
+     "Rent a room, leave immediately"       "Move in and stay forever"
+
+     Time 1: 100 Users Request              Time 1: 100 Users Connect
+     [Memory: ||||......] (In Use)          [Memory: ||||......] (In Use)
+             |                                      |
+             v                                      v
+     Time 2: Requests Finished              Time 2: 100 New Users Connect
+     (Connections Closed)                   (Old ones STAY open!)
+     [Memory: ..........] (Empty)           [Memory: ||||||||..] (Filling up)
+             |                                      |
+             v                                      v
+     Time 3: 100 New Requests               Time 3: 100 New Users Connect
+     [Memory: ||||......] (In Use)          [Memory: ||||||||||] (FULL!)
+             |                                      |
+             v                                      v
+     RESULT: Stable Memory Usage            RESULT: CRASH (Out of RAM/Ports)
+```
+
+2. **Server Isolation (The "Chat" Problem):** User A is on Server 1. User B is on Server 2. They cannot talk to each other directly. You are forced to build a complex "backend bus" (like Redis Pub/Sub) just to pass messages between servers
+```
+User A (Say "Hi")          User B (Waiting)
+            |                          ^
+            v                          |
+    +--------------+            +--------------+
+    |   Server 1   |            |   Server 2   |
+    +--------------+            +--------------+
+            |                          ^
+            | (Message Stuck here)     |
+            X                          |
+  (Servers don't share memory!)        |
+            |                          |
+            |      THE FIX: REDIS      |
+            v                          |
+    +------------------------------------------+
+    |           Redis Pub/Sub Layer            |
+    | (Server 1 publishes -> Server 2 picks up)|
+    +------------------------------------------+
+```
+
+3. **Sticky Load Balancing:** You cannot route packets randomly. The Load Balancer must remember exactly which server holds a user's connection. If it sends a packet to the wrong server, the connection breaks (See "sticky sessions" explained in the above section for diagram)
+
+4. **The Reconnection Storm:** If a server with 20,000 users crashes, all 20,000 try to reconnect instantly. This massive spike (Thundering Herd) acts like a DDoS attack and often crashes the surviving servers too
+```
+    [ Server 1 ]                [ Server 2 ]
+      (CRASHES!)                   (Alive)
+          |                           |
+          v                           |
+  10,000 Users Disconnect             |
+          |                           |
+          | (ALL RETRY AT ONCE)       |
+          v                           |
+  +-----------------------+           |
+  |     LOAD BALANCER     | <---------+
+  +-----------------------+
+          |
+          | (Dumps 10k users onto Server 2 instantly)
+          v
+     [ Server 2 ]
+     (OVERLOADED -> CRASHES!)
+```
+```
+      [ NORMAL STATE ]                  [ SERVER A CRASHES ]
+                                    (50k Users Disconnected!)
+      +-------------+                
+      | Load Balncr |                +-------------+
+      +-------------+                | Load Balncr | <=== (PANIC!!)
+       /     |     \                 +-------------+
+      /      |      \                 /     |     \
+  [Srv A] [Srv B] [Srv C]          (X)   [Srv B] [Srv C]
+  (50k)   (50k)   (50k)           DEAD    (50k)   (50k)
+                                            ^       ^
+                                            |       |
+                                     +25k Re-connects EACH!
+                                     (Instant Spike causes crash)
+```
+
+### Server push vs SSE vs Web sockets
+
 | Concept                       | Use Case                                                  | Example                                     | Pros                                                        | Cons                                                                                     |
 | ----------------------------- | --------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | **Server Push (HTTP/2 Push)** | Server proactively sends resources before client requests | HTTP/2 pushes CSS/JS when HTML is requested | Reduces page load time; leverages HTTP/2                    | Hard to control; may send unnecessary resources; not suitable for dynamic real-time data |
 | **SSE (Server-Sent Events)**  | One-way real-time updates from server to client           | Live news feed, stock tickers               | Simple to implement; built-in reconnection; works over HTTP | Only server → client; no binary support; limited browser support in some cases           |
 | **WebSocket (WS)**            | Full-duplex, low-latency communication                    | Chat apps, multiplayer games                | Bi-directional; low overhead; supports binary data          | More complex; connection management; firewall/port issues                                |
 
-**More comparison**:
+**More comparisons**
 | Feature     | SSE             | WebSocket             | Server Push      |
 | ----------- | --------------- | --------------------- | ---------------- |
 | Direction   | Server → Client | Bidirectional         | Server → Client  |
@@ -1314,10 +1763,9 @@ Key points:
 | Scalability | Moderate        | Needs connection mgmt | Depends on cache |
 
 
-<!-- TOC --><a name="webrtc"></a>
 ## WebRTC
 
-Concept: Peer-to-peer,  real-time communication
+**Concept**: Peer-to-peer,  real-time communication
 
 **Peer-to-Peer (P2P) in WebRTC**
 - Meaning: Two clients (browsers or apps) communicate directly with each other without sending all data through a central server.
@@ -1331,23 +1779,26 @@ Concept: Peer-to-peer,  real-time communication
 
 **Advantage**: Supports audio, video, data channels
 
-Use Cases
+**Use Cases**
 - Video conferencing (Zoom, Google Meet)
 - Live streaming
 - Peer-to-peer file transfer
 
-**How it works**:
+### How WebRTC works
+
 - Uses ICE, STUN, TURN to traverse NATs
 - Most clients are behind NATs (Network Address Translators) or firewalls.
 	- NAT changes private IPs to public IPs.
 	- Without help, two browsers can’t easily find each other to do P2P.
-- ICE (Interactive Connectivity Establishment)
-	- Framework that finds the best way for two peers to connect.
-	- Tries multiple options (direct, relayed) to establish connection.
-- STUN (Session Traversal Utilities for NAT)
+
+Steps:
+1. **STUN** (Session Traversal Utilities for NAT)
 	- Lets a client discover its public IP and port as seen from the internet.
 	- Example: “I’m behind NAT, my public IP is 203.0.113.5, port 54321”
-- TURN (Traversal Using Relays around NAT)
+2. **ICE** (Interactive Connectivity Establishment)
+	- Framework that finds the best way for two peers to connect.
+	- Tries multiple options (direct, relayed) to establish connection.
+3. **TURN** (Traversal Using Relays around NAT)
 	- If direct P2P fails, relay traffic via a server.
 	- Slower, but ensures connection works even with strict NAT/firewall.
 
@@ -1371,33 +1822,30 @@ Peer A               Peer B
 
 > WebRTC uses ICE to find the best path, STUN to discover public addresses, and TURN to relay data when direct peer-to-peer connections are blocked.
 
-<!-- TOC --><a name="mac-address"></a>
 ## MAC address
 
-MAC Address stands for Media Access Control
+MAC Address stands for **Media Access Control Address**
 
-- Purpose: A unique hardware identifier for a network device’s interface (like Wi-Fi or Ethernet).
-- How it works: Every network card has a fixed 48-bit address, usually written as `AA:BB:CC:DD:EE:FF.`
+- **Purpose**: A unique hardware identifier for a network device’s interface (like Wi-Fi or Ethernet).
+- **How it works**: Every network card has a fixed 48-bit address, usually written as `AA:BB:CC:DD:EE:FF.`
 - Used for local network communication (LAN), ***not for routing across the internet***.
 
-Analogy
+**Analogy**
 - Think of a MAC address as your device’s permanent name tag in your house or office.
 - Even if you change rooms (IP address), the name tag stays the same, so people know exactly which device to talk to.
 
-Key points
+**Key points**
 - Unique per device interface
 - Works within the local network
 - Assigned by the manufacturer (can sometimes be spoofed)
 
-<!-- TOC --><a name="ip-address"></a>
 ## IP address
 
-Concept:
+**Concept**
 - An IP address is like a home address for your computer/device on a network.
 - It tells other computers where to send data.
 - Without it, the internet would be like a city with no street numbers.
 
-<!-- TOC --><a name="ipv4-vs-ipv6"></a>
 ### IPv4 vs IPv6
 
 **IPv4 (most common today)**
@@ -1427,17 +1875,16 @@ Network part | Host part
 
 Shortcut: ***IPv6 lets every device have a unique public address globally.***
 
-<!-- TOC --><a name="public-vs-private-ips"></a>
 ### Public vs private IPs
 
-Public IP
+**Public IP**
 - Visible on the internet
 - Assigned by your ISP
 - Example: `103.21.45.67`
 
-Analogy: Your house number that anyone in the world can send mail to.
+**Analogy**: Your house number that anyone in the world can send mail to.
 
-Private IP
+**Private IP**
 - Only visible inside your network (LAN)
 - Not routable on the public internet
 - Common ranges (IPv4):
@@ -1447,11 +1894,11 @@ Private IP
 192.168.0.0 – 192.168.255.255
 ```
 
-Example: 192.168.1.10
+Example: `192.168.1.10`
 
-Analogy: Apartment number inside a building; the mailman needs the building address (public IP) to reach it.
+**Analogy**: Apartment number inside a building; the mailman needs the building address (public IP) to reach it.
 
-How They Work Together
+**How They Work Together**
 - Device has private IP: `192.168.1.10`
 - Router has public IP: `103.21.45.67`
 - When you access a website:
@@ -1459,7 +1906,7 @@ How They Work Together
 	- Website sees only 103.21.45.67
 	- Response comes back → router sends to correct private IP
 
-Benefits of Private IPs:
+**Benefits of Private IPs**
 1. Conserves public IP addresses (Especially v4)
 2. Enhances security (Private IPs are not known publicly)
 3. Enables NATs (Network Address Translation - usually configured on your router) to allow multiple private IPs to share a public IP
@@ -1474,25 +1921,24 @@ Benefits of Private IPs:
 [Website 142.250.190.78]
 ```
 
-Additional benefits of IP addresses in general (All types of IPs):
+**Additional benefits of IP addresses in general (All types of IPs)**
 1. Load balancing for scalability: It enables load balancers to distribute traffic by using the IP addreess
 2. Security based on IP: Firewall rules, VPNs, etc
 3. Microservices and container communication: They can talk to each other using internal private IPs
 
-<!-- TOC --><a name="nat"></a>
 ## NAT
 
-NAT (Network Address Translator)
+NAT (**Network Address Translator)**
 
-Purpose: Lets many devices in a private network share a single public IP to access the internet.
+**Purpose**: Lets many devices in a private network share a single public IP to access the internet.
 
-How it works:
+**How it works**
 - Devices have private IPs (like `192.168.x.x`) that aren’t visible on the internet.
 - NAT translates private IP + port → public IP + port when sending packets out.
 
 Important: ***Incoming replies are mapped back to the correct private device.***
 
-Analogy
+**Analogy**
 - Your house has many rooms (devices) but only one mailbox (public IP).
 - NAT is the mailman who ensures letters from the internet get to the correct room.
 
@@ -1505,15 +1951,14 @@ NAT translates IPs, Load Balancer spreads traffic, API Gateway manages and secur
 | Load Balancer | Distributes traffic across servers | L4/L7            | Improves performance, availability, may terminate TLS |
 | API Gateway   | Manages and routes API requests    | Application (L7) | Handles auth, rate limiting, logging, transformations |
 
-<!-- TOC --><a name="subnetting"></a>
 ## Subnetting
 
 Subnetting **splits** a large network into smaller networks (subnets).
 
-Use:
+**Use case**
 Helps organize IPs, improve security, and reduce broadcast traffic.
 
-Analogy
+**Analogy**
 - A big apartment complex (network) is divided into blocks (subnets).
 - Each block has its own range of apartment numbers (IP addresses).
 
@@ -1529,14 +1974,13 @@ Subnet 1 (/25): 192.168.1.0 - 192.168.1.127
 Subnet 2 (/25): 192.168.1.128 - 192.168.1.255
 ```
 
-When to Subnet
+**When to Subnet**
 - You have a big network and want to divide it into smaller networks for organization, security, or traffic management.
 - Example: Your `192.168.1.0/24` network for an office can be split into `/26` subnets for different departments.
 
-<!-- TOC --><a name="cidr"></a>
 ## CIDR
 
-CIDR stands Classless Inter-Domain Routing. CIDR is a **notation** to specify IP ranges using a suffix `/n` instead of old classful addresses.
+CIDR stands **Classless Inter-Domain Routing**. CIDR is a **notation** to specify IP ranges using a suffix `/n` instead of old classful addresses.
 
 `/n` = number of bits used for the network part of the address.
 
@@ -1556,7 +2000,7 @@ Subnet 1: 11000000.10101000.00000001.0xxxxxxx (0-127)
 Subnet 2: 11000000.10101000.00000001.1xxxxxxx (128-255)
 ```
 
-When to Use CIDR
+**When to use CIDR**
 - You want to define or communicate a network range efficiently.
 - CIDR is the notation that tells devices how many bits are for the network vs hosts.
 - Example: Instead of saying “Network class C with 256 addresses,” you say 192.168.1.0/24.
@@ -1572,10 +2016,9 @@ Simple way to remember
 - `Subnetting = “split the cake”`
 - `CIDR = “label the pieces”`
 
-<!-- TOC --><a name="dns"></a>
 ## DNS
 
-Definition: 
+**Definition**
 - DNS is like the internet’s phonebook.
 - It ***translates human-friendly domain names*** (e.g., example.com) into ***IP addresses*** (e.g., `93.184.216.34`) so computers can communicate.
 
@@ -1601,12 +2044,11 @@ DNS Resolver
 Client connects to 142.250.190.68
 ```
 
-Why DNS matters
+**Why DNS matters**
 - Converts human-friendly names → machine-friendly IPs
 - Enables scalable and distributed internet addressing
 - Supports email, web, and app services
 
-<!-- TOC --><a name="types-of-dns-and-dns-components"></a>
 ### Types of DNS and DNS components
 
 | Component                         | Description                                             | Example                                      |
@@ -1644,7 +2086,6 @@ Why DNS matters
 - Analogy:
 	- Think of it as the owner of the house: it knows exactly which apartment number corresponds to the person you’re looking for.
 
-<!-- TOC --><a name="dns-request-flow-and-hierarchy"></a>
 ### DNS request flow and hierarchy
 
 ```
@@ -1728,40 +2169,40 @@ Client wants to visit: www.example.com
 | **NS**          | Nameserver                   | `example.com → ns1.example.com`                    |
 | **PTR**         | Reverse lookup (IP → domain) | `93.184.216.34 → example.com`                      |
 
-
-<!-- TOC --><a name="dns-caching"></a>
 ### DNS caching
 
 DNS caching is the process of temporarily storing the IP address of a recently visited domain (like saving a contact in your phone) so that your computer doesn't have to ask the global network where to find it every single time you load a page.
 
-DNS caching helps to:
+**DNS caching helps to**
 1. Reduce latency i.e less time to know the IP address and hit server
 2. Reduce load on DNS servers themselves i.e fewer requests going through them
 
-Where does caching occur? It occurs in 3 places:
-1. Browser (Browser can cache the previous IP lookups)
-2. OS cache (`etc/hosts` file on MacOS, Windows DNS cache) i.e OS too can cache lookups at the system level
-3. Recursive resolver (@ ISP): Your ISP too will usually maintain a lookup table as a cache
+**Where does caching occur?** It occurs in 3 places:
+1. *Browser* (Browser can cache the previous IP lookups)
+2. *OS cache* (`etc/hosts` file on MacOS, Windows DNS cache) i.e OS too can cache lookups at the system level
+3. *Recursive resolver* (@ ISP): Your ISP too will usually maintain a lookup table as a cache that the recursive resolver will use
 
-When does the cache get invalidated?
+**When does the cache get invalidated?**
 - **Time-To-Live (TTL)**: This attribute to the cached lookup determines when the cache should be invalidated so that fresh request do actually hit the DNS. It helps avoid stale lookups. Ex: If server IP has changed but we still use the old one indefinitely, it is a problem!
 
 ### DNS in large scale systems
 
-1. It ensures "high availability":
-  1. DNS can act as a load balancer (a primitive one though)
+**DNS ensures "high availability"**
+  1. DNS can act as a *load balancer (a primitive one though)*
   2. Anycast DNS: Instead of a single DNS, we use multiple geographically distributed DNSes. Why? Ensures users get the response from the closest DNS -- also the fastest!
 2. DNS failover strategies: Use a primary and a secondary DNS (Fault tolerance?)
 3. DNS routing to CDNs: DNS can route requests to the nearest CDN for faster loading -- mainly for static assets that need to load quickly and they don't change frequently
-4. **DNS security risks**:
-  1. DNS poisoning: This is hacking the "address book" of the internet so that when a user types a legitimate website name (like https://www.google.com/search?q=google.com), they are secretly redirected to a fake malicious site (**Analogy**: It’s like a prankster breaking into the phone company’s database and swapping your bank's phone number with their own; when you dial the bank, you unknowingly talk to the scammer). **Solution**: The most effective solution is to implement **DNSSEC** (Domain Name System Security Extensions), which adds cryptographic signatures to DNS records so that computers can verify the data actually came from the authoritative source and was not faked. 
-  3. Cache poisoning: This involves tricking a system (like a browser or server) into storing a fake or malicious file, which it then automatically serves to other users thinking it is the real version (Analogy: It’s like someone slipping a fake answer key into a teacher's desk; the teacher (the cache) confidently hands out the wrong answers to every student who asks, spreading the error automatically). **Solution**: configure your cache to treat requests with different inputs (like headers) as completely different pages so that the previous page's cache is not affected
-  5. DDOS attacks (Distributed Denial of Service): This is an attack where thousands of hijacked computers flood a target server with junk traffic to crash it or make it unusable for real people (Analogy: It’s like a group of 500 people crowding into a small coffee shop and refusing to buy anything, making it impossible for actual customers to enter or get served). **Note**: **CDNs** help avoid DDOS attacks on DNS and your company servers
 
-<!-- TOC --><a name="load-balancers"></a>
+**DNS security risks**:
+  - **DNS poisoning**: This is hacking the "address book" of the internet so that when a user types a legitimate website name (like https://www.google.com/search?q=google.com), they are secretly redirected to a fake malicious site (**Analogy**: It’s like a prankster breaking into the phone company’s database and swapping your bank's phone number with their own; when you dial the bank, you unknowingly talk to the scammer). **Solution**: The most effective solution is to implement **DNSSEC** (Domain Name System Security Extensions), which adds cryptographic signatures to DNS records so that computers can verify the data actually came from the authoritative source and was not faked. 
+  - **Cache poisoning**: This involves tricking a system (like a browser or server) into storing a fake or malicious file, which it then automatically serves to other users thinking it is the real version (Analogy: It’s like someone slipping a fake answer key into a teacher's desk; the teacher (the cache) confidently hands out the wrong answers to every student who asks, spreading the error automatically). **Solution**: configure your cache to treat requests with different inputs (like headers) as completely different pages so that the previous page's cache is not affected
+  - **DDOS attacks (Distributed Denial of Service)**: This is an attack where thousands of hijacked computers flood a target server with junk traffic to crash it or make it unusable for real people (Analogy: It’s like a group of 500 people crowding into a small coffee shop and refusing to buy anything, making it impossible for actual customers to enter or get served). **Note**: **CDNs** help avoid DDOS attacks on DNS and your company servers
+
 ## Load balancers
 
 A Load Balancer is a device or service that **distributes incoming network or application traffic across multiple servers** to *improve availability, reliability, and performance*.
+
+A Load Balancer provides **High Availability** and **Failover**
 
 Works at **Layer 4 (TCP/UDP)** or **Layer 7 (HTTP/HTTPS)**.
 
@@ -1786,32 +2227,212 @@ Works at **Layer 4 (TCP/UDP)** or **Layer 7 (HTTP/HTTPS)**.
 	- Reception (LB) decides which room (server) to send them to
 	- Ensures no room is overcrowded and broken rooms are skipped
 
-Examples
-- Hardware: F5 BIG-IP, Citrix ADC
-- Cloud: AWS ELB, Google Cloud Load Balancing, Azure Load Balancer
-- Software: NGINX, HAProxy
+**Examples: LBs based on deployment**
+1. ***Hardware based***: F5 BIG-IP, Citrix ADC
+2. ***Cloud based***: AWS ELB, Google Cloud Load Balancing, Azure Load Balancer
+3. ***Software based***: NGINX, HAProxy
 
-Pros
-- High availability → if a server fails, LB redirects traffic
+**Pros**
+- High availability → if a server fails, LB redirects traffic (Handles failures gracefully)
 - Scalability → add/remove servers without affecting clients
 - Health checks → ensures traffic only goes to healthy servers
-- SSL/TLS termination → reduces load on backend servers
+- SSL/TLS termination → reduces load on backend servers ***(Note: This can also be a con in terms of security! Communication beyond the LB and to the servers is not TLS encrypted)***
 
-Cons
+**Cons**
 - Single LB failure → if not redundant, it becomes a bottleneck
 - Added latency → traffic goes through an extra layer
 - Complexity → configuration and monitoring required
 
-When to Use
+**When to Use**
 - Web apps with many concurrent users
 - Microservices architectures needing traffic distribution
 - High availability or fault tolerance requirements
 
-When Not to Use
+**When Not to Use**
 - Small apps with very few users
 - Simple static content sites where direct server access is fine
 
-<!-- TOC --><a name="api-gateways"></a>
+**Load balancing strategies**
+1. **Static LB strategies**
+	1. **Round Robin**: Distributes requests sequentially to each server
+	2. **Least connections**: Directs traffic to the server with the least connections
+	3. **IP Hashing**: Routes requests based on client IP
+2. **Dynamic LB strategies**:
+	1. **Least Response Time**: Request sent to server with the least response time
+	2. **Adaptive load balancing**: Use real-time monitoring to make decisions
+	3. **Weighted load balancing**: Assigns different weights to servers based capacity
+
+### Choosing a load balancing strategy
+
+Key questions to ask: 
+- Are my servers equal?
+- Do my users need to stay put?
+- How long do requests take?
+
+Here is a simple guide to choosing the right strategy (algorithm).
+1. ***The "Default" Choice: Round Robin***
+- How it works: Goes down the list 1-by-1 (Server A, then B, then C, repeat).
+- Best for: Stateless applications where all servers have the same specs (CPU/RAM).
+- Why: It is simple, foolproof, and requires almost no processing power.
+
+2. ***If Servers Are Unequal: Weighted Round Robin***
+- How it works: You assign a "weight" (score) to servers. A powerful server gets 5 requests for every 1 request a weak server gets.
+- Best for: Mixed hardware (e.g., you have one brand new powerful server and two older, slower ones).
+- Why: It prevents the old servers from crashing while the new one sits idle.
+
+3. ***If Requests vary in Length: Least Connections***
+- How it works: Sends the next user to the server with the fewest active users right now.
+- Best for: Long-lived connections (e.g., WebSocket chats, video streaming, or heavy database queries).
+- Why: In Round Robin, Server A might get stuck with 5 "heavy" users while Server B has 5 "fast" users. "Least Connections" balances the actual load, not just the request count.
+
+4. ***If You Need "Memory": IP Hash / Sticky Sessions***
+- How it works: The LB remembers the user's IP address (or cookie) and always sends them to the exact same server.
+- Best for: Shopping carts or apps that store data locally on the server RAM rather than a shared database.
+- Why: If a user adds an item to their cart on Server A, and the next request goes to Server B, their cart will appear empty.
+
+### L4 vs L7 load balancers
+
+- **L4** (Transport Layer): Makes decisions based on **numbers** (IP address and Port). It does not look at the message content.
+	- How it works: It looks at the TCP/UDP protocol info.
+	- Speed: Very fast because it does not decrypt or inspect the data
+	- Key Behavior: Once a connection is established, it just passes packets back and forth without analyzing them
+- **L7** (Application Layer): Makes decisions based on **content** (URL, Cookies, Headers). It reads the message to understand what the user wants
+	- How it works: It looks at the HTTP/HTTPS headers, URLs, and cookies.
+	- Speed: Slower than L4 (more processing required), but much "smarter."
+	- Key Behavior: It can terminate SSL (decrypt the traffic) to read the request, then re-encrypt it to send it to the server.
+
+| Feature |	L4 Load Balancer |	L7 Load Balancer |
+| -- | -- | -- |
+| OSI Layer |	Transport Layer (Layer 4)	| Application Layer (Layer 7) |
+| Visibility |	IP Address & Port |	URL, Headers, Cookies, Data |
+| Complexity |	Low (Simple routing) |	High (Intelligent routing) |
+| Performance	| High (Less processing) |	Lower (More CPU intensive) |
+| Decryption |	No (Usually just passes encrypted data) |	Yes (SSL Termination) |
+
+***Practical example***: You move to microservices from a monolith and now you need to route to different microservices based on the route (Ex: `/cart`). For this, you need to move from an L4 to L7 load balancer!
+
+### Consistent hashing
+
+**What is Consistent Hashing?**
+- It is a ***distributed hashing scheme*** that maps data to servers using a ***circular data structure*** (a "Ring")
+- Its main feature is that ***adding or removing a server does not force you to reorganize all data***—only a small fraction moves!
+
+**The Problem It Solves**
+- It solves the "Rehashing Storm" seen in traditional hashing (`hash(key) % N`)
+- Traditional: If you change the number of servers (`N`), the math changes for every key
+- 100% of data moves, crashing the system
+- Consistent: Only the "neighbors" of the new server are affected. ~90% of data stays where it is.
+
+**How It Works (The Math)**
+- Imagine a circle representing values `0` to `360`.
+- **Servers**: Hash server IPs to place them on the circle.
+- **Keys**: Hash data keys to place them on the circle.
+- **The Rule**: A key belongs to the first server found moving Clockwise on the ring
+
+```
+Think of the hash space as a path starting at the top (0) 
+and going clockwise around the square.
+
+The Rule: A Key belongs to the first Server it hits while moving clockwise.
+
+Server A owns everything in the top-left quadrant. 
+Server B owns the top-right, and so on.
+
+START (0) >----------------[ Server A ]----------------+
+|                                                      |
+|   (Range owned by A)            (Range owned by B)   |
+|                                                      |
+|                                          * Key_1     |
+|                                            |         |
+|                                            v         |
+[ Server D ] <---------------------------[ Server B ]  |
+|                                                      |
+|   (Range owned by D)            (Range owned by C)   |
+|                                                      |
+|   * Key_2                                            |
+|     |                                                |
+|     v                                                |
++------------------------[ Server C ]------------------< END
+
+
+Key_1: Lands between A and B. It moves clockwise and hits Server B.
+Key_2: Lands between C and D. It moves clockwise and hits Server D.
+```
+```
+We are zooming in on the path between Server A 
+and Server B from the previous diagram.
+
+We add a new Server E in the middle of that path.
+
+BEFORE adding Server E: Server B owned the entire path. 
+Both Key_X and Key_Y would have gone to Server B.
+
+AFTER adding Server E:
+
+          [ Server A ] (Start of range)
+              |
+              |
+    (Region 1)|  * Key_X (Starts here)
+              |    |
+              |    v (Moves Clockwise)
+              |
+NEW ----> [ Server E ] (INTERCEPTION!)
+NODE          |    ^
+              |    | (Key_X now parks here)
+              |
+    (Region 2)|  * Key_Y (Starts here, past E)
+              |    |
+              |    v (Moves Clockwise)
+              |
+         [ Server B ] (Original owner)
+                   ^
+                   | (Key_Y still parks here)
+
+
+The Interception (Key_X): 
+Because Server E was placed before Key_X's original destination, 
+Server E "intercepts" it. Data moves.
+
+The No-Op (Key_Y): Because Key_Y is located after the new Server E, 
+its path to Server B is unchanged. Data stays put.
+
+Efficiency: Only the data in "Region 1" had to move. 
+"Region 2" remains untouched.
+```
+
+To "move data" for a new region:
+1. Identify the Successor: Find the node directly clockwise of the new server.
+2. Filter: The successor identifies which of its keys now fall into the new server's range.
+3. Migrate: Only those specific keys are copied over network to the new server.
+
+Use cases of consistent hashing:
+- ***Distributed Caches***: (Redis Cluster, Memcached) To add cache nodes without flushing the whole memory.
+- ***NoSQL Databases***: (Cassandra, DynamoDB) To partition Terabytes of data across thousands of nodes.
+- ***Load Balancers***: To ensure "Sticky Sessions" (User A always maps to Server A) even when the server fleet scales up/down.
+
+### Consistent hashing in load balancers
+
+In the context of a Load Balancer (LB), Consistent Hashing is used to solve one specific problem: **Sticky Sessions** (also called Session Affinity)
+
+```
+     [ User A (IP: 1.2) ]       [ User B (IP: 5.6) ]
+               |                          |
+               v                          v
+      +-------------------------------------------+
+      |             LOAD BALANCER                 |
+      | Logic: Hash(Source_IP) -> Map to Ring     |
+      +-------------------------------------------+
+               |                          |
+               | (Consistently            | (Consistently
+               |  routes to A)            |  routes to B)
+               v                          v
+      +------------------+       +------------------+
+      |    SERVER A      |       |    SERVER B      |
+      | (Has User A's    |       | (Has User B's    |
+      |  Cart in RAM)    |       |  Cart in RAM)    |
+      +------------------+       +------------------+
+```
+
 ## API gateways
 
 An API Gateway is a server that acts as a ***single entry point for clients to access multiple backend services or microservices.***
@@ -1834,39 +2455,56 @@ An API Gateway is a server that acts as a ***single entry point for clients to a
    Service1 Service2 Service3
 ```
 
-Analogy
+**Analogy**
 - API Gateway = Reception desk in a large office building
 - Visitors (clients) arrive
 - Reception checks ID (auth), enforces rules (rate limits), and directs them to the correct department (service).
 - Reduces chaos and ensures security and logging
 
-Examples
+**Examples**
 - Cloud: AWS API Gateway, Azure API Management, GCP Apigee
 - Open-source: Kong, Tyk, Traefik, NGINX as API gateway
 
-Pros
+**Pros**
 - Centralized security and authentication
+	- Supports *OAuth*, *JWT*, *API keys*
+	- DDOS protection 
+	- Bot protection
+	- TLS termination: similar to a load balancer
 - Simplifies client interaction with many microservices
-- Rate limiting, caching, logging for observability and performance
-- Can transform requests/responses to match service requirements (Request translation)
+	- Combines multiple client requests to different servers into just one to the gateway
+	- The gateway takes care of making those multiple calls to the servers internally and fetching the data
+- Rate limiting: Restricts number of calls from a user/IP per second/minute
+- Throttling: Controls traffic during peak loads to avoid system crashes
+- Caching
+- Logging & monitoring for observability and performance
+- Can transform requests/responses to match service requirements (**Request transformation**)
+	- Ex: Client might send a payload using gRPC but a server accepts only REST over HTTP. API Gateway will do this transformation, both for the request as well as in the opposite direction i.e for the response
 
-Cons
+**Cons**
 - Single point of failure if not redundant
 - Added latency since all traffic passes through it
 - Extra complexity in configuration and maintenance
 
-When to Use
+**When to Use**
 - Microservices architecture with multiple APIs
+- Multi-client APIs (Ex: web, mobile, IoT)
 - Need centralized auth, rate limiting, logging, or request transformation
 - Public APIs that need security and monitoring
 
-When Not to Use
-- Small monolithic apps
-- Direct, simple client-server setups with minimal security or routing requirements
+**When Not to Use**
+- Small, monolithic apps (Ex: Low traffic)
+- Direct, simple client-server setups with minimal security or routing requirements (Ex: internal only services)
 
-**API gateways vs Load balancers**
+**Note**: Similar to Load Balancers, an ***API Gateway too can act as a reverse proxy to servers***
+
+### API gateways vs Load balancers
 
 Load balancers focus on distributing traffic across servers, while API gateways focus on managing, securing, and routing API requests.
+
+The "Acid Test" Difference:
+
+> If you are only routing traffic based on `/video` vs. `/images`, you are doing L7 Load Balancing. If you are asking, "Does this user have a valid API key?" or "Has this user made too many requests?", you are using an API Gateway.
 
 | Feature                   | API Gateway                                                         | Load Balancer                                                              | Example Use Case                                             |
 | ------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -1877,15 +2515,31 @@ Load balancers focus on distributing traffic across servers, while API gateways 
 | **Transforms / Features** | Can modify requests/responses, caching, protocol translation        | Mostly pass-through or simple load distribution                            | Convert JSON → XML or route HTTP → gRPC                      |
 | **When to use**           | Microservices, public APIs, need security & monitoring              | Distribute traffic across multiple servers, ensure high availability       | Microservice architecture vs high-traffic web app            |
 
-<!-- TOC --><a name="proxy-and-reverse-proxy"></a>
 ## Proxy and reverse proxy
+
+**Proxy**: It is an *intermediary server* between server and client
 
 | Type                      | Definition                                                                                                                                                                |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Proxy (Forward Proxy)** | A server that acts on behalf of **clients**, forwarding requests to the internet and returning responses. Clients know and configure the proxy.                           |
 | **Reverse Proxy**         | A server that acts on behalf of **servers**, receiving requests from clients and forwarding them to backend servers. Clients usually don’t know the reverse proxy exists. |
 
-**Forward proxy (proxy)**
+*Tip*: *The direction of flow is from the client (start) to the server (end)*
+
+**Usefulness: Why do we need them?**
+- Proxy in general: Security, caching, traffic control
+- **Forward proxy** :
+	- *Privacy / Anonymity*: Hides user IP (Ex: ***VPN is a forward proxy***)
+	- *Content filtering* (Access control): Restrict certain websites (Ex: your company blocks you from visiting NSFW sites)
+	- *Bypass geo-restrictions*: Access region-blocked content (Ex: ***VPN*** again)
+	- *Caching*: Reduce redundant requests, speed up browsing
+- **Reverse proxy**
+	- *Load balancing*: Distribute the load among server (Ex: ***Nginx, Cloudflare, AWS LB***). Do not overload any single one
+	- *Security and DDOS protection*: Hide backend servers, block attacks
+	- *SSL termination*: Offload TLS termination to proxy instead of individual servers
+	- *Caching and compression*: Again, reduces load on servers and saves bandwidth
+
+### Forward proxy or proxy
 
 ```
            +-----------------+
@@ -1917,13 +2571,13 @@ Load balancers focus on distributing traffic across servers, while API gateways 
            +-----------------+
 ```
 
-Flow explained
+**Flow explained**
 1. Client sends request to the proxy instead of directly to the internet.
 2. Forward Proxy forwards the request to the target server.
 3. Server responds to the proxy.
 4. Proxy sends the response back to the client.
 
-**Reverse proxy**
+### Reverse proxy
 
 ```
            +-----------------+
@@ -1954,7 +2608,7 @@ Flow explained
            +-----------------+
 ```
 
-Flow explained
+**Flow explained**
 1. Client sends request to the reverse proxy (they usually don’t know about backend servers).
 2. Reverse Proxy forwards the request to one of the backend servers (load balancing possible).
 3. Server responds → Reverse Proxy receives the response.
@@ -1989,7 +2643,9 @@ Flow explained
 | Reverse Proxy | Load balancing, securing backend servers, caching, SSL termination                     | Single-server apps with minimal traffic, simple setups        |
 
 
-**Reverse proxy vs Load balancer**
+### Reverse proxy vs Load balancer
+
+*They are **quite similar and can be implemented by the same tool / cloud service** but ***it need not be the same conceptually***!*
 
 A reverse proxy primarily secures, manages, and routes requests to servers, while a load balancer primarily distributes traffic across servers for availability and performance.
 
@@ -2002,7 +2658,7 @@ A reverse proxy primarily secures, manages, and routes requests to servers, whil
 | **Additional Features** | Caching, compression, request/response transformation                                           | Health checks, sticky sessions                                                          | Reverse Proxy can modify requests; LB mainly balances load                                              |
 | **When to use**         | Securing backend servers, centralizing routing, adding caching                                  | Distributing traffic for scalability and fault tolerance                                | Microservices with exposed APIs (Reverse Proxy) vs Web app needing high availability (LB)               |
 
-**Reverse proxy vs API gateway**
+### Reverse proxy vs API gateway
 
 Reverse Proxy is mainly about protecting and routing to servers, while an API Gateway is about managing, securing, and transforming API requests for clients.
 
@@ -2014,7 +2670,7 @@ Reverse Proxy is mainly about protecting and routing to servers, while an API Ga
 - Reverse Proxy: NGINX sits in front of Server1, Server2, Server3 → forwards HTTP requests.
 - API Gateway: AWS API Gateway sits in front of User Service, Payment Service, Order Service → handles authentication, rate limiting, routing, and request/response changes.
 
-Tip to remember:
+**Tip to remember**
 - Reverse Proxy = Server-focused (routes & protects servers)
 - API Gateway = API-focused (manages traffic, security, and transformations for clients)
 
@@ -2042,7 +2698,7 @@ Example
    User Service  Payment Service  Order Service
 ```
 
-Flow Explained
+**Flow Explained**
 - Clients send requests to the Reverse Proxy first.
 - RP protects backend web servers, hides their IPs, may handle SSL termination.
 - Requests needing microservice APIs are routed through the API Gateway.
@@ -2050,24 +2706,23 @@ Flow Explained
 - API Gateway forwards requests to the correct microservice.
 - Responses flow back the same path to the client.
 
-Memory Tip:
-- Reverse Proxy = server-focused, first line of defense
-- API Gateway = API-focused, smart traffic manager for microservices
+**Memory Tip**
+- `Reverse Proxy = server-focused, first line of defense`
+- `API Gateway = API-focused, smart traffic manager for microservices`
 
-<!-- TOC --><a name="cryptography"></a>
 ## Cryptography
 
-Cryptography = the science of keeping information secret, safe, and trustworthy.
+**`Cryptography = the science of keeping information secret, safe, and trustworthy`**
 
-Main goals:
+**Main goals**
 - Confidentiality → only intended people can read it
 - Integrity → data is not tampered
 - Authentication → prove identity of sender/receiver
 - Non-repudiation → sender cannot deny sending
 
-Analogy: Sending a locked box with a secret message inside. Only someone with the correct key can open it.
+**Analogy**: Sending a locked box with a secret message inside. Only someone with the correct key can open it.
 
-**Types of cryptography**
+### Types of cryptography
 
 | Type           | How it Works                                  | Example Use  |
 | -------------- | --------------------------------------------- | ------------ |
@@ -2075,11 +2730,9 @@ Analogy: Sending a locked box with a secret message inside. Only someone with th
 | **Asymmetric** | Public key encrypts, private key decrypts     | RSA, ECC     |
 | **Hashing**    | Converts data into fixed-size digest; one-way | SHA-256, MD5 |
 
-
-<!-- TOC --><a name="rsa"></a>
 ### RSA
 
-Definition
+**Definition**
 - RSA is an asymmetric encryption algorithm.
 - Uses a public key (everyone can see) to encrypt, and a private key (kept secret) to decrypt.
 
@@ -2088,26 +2741,27 @@ Sender:   Message → Encrypt with Public Key → Ciphertext → Send
 Receiver: Ciphertext → Decrypt with Private Key → Original Message
 ```
 
-Analogy:
+**Analogy**:
 - Imagine a mailbox with a public slot (public key).
 - Anyone can drop a letter in (encrypt), but only the owner has the key to open the mailbox (private key) and read the letters.
 
-Key Points:
+**Key Points**
 - RSA is asymmetric: public key ≠ private key
 - Usually used to secure small data or encryption keys, not large files. Why?
-	- 1. Computational Cost
+	1. Computational Cost
 		- RSA uses very large numbers (hundreds or thousands of bits) and complex math (modular exponentiation).
 		- Encrypting large files directly would be very slow and resource-intensive.
-	- 2. Practical Approach
+	2. Practical Approach
 		- Instead of encrypting the full file, RSA is used to encrypt a small symmetric key (like an AES key).
 		- Then the large file is encrypted with AES (fast symmetric crypto).
 		- This combines speed of AES with security of RSA.
 
-Analogy
+**Analogy**
 - RSA = a tiny, very strong padlock
 - AES = a big, fast padlock
 
-<!-- TOC --><a name="service-mesh"></a>
+***Easy & performant***: Use RSA to secure the tiny key, AES to secure the big file
+
 ## Service mesh
 
 **Definition**
@@ -2120,14 +2774,14 @@ Imagine you are building a simple e-commerce app. You have a Cart Service and a 
 - In a Monolith (Old way): The Cart just calls a function payment.process(). It’s instant and reliable because it happens in the same memory space.
 - In Microservices (New way): The Cart has to make an HTTP request over a network to the Payment Service.
 
-Problems:
+**Problems**
 1. Here is where the headache starts. Networks are unreliable.
 2. What if the Payment Service is down? You need code to retry.
 3. What if the Payment Service is slow? You need code for a timeout.
 4. How do you ensure the data is safe? You need code for encryption (SSL/TLS).
 5. How do you know who called whom? You need code for logging.
 
-The Nightmare: If you have 50 microservices written in different languages (Java, Python, Go), you have to write this "retry/timeout/security" logic 50 times. If you want to change how retries work, you have to update and redeploy all 50 services.
+**The Nightmare**: If you have 50 microservices written in different languages (Java, Python, Go), you have to write this "retry/timeout/security" logic 50 times. If you want to change how retries work, you have to update and redeploy all 50 services.
 
 **The Solution: The "Personal Assistant" (Service Mesh)**
 
@@ -2139,7 +2793,7 @@ It does this using a pattern called the **Sidecar**.
 - The CEO (Service) shouldn't be dialing numbers, waiting on hold, or checking security badges.
 - Instead, every CEO gets a Personal Assistant (Sidecar Proxy) sitting at the desk right next to them.
 
-The Workflow:
+**The Workflow**
 - Cart Service (CEO) wants to talk to Payment Service.
 - It doesn't call Payment directly. It whispers to its Assistant (Sidecar): "Send this data to Payment."
 - The Assistant handles the hard stuff: It encrypts the data, finds the best route, and retries if the line is busy.
@@ -2188,7 +2842,7 @@ With Service Mesh (The Clean Way) Your code is clean. The "Proxy" handles the me
        ----------------- Pod B -----------------
 ```
 
-**The Three Superpowers (Why use it?)**
+**The three superpowers (Why use a service mesh?)**
 
 1. ***Traffic Control (Connect)***
 	- You can control traffic without changing code.
@@ -2214,9 +2868,9 @@ Question: If Service Meshes are so great, why doesn't everyone use them?
 1. ***Complexity***: You are doubling the number of moving parts. Instead of 50 services, you now have 50 services + 50 proxies + a Control Plane. Debugging can be hard.
 2. ***Latency***: Every request now makes two little extra hops (Service -> Proxy -> Network -> Proxy -> Service). It adds a tiny bit of slowness (milliseconds), but for high-frequency trading, this is bad.
 
-**Service mesh vs Load Balancer vs API Gateway**
+### Service mesh vs Load Balancer vs API Gateway
 
-The Analogy
+**The Analogy**
 - Load Balancer (LB): The Revolving Door.
 	- Its only job is to get people (requests) inside evenly so no single door gets jammed. It doesn't care who you are or what you want; it just balances the flow.
 - API Gateway: The Front Desk / Receptionist
@@ -2253,16 +2907,420 @@ Once you pass the receptionist, you are inside. Now, how does the Accounting Dep
      (East-West Traffic)
 ```
 
-Does a Service Mesh "live inside" these LB or API gateway tools?
+**Does a Service Mesh "live inside" these LB or API gateway tools?**
 Short Answer: **No**. They are ***neighbors***, not roommates.
 
-Detailed Answer: They are distinct layers, but they are often built using the same underlying technology.
+**Detailed Answer**: They are distinct layers, but they are often built using the same underlying technology.
 
-The Shared Engine: A popular tool called **Envoy** is a high-performance proxy.
+**The Shared Engine**: A popular tool called **Envoy** is a high-performance proxy.
 - It is often used inside an API Gateway to route external traffic.
 - It is also used as the sidecar in a Service Mesh to route internal traffic.
 - So, while a Service Mesh doesn't "live inside" an API Gateway, they might both be "wearing the same uniform" (using Envoy under the hood).
 
-Exceptions: Some modern tools try to blur the lines. For example, **Istio** (a service mesh) has an "Ingress Gateway" feature that acts like a basic API Gateway, allowing you to use one tool for both. However, in a strict system design sense, treat them as separate boxes.
+**Exceptions**: Some modern tools try to blur the lines. For example, **Istio** (a service mesh) has an "Ingress Gateway" feature that acts like a basic API Gateway, allowing you to use one tool for both. However, in a strict system design sense, treat them as separate boxes.
 
-Use RSA to secure the tiny key, AES to secure the big file
+## Client Server model
+
+**Client Server model**: A model where *clients request services* and *servers provide them*. It is the foundation of modern web, DB, & application architectures
+
+**Why is it important?**
+- Enables ***efficient resource management***: 
+	- *Meaning*: Instead of requiring every user's device (the Client) to have a massive hard drive, a powerful CPU, and expensive software licenses, you put all that power into one centralized machine (the Server). The clients can be lightweight and cheap because they are just "remote controls" for the heavy lifting happening on the server.
+	- *Analogy*: You don't need to buy a Ferrari for every employee; you just buy a bus.
+- Used in:
+	1. Web browsing (Browser is client, application server serves responses)
+	2. Emails (Email app is client, email server serves emails)
+	3. APIs
+	4. Databases (SQL client is the client, DB server is the server)
+	5. Cloud services
+
+### 3 components of the client server model
+
+1. **Client**: User facing. Sends the requests. Ex: browser, mobile app, API consumer
+2. **Server**: System processing requests and returning responses. Ex: Web or DB servers, mail server
+3. **Network**: The medium of communication between client and server. Ex: Internet, LAN, WiFi, 5g
+
+### Steps of a client server interaction
+
+(Using the Analogy: Ordering Pizza)
+1. **Connect**: You dial the pizza place (Establish connection).
+2. **Request**: "I want a large pepperoni" (Send data).
+3. **Process**: The kitchen bakes the pizza (Server logic/Database lookup).
+4. **Response**: The delivery driver hands you the box (Send data back).
+5. **Disconnect**: You hang up the phone -- not practical to wait till delivery but this is just for explanation (Close connection)
+
+```
+CLIENT (Browser)                        SERVER (Backend)
+     +----------------+                      +-------------------+
+     |                |                      |                   |
+  1. |  Open Connect  |--------------------->| (Accept Conn)     |
+     |                |                      |                   |
+  2. |   "GET /home"  |----(Request)-------->|                   |
+     |                |                      |  [ 3. Processing ]|
+     |                |                      |  [ DB Lookup  ]   |
+  4. |                |<---(Response)--------|                   |
+     |   Render Page  |      (200 OK)        |                   |
+     |                |                      |                   |
+  5. |  Close Connect |--------------------->| (Close)           |
+     +----------------+                      +-------------------+
+```
+
+### 3 types of communication in the client server model
+
+**Type A: Synchronous (Blocking)**
+- What it is: The "Telephone Call." You ask a question and you hold the line until you get an answer. You cannot do anything else while waiting.
+- Protocol: Standard `HTTP/REST`.
+- Use Case: Logging in, searching for a product, loading a webpage.
+- Pros/Cons: Simple to build, but if the server is slow, the user freezes.
+
+```
+Client: "Here is my password. Is it right?"
+   |
+   | (Client freezes/waits...)
+   |
+Server: "Yes, logged in."
+Client: "Okay, now I can move on."
+```
+
+**Type B: Asynchronous (Non-Blocking)**
+- What it is: The "Email" or "Text Message." You send a request and immediately go back to work. You don't wait. The server will ping you later (or you check back later) when it's done.
+- Protocol: `Message Queues` (RabbitMQ, Kafka) or `HTTP with callbacks`.
+- Use Case: Generating a heavy PDF report, sending a welcome email, video processing.
+- Pros/Cons: Great for user experience (no freezing), but harder to build (need to handle "callbacks").
+
+```
+Client: "Please generate the yearly report (this takes 10 mins)."
+Server: "Received. I'll email you when it's done."
+Client: (Immediately shows "Job Started" and lets user browse other pages)
+...
+(10 mins later)
+Server: "Report is ready."
+```
+
+**Type C: Bidirectional / Streaming**
+- What it is: The "Walkie-Talkie" or "Open Line." The connection stays open permanently. Both sides can shout data at each other whenever they want.
+- Protocol: `WebSockets` / `FTP sessions`.
+- Use Case: Chat apps (***WhatsApp***), Live Stock Tickers, Multiplayer Games.
+- Pros/Cons: Real-time and fast, but keeps a connection open on the server (resource heavy).
+
+```
+Client: [Connects via WebSocket]
+   |
+   | (Connection stays open indefinitely)
+   |
+Server: "New message from Mom!"
+Client: "Typing reply..."
+Server: "New message from Dad!"
+```
+
+**Note**: The usual protocols used in client-server (typical but not mandatory)
+- The Protocol (The Language): `HTTP` (Uses Verbs (GET, POST, PUT, DELETE) and Status Codes (200 OK, 404 Missing, 500 Error))
+- The Transport (The Road): Usually `TCP/IP`. This ensures reliability (Analogy: It guarantees the pizza arrives in one piece, not scattered slices)
+- The Payload (The Package): Usually `JSON` (JavaScript Object Notation). It's the standard format for data. Example: `{"user": "John", "id": 123}`
+
+### Request response cycle
+
+Request-Response cycle explained as a "Data Retrieval Mission"
+
+The 4-Step Cycle
+1. The ***Lookup*** (Where are you?): Before talking, the Client (Browser) needs the Server's IP address. It asks a DNS server: "What is the IP for google.com?" The DNS replies: "It is 142.250.1.1."
+
+2. The ***Handshake*** (Are you listening?): The Client knocks on the Server's door (port 80 or 443) to open a connection. This is the TCP Handshake (SYN, SYN-ACK, ACK). It ensures the server is ready to talk before we send any data.
+
+3. The ***Request*** (The "Ask"): The Client sends a specific command using HTTP. It includes:
+	- Method: What I want to do (GET a page, POST a form).
+	- Path: Specific file (/index.html).
+	- Headers: Metadata (I am using Chrome; I accept JSON).
+
+4. The ***Response*** (The "Answer"): The Server processes the logic (queries the database), then sends back:
+	- Status Code: Did it work? (200 OK, 404 Not Found)
+	- Body: The actual content (HTML, JSON data, Image)
+
+```
+CLIENT (Browser)                               SERVER (Backend)
+             |                                             |
+   (User types URL)                                        |
+             |                                             |
+   1. DNS LOOKUP                                           |
+   "Where is example.com?" ------------------------------> | (DNS Server)
+   <------------------------------- "It is 93.184.216.34"  |
+             |                                             |
+             |                                             |
+   2. TCP HANDSHAKE (Connect)                              |
+   "Hello? Can we talk?"  -------------------------------> |
+                          <------------------------------- "Yes, I am ready."
+   "Great, here I come."  -------------------------------> |
+             |                                             |
+             |                                             |
+   3. HTTP REQUEST                                         |
+   "GET /users/123 HTTP/1.1" ----------------------------> |
+   (Headers: Accept JSON)                                  | [ PROCESSING ]
+                                                           | - Check Auth
+                                                           | - Query Database
+                                                           | - Format Data
+                                                           |
+   4. HTTP RESPONSE                                        |
+                          <------------------------------- "HTTP/1.1 200 OK"
+   (Render Data to User)                                   | (Body: {"id": 123...})
+             |                                             |
+             v                                             v
+```
+
+### Stateless vs stateful servers
+
+**Stateless Architecture**
+
+In a Stateless model, the server does not retain any session information or context about the client between requests. This is a "Shared Nothing" architecture.
+
+Mechanism: Every HTTP request is completely independent. The client must include all necessary context (authentication tokens, user preferences, pagination cursors) in the payload or headers of every single request.
+
+Server Logic: The server processes the request based solely on the information provided in that specific request package. It does not look up local memory variables to see "what this user did last."
+
+State Location: The state is offloaded to the Client (e.g., holding a JWT) or a centralized, external database (e.g., Redis), never on the application server's local RAM.
+
+```
+ [ Client ] --(Req 1: Auth Token)---> [ Load Balancer ] ---> [ Server A ]
+                                                                  |
+                                                            (Validates Token)
+                                                                  |
+ [ Client ] <--(Resp 1: 200 OK )----- [ Load Balancer ] <---------|
+
+
+ [ Client ] --(Req 2: Auth Token)---> [ Load Balancer ] ---> [ Server B ]
+                                                                  |
+                                                            (Validates Token)
+                                                                  |
+ [ Client ] <--(Resp 2: Data )------- [ Load Balancer ] <---------|
+```
+
+**Stateful Architecture**
+
+In a Stateful model, the server retains client context (session data) in its local memory or disk during the lifespan of a session.
+
+Mechanism: The client establishes a session (often via a handshake). The server generates a Session ID and stores the user's data (e.g., is_logged_in=true, cart_items=[...]) in its own RAM. The client only sends the Session ID in subsequent requests.
+
+Server Logic: Upon receiving a request, the server uses the Session ID to look up the user's context in its local memory.
+
+State Location: The state lives on the specific Server Instance that handled the initial login.
+
+```
+ [ Client ] --(Login Request)-------> [ Load Balancer ] ---> [ Server A ]
+                                                                  |
+                                                          (Writes to RAM: "Session_99 = Bob")
+                                                                  |
+ [ Client ] <--(Set-Cookie: ID_99)--- [ Load Balancer ] <---------|
+
+
+ [ Client ] --(Req 2: Cookie ID_99)-> [ Load Balancer ] ---> [ Server A ]
+                                                                  |
+                                                          (Reads RAM: "ID_99 is Bob")
+                                                                  |
+ [ Client ] <--(Resp 2: Data )------- [ Load Balancer ] <---------|
+```
+
+**HTTP Specifics**
+
+HTTP is inherently Stateless. The TCP connection may be kept alive (Keep-Alive), but the HTTP application layer treats each request as an isolated transaction.
+
+***To implement stateful behavior over stateless HTTP, we use Cookies or Headers.***
+
+Stateful Implementation: The server sets a Set-Cookie: session_id=xyz header. The browser automatically appends this cookie to future requests. The server maps session_id to local memory.
+
+Stateless Implementation (Modern Standard): The client stores a JWT (JSON Web Token). This token contains the data itself (payload: `{"user_id": 123, "role": "admin"}`) and is cryptographically signed. The server validates the signature. No lookup in local server memory is required.
+
+**Benefits of stateless architecture**
+
+- ***Horizontal Scaling (Elasticity)***
+	- Stateless: Highly elastic. You can spin up 100 new server instances instantly. The Load Balancer can use a simple Round Robin algorithm because any server can handle any request.
+	- Stateful: Difficult to scale. You cannot simply direct a user to a new server, because the new server doesn't have that user's session data in RAM. You must implement Sticky Sessions (Session Affinity) at the Load Balancer level, ensuring traffic from IP X always goes to Server A.
+
+- ***Fault Tolerance***
+	- Stateless: If Server A crashes, the Load Balancer retries the request against Server B. The user notices nothing.
+	- Stateful: If Server A crashes, all session data stored in its RAM is lost. All users connected to Server A are logged out or lose their progress.
+
+**Benefits of stateful architecture**
+
+- Personalization
+- Seamless user experiences
+
+However, the drawbacks far outweigh the benefits for a *client-server model that needs to scale and be fault tolerant*
+
+**Does using cookies make the server stateful?**
+
+*Using a cookie does **not automatically** make a server stateful.* A cookie is just a transport mechanism (like an envelope) for moving data from the client to the server.
+
+Whether the system is Stateful or Stateless depends on what you put inside that cookie.
+
+> If the cookie is a **Map** (telling you where to look on the server), it is **Stateful**
+
+> If the cookie is a **Backpack** (carrying the data itself), it is **Stateless**.
+
+Here are the two scenarios you must distinguish in an interview:
+
+***Scenario 1: The "Reference" Cookie (Stateful)***
+
+- Content: The cookie contains only a random ID (e.g., `session_id=99`).
+- Server Logic: The server receives ID 99. It must pause and search its local memory (RAM) to figure out: "Who is 99? Oh, it's Bob."
+- Verdict: Stateful. The server relies on its own memory to interpret the cookie.
+
+```
+ [ Cookie: "ID=99" ]  ----->  [ Server ]
+                                |
+                             (Looks in RAM: "99 = Bob")
+```
+
+***Scenario 2: The "Self-Contained" Cookie (Stateless)***
+
+- Content: The cookie contains the actual data, cryptographically signed (e.g., a JWT: `user=Bob; role=admin; signature=xyz`).
+- Server Logic: The server receives the data. It validates the signature mathematically. It does not need to look up anything in memory. It trusts the cookie itself.
+- Verdict: Stateless. The server is purely processing the input without needing local history.
+
+```
+ [ Cookie: "User=Bob" ]  ----->  [ Server ]
+                                  |
+                               (Validates Signature: "OK, Hi Bob")
+                               (No RAM lookup needed)
+```
+
+### Caching helps performance of client server models
+
+Caching improves performance by inserting a high-speed storage layer between the client and the primary data source (origin server), effectively **short-circuiting** the request lifecycle
+
+Caching improves performance by inserting a high-speed storage layer between the client and the primary data source (origin server), effectively short-circuiting the request lifecycle.
+
+The Mechanics: "Hit" vs. "Miss"
+- Cache Hit: The client requests data, and the cache already has a copy. The data is returned instantly. Result: Zero interaction with the origin server.
+- Cache Miss: The cache does not have the data. The request travels to the origin server, the response is fetched, stored in the cache for future use, and then sent to the client.
+
+**Three Key Performance Gains**
+1. ***Reduced Latency*** (Speed): Reading from memory (Cache/RAM) is nanoseconds; reading from a disk/database (Origin) is milliseconds. If the cache is on the client (Browser Cache) or a CDN (Edge Server), the physical distance the data travels is significantly shorter.
+2. ***Reduced Server Load*** (Scale): By intercepting read requests, the cache acts as a "shock absorber." This prevents the origin server's CPU and Database from being overwhelmed by repetitive queries (e.g., thousands of users asking for the same "Top 10 Products" list).
+3. ***Bandwidth Optimization*** (Cost): Fewer repeated large payloads travel across the network, reducing congestion and egress costs.
+
+```
+       [ CLIENT ]
+           |
+           v
+  +------------------+
+  |  CACHE LAYER     |  <-- Checks: "Do I have this Data?"
+  | (Redis / CDN)    |
+  +--------+---------+
+           |
+           | (Yes: CACHE HIT)
+           | --------------------------------> Return Data Instantly (FAST)
+           |
+           | (No: CACHE MISS)
+           v
+  +------------------+
+  |  ORIGIN SERVER   |  <-- Expensive Operations occur here
+  | (App + Database) |      (Logic + Disk I/O)
+  +------------------+      (Returns Data & Updates Cache)
+```
+
+### How LBs work in a client-server model
+
+In the Client-Server model, a Load Balancer (LB) acts as a "traffic cop" or reverse proxy sitting directly in front of your server fleet.
+
+LB accepts all incoming network traffic from clients and distributes those requests across multiple backend servers using algorithms like *Round Robin (taking turns)* or *Least Connections*. This prevents any single server from becoming a bottleneck, increases reliability (if one server dies, the LB stops sending traffic to it), and allows you to scale horizontally by adding more servers without changing the client's configuration.
+
+```
+       [ Client ]       [ Client ]
+            \              /
+             \            /
+           +----------------+
+           |  Load Balancer |   <-- Public IP Address
+           |    (Nginx)     |
+           +--------+-------+
+                    |
+      /-------------+-------------\
+     /              |              \
++----------+   +----------+   +----------+
+| Server A |   | Server B |   | Server C |  <-- Private IPs
+| (Active) |   | (Active) |   | (Active) |
++----------+   +----------+   +----------+
+```
+
+### Scaling a client server model for high traffic scale
+
+Here is the step-by-step evolution of scaling a system, moving from a simple startup to a high-traffic enterprise.
+
+***Phase 1***: Vertical Scaling (Scaling Up)
+- The "Bigger Hardware" Approach. You simply upgrade the existing server with a faster CPU, more RAM, and a bigger SSD.
+- Pros: Simplest option. No code changes required.
+- Cons: Expensive and has a hard physical limit (you can only buy so much RAM). It is a "Single Point of Failure."
+
+```
+ [ Client ] ---> [  SERVER (XL)  ] <--- [ Database ]
+               (128GB RAM, 64 Cores)
+```
+
+***Phase 2***: Horizontal Scaling (Scaling Out)
+- The "More Hardware" Approach. Instead of making one server stronger, you add more servers. This is where the Load Balancer (LB) becomes mandatory to distribute the traffic.
+- Statelessness: This only works effectively if your servers are Stateless (as discussed earlier).
+- Pros: Infinite scaling (just add more boxes).
+- Cons: More complex to manage and deploy.
+
+```
+                     /--> [ Server A ]
+[ Client ] --> [ LB ] --> [ Server B ]
+                     \--> [ Server C ]
+```
+
+***Phase 3***: Database Scaling (The Bottleneck)
+- Adding more application servers is easy, but eventually, your single Database will choke. You scale it in two ways:
+- ***Read Replicas (Master-Slave)***: Split the workload.
+	- Master DB: Handles all Writes (INSERT, UPDATE).
+	- Slave DBs: Handle all Reads (SELECT).
+	- Logic: Since most apps read 10x more than they write, this relieves massive pressure.
+```
+ [ App Server ] ---(Write)---> [ Master DB ]
+      |                             |
+      |                        (Replicates Data)
+      |                             v
+      L----------(Read)-----> [ Slave DB ]
+```
+- ***Sharding (Partitioning)***: Split the data itself.
+	- Method: Store users A-M on Database 1 and N-Z on Database 2.
+	- Result: No single database holds all the data. It is infinitely scalable but complex to query (joining data across shards is hard).
+
+***Phase 4***: Optimization Layers
+- Before adding more servers, reduce the work they have to do.
+- ***Caching*** (Redis/Memcached): Sit a cache in front of the Database. If the data is there, don't touch the DB.
+- ***CDN*** (Content Delivery Network): Move static files (Images, CSS, JS) to edge servers closer to the user. The main server should strictly handle API logic, not serve JPEGs.
+- ***Asynchronous Queues*** (RabbitMQ/Kafka): If a task is slow (e.g., "Send Email" or "Resize Video"), do not do it in the HTTP Request. Push it to a Queue and let a separate "Worker" server handle it later.
+
+**Summary**:
+```
+ [ Client ]
+    |
+    v
+[ CDN ] (Serves Images)
+    |
+    v
+[ Load Balancer ]
+    |
+    v
+[ App Servers (x100) ] <---> [ Redis Cache ]
+    |             \
+    |              \---> [ Message Queue ] ---> [ Worker Server ]
+    v
+[ DB Master ] ---> [ DB Slave ]
+```
+
+### Security challenges in client server model
+
+Here are the key security challenges in the Client-Server model:
+
+1. **Man-in-the-Middle (MITM)**: Attackers intercept data traveling across the network; prevent this by strictly enforcing HTTPS/TLS encryption.
+2. **SQL Injection**: Attackers send malicious database commands through input fields; prevent this by using parameterized queries instead of raw SQL.
+3. **Denial of Service (DDoS)**: Attackers flood the server with junk traffic to crash it; prevent this by using Rate Limiting and CDNs.
+4. **Cross-Site Scripting (XSS)**: Attackers inject malicious scripts into web pages to steal cookies; prevent this by escaping/sanitizing all user output.
+5. **Broken Authentication**: Attackers steal session IDs to impersonate users; prevent this by using secure, HttpOnly cookies and short-lived tokens.
+6. **Insecure Direct Object References (IDOR):** Users access data belonging to others (e.g., changing id=1 to id=2); prevent this with strict access control checks on the server.
+
+## Beyond REST APIs
+
+### GraphQL
+
+### gRPC
+
