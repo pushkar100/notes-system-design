@@ -1,7 +1,6 @@
 <!-- TOC --><a name="networking-concepts-and-basics"></a>
 # Networking Concepts and Basics
 
-<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
 - [Networking Concepts and Basics](#networking-concepts-and-basics)
    * [Networking layers](#networking-layers)
       + [OSI Model ](#osi-model)
@@ -42,13 +41,13 @@
       + [Types of DNS and DNS components](#types-of-dns-and-dns-components)
       + [DNS request flow and hierarchy](#dns-request-flow-and-hierarchy)
       + [Types of DNS requests](#types-of-dns-requests)
+      + [DNS caching](#dns-caching)
    * [Load balancers](#load-balancers)
    * [API gateways](#api-gateways)
    * [Proxy and reverse proxy](#proxy-and-reverse-proxy)
    * [Cryptography](#cryptography)
       + [RSA](#rsa)
    * [Service mesh](#service-mesh)
-<!-- TOC end -->
 
 <!-- TOC --><a name="networking-layers"></a>
 ## Networking layers
@@ -1774,6 +1773,7 @@ Client wants to visit: www.example.com
 | **PTR**         | Reverse lookup (IP → domain) | `93.184.216.34 → example.com`                      |
 
 
+<!-- TOC --><a name="dns-caching"></a>
 ### DNS caching
 
 DNS caching is the process of temporarily storing the IP address of a recently visited domain (like saving a contact in your phone) so that your computer doesn't have to ask the global network where to find it every single time you load a page.
