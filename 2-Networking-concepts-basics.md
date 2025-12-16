@@ -1773,6 +1773,23 @@ Client wants to visit: www.example.com
 | **NS**          | Nameserver                   | `example.com → ns1.example.com`                    |
 | **PTR**         | Reverse lookup (IP → domain) | `93.184.216.34 → example.com`                      |
 
+
+### DNS caching
+
+DNS caching is the process of temporarily storing the IP address of a recently visited domain (like saving a contact in your phone) so that your computer doesn't have to ask the global network where to find it every single time you load a page.
+
+DNS caching helps to:
+1. Reduce latency i.e less time to know the IP address and hit server
+2. Reduce load on DNS servers themselves i.e fewer requests going through them
+
+Where does caching occur? It occurs in 3 places:
+1. Browser (Browser can cache the previous IP lookups)
+2. OS cache (`etc/hosts` file on MacOS, Windows DNS cache) i.e OS too can cache lookups at the system level
+3. Recursive resolver (@ ISP): Your ISP too will usually maintain a lookup table as a cache
+
+When does the cache get invalidated?
+- **Time-To-Live (TTL)**: This attribute to the cached lookup determines when the cache should be invalidated so that fresh request do actually hit the DNS. It helps avoid stale lookups. Ex: If server IP has changed but we still use the old one indefinitely, it is a problem!
+
 <!-- TOC --><a name="load-balancers"></a>
 ## Load balancers
 
