@@ -1507,6 +1507,11 @@ How They Work Together
 	- Website sees only 103.21.45.67
 	- Response comes back → router sends to correct private IP
 
+Benefits of Private IPs:
+1. Conserves public IP addresses (Especially v4)
+2. Enhances security (Private IPs are not known publicly)
+3. Enables NATs (Network Address Translation - usually configured on your router) to allow multiple private IPs to share a public IP
+
 ```
 [Your PC 192.168.1.10] 
            |
@@ -1516,6 +1521,11 @@ How They Work Together
            v
 [Website 142.250.190.78]
 ```
+
+Additional benefits of IP addresses in general (All types of IPs):
+1. Load balancing for scalability: It enables load balancers to distribute traffic by using the IP addreess
+2. Security based on IP: Firewall rules, VPNs, etc
+3. Microservices and container communication: They can talk to each other using internal private IPs
 
 <!-- TOC --><a name="nat"></a>
 ## NAT
