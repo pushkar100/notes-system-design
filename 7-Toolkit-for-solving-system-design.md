@@ -223,6 +223,8 @@ Here we go into the Non-functional requirements of our design and try to solve t
 	- **Note: Think of questions along *speed*, *structure*, *complexity*, *time* (*to process*), and *length***
 2. Check the remaining NFRs and based on *distributed* and *microservices* concepts solve for scale, reliability, availability, and so on
 
+**NOTE**: When solving for scale, move from **Left-to-Right** i.e Start from the client, move to the server, then cache (Redis?), and finally the database! At each step, try to scale that component (**Easy process, methodical**)
+
 Finally, ***after considering all FRs and NFRs and proposed solutions that handle them along with their trade-offs***, you have successfully **completed** your system design interview! Answer any follow-up questions that come
 
 ## Important HTTP verbs and status codes for API endpoints
