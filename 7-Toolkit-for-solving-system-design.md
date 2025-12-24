@@ -218,7 +218,9 @@ Here we go into the Non-functional requirements of our design and try to solve t
 
 *Steps*:
 1. Check the ***black boxes*** ("non-trivial") of our server actions in the HLD and map them to an existing NFR. ***Spend time solving them!***
-	- Ex: "Create a short URL" is a server action. It may relate to a uniqueness quality attribute (NFR). Discuss it further (needs to be fast, short, unique) and find approaches / algorithms that solve for it!
+	- Ex: "Create a short URL" is a server action. It may relate to a uniqueness quality attribute (NFR).
+	- Discuss it further (needs to be fast, short, unique) and find approaches / algorithms that solve for it!
+	- **Note: Think of questions along *speed*, *structure*, *complexity*, *time* (*to process*), and *length***
 2. Check the remaining NFRs and based on *distributed* and *microservices* concepts solve for scale, reliability, availability, and so on
 
 Finally, ***after considering all FRs and NFRs and proposed solutions that handle them along with their trade-offs***, you have successfully **completed** your system design interview! Answer any follow-up questions that come
