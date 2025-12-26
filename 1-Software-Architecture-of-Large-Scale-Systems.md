@@ -2,93 +2,164 @@
 
 [Course link](https://www.udemy.com/course/software-architecture-design-of-modern-large-scale-systems)
 
-<!-- TOC start (generated with https://github.com/derlin/bitdowntoc) -->
+## Table of Contents
 
 - [Software Architecture of Large Scale Systems](#software-architecture-of-large-scale-systems)
-   * [Definition of software architecture](#definition-of-software-architecture)
-   * [Levels of abstraction](#levels-of-abstraction)
-   * [Advantages of distributed services](#advantages-of-distributed-services)
-   * [Software architecture position in the SDLC](#software-architecture-position-in-the-sdlc)
-   * [Challenges of software architecture](#challenges-of-software-architecture)
-   * [Gathering requirements](#gathering-requirements)
-      + [Importance of gathering requirements](#importance-of-gathering-requirements)
-      + [Types of requirements](#types-of-requirements)
-         - [Functional requirements](#functional-requirements)
-         - [Non-Functional requirements](#non-functional-requirements)
-         - [Limitations and boundaries](#limitations-and-boundaries)
-      + [Right way to gather functional requirements](#right-way-to-gather-functional-requirements)
-         - [Formal way of gathering requirements:](#formal-way-of-gathering-requirements)
-         - [Steps to gather requirements:](#steps-to-gather-requirements)
-      + [More on non-functional requirements](#more-on-non-functional-requirements)
-         - [Non-functional requirements need to be proven](#non-functional-requirements-need-to-be-proven)
-         - [Last consideration is feasibility](#last-consideration-is-feasibility)
-      + [System constraints ](#system-constraints)
-         - [Technical constraints](#technical-constraints)
-         - [Business constraints](#business-constraints)
-         - [Legal/Regulatory constraints](#legalregulatory-constraints)
-         - [Accepting vs pushing back on constraints](#accepting-vs-pushing-back-on-constraints)
-   * [Performance](#performance)
-      + [Response time](#response-time)
-      + [Measuring response time distribution](#measuring-response-time-distribution)
-         - [Tail latency in response times](#tail-latency-in-response-times)
-      + [Throughput](#throughput)
-      + [Identifying performance degradation](#identifying-performance-degradation)
-   * [Scalability](#scalability)
-      + [Understanding load](#understanding-load)
-      + [Intuition for a scalable design](#intuition-for-a-scalable-design)
-      + [Note on linear scalability](#note-on-linear-scalability)
-      + [Types of scalability](#types-of-scalability)
-         - [Vertical scalability](#vertical-scalability)
-         - [Horizontal scalability](#horizontal-scalability)
-         - [Pros and cons of each scalability choice](#pros-and-cons-of-each-scalability-choice)
-         - [Team / Organisational scalability](#team-organisational-scalability)
-   * [Availability](#availability)
-      + [Formula of availability](#formula-of-availability)
-      + [Alternative formula of availability](#alternative-formula-of-availability)
-      + [Myth of complete availability](#myth-of-complete-availability)
-      + [The 9s of availability](#the-9s-of-availability)
-      + [Fault tolerance](#fault-tolerance)
-         - [Failure prevention](#failure-prevention)
-         - [Types of redundancy](#types-of-redundancy)
-         - [Strategies for redundancy](#strategies-for-redundancy)
-         - [Failure detection](#failure-detection)
-         - [Failure recovery](#failure-recovery)
-      + [SLAs SLOs and SLIs](#slas-slos-and-slis)
-         - [SLA or Service Level Agreement](#sla-or-service-level-agreement)
-         - [SLOs or Service Level Objectives](#slos-or-service-level-objectives)
-         - [SLIs or Service Level Indicators](#slis-or-service-level-indicators)
-         - [Important considerations](#important-considerations)
-   * [APIs](#apis)
-      + [Categories of APIs](#categories-of-apis)
-      + [API benefits](#api-benefits)
-      + [API best practices](#api-best-practices)
-   * [Remote Procedure Calls](#remote-procedure-calls)
-      + [RESTful  APIs](#restful-apis)
-         - [REST API quality attributes (Non-functional requirements)](#rest-api-quality-attributes-non-functional-requirements)
-         - [REST API endpoints](#rest-api-endpoints)
-         - [Best practices for resources](#best-practices-for-resources)
-         - [CRUD operations via HTTP verbs](#crud-operations-via-http-verbs)
-         - [REST API step by step process](#rest-api-step-by-step-process)
-      + [Why is gRPC popular?](#why-is-grpc-popular)
-   * [Architectural blocks of large scale systems](#architectural-blocks-of-large-scale-systems)
-      + [Load balancer](#load-balancer)
-         - [Benefit of using a load balancer](#benefit-of-using-a-load-balancer)
-         - [Quality attributes of a load balancer](#quality-attributes-of-a-load-balancer)
-         - [Types of load balancers](#types-of-load-balancers)
-         - [DNS load balancer](#dns-load-balancer)
-         - [Hardware and software load balancers](#hardware-and-software-load-balancers)
-         - [Global Server Load Balancing](#global-server-load-balancing)
-         - [Common load balancer tools](#common-load-balancer-tools)
-      + [Message brokers](#message-brokers)
-         - [Quality attributes of message brokers](#quality-attributes-of-message-brokers)
-         - [Popular message broker tools](#popular-message-broker-tools)
-      + [API gateways](#api-gateways)
-         - [Popular API gateways](#popular-api-gateways)
-         - [API Gateway vs Load Balancer](#api-gateway-vs-load-balancer)
-      + [Content Delivery Networks](#content-delivery-networks)
-         - [Popular CDN providers](#popular-cdn-providers)
-
-<!-- TOC end -->
+  - [Definition of software architecture](#definition-of-software-architecture)
+  - [Levels of abstraction](#levels-of-abstraction)
+  - [Advantages of distributed services](#advantages-of-distributed-services)
+  - [Software architecture position in the SDLC](#software-architecture-position-in-the-sdlc)
+  - [Challenges of software architecture](#challenges-of-software-architecture)
+  - [Gathering requirements](#gathering-requirements)
+    - [Importance of gathering requirements](#importance-of-gathering-requirements)
+    - [Types of requirements](#types-of-requirements)
+      - [Functional requirements](#functional-requirements)
+      - [Non-Functional requirements](#non-functional-requirements)
+      - [Limitations and boundaries](#limitations-and-boundaries)
+    - [Right way to gather functional requirements](#right-way-to-gather-functional-requirements)
+      - [Formal way of gathering requirements:](#formal-way-of-gathering-requirements)
+      - [Steps to gather requirements:](#steps-to-gather-requirements)
+    - [More on non-functional requirements](#more-on-non-functional-requirements)
+      - [Non-functional requirements need to be proven](#non-functional-requirements-need-to-be-proven)
+      - [Last consideration is feasibility](#last-consideration-is-feasibility)
+    - [System constraints](#system-constraints)
+      - [Technical constraints](#technical-constraints)
+      - [Business constraints](#business-constraints)
+      - [Legal/Regulatory constraints](#legalregulatory-constraints)
+      - [Accepting vs pushing back on constraints](#accepting-vs-pushing-back-on-constraints)
+  - [Performance](#performance)
+    - [Response time](#response-time)
+    - [Measuring response time distribution](#measuring-response-time-distribution)
+      - [Tail latency in response times](#tail-latency-in-response-times)
+    - [Throughput](#throughput)
+    - [Identifying performance degradation](#identifying-performance-degradation)
+  - [Scalability](#scalability)
+    - [Understanding load](#understanding-load)
+    - [Intuition for a scalable design](#intuition-for-a-scalable-design)
+    - [Note on linear scalability](#note-on-linear-scalability)
+    - [Types of scalability](#types-of-scalability)
+      - [Vertical scalability](#vertical-scalability)
+      - [Horizontal scalability](#horizontal-scalability)
+      - [Pros and cons of each scalability choice](#pros-and-cons-of-each-scalability-choice)
+      - [Team / Organisational scalability](#team-organisational-scalability)
+  - [Availability](#availability)
+    - [Formula of availability](#formula-of-availability)
+    - [Alternative formula of availability](#alternative-formula-of-availability)
+    - [Myth of complete availability](#myth-of-complete-availability)
+    - [The 9s of availability](#the-9s-of-availability)
+    - [Fault tolerance](#fault-tolerance)
+      - [Failure prevention](#failure-prevention)
+      - [Types of redundancy](#types-of-redundancy)
+      - [Strategies for redundancy](#strategies-for-redundancy)
+      - [Failure detection](#failure-detection)
+      - [Failure recovery](#failure-recovery)
+    - [SLAs SLOs and SLIs](#slas-slos-and-slis)
+      - [SLA or Service Level Agreement](#sla-or-service-level-agreement)
+      - [SLOs or Service Level Objectives](#slos-or-service-level-objectives)
+      - [SLIs or Service Level Indicators](#slis-or-service-level-indicators)
+      - [Important considerations](#important-considerations)
+  - [APIs](#apis)
+    - [Categories of APIs](#categories-of-apis)
+    - [API benefits](#api-benefits)
+    - [API best practices](#api-best-practices)
+  - [Remote Procedure Calls](#remote-procedure-calls)
+    - [RESTful  APIs](#restful-apis)
+      - [REST API quality attributes (Non-functional requirements)](#rest-api-quality-attributes-non-functional-requirements)
+      - [REST API endpoints](#rest-api-endpoints)
+      - [Best practices for resources](#best-practices-for-resources)
+      - [CRUD operations via HTTP verbs](#crud-operations-via-http-verbs)
+      - [REST API step by step process](#rest-api-step-by-step-process)
+    - [Why is gRPC popular?](#why-is-grpc-popular)
+  - [Architectural blocks of large scale systems](#architectural-blocks-of-large-scale-systems)
+    - [Load balancer](#load-balancer)
+      - [Benefit of using a load balancer](#benefit-of-using-a-load-balancer)
+      - [Quality attributes of a load balancer](#quality-attributes-of-a-load-balancer)
+      - [Types of load balancers](#types-of-load-balancers)
+      - [DNS load balancer](#dns-load-balancer)
+      - [Hardware and software load balancers](#hardware-and-software-load-balancers)
+      - [Global Server Load Balancing](#global-server-load-balancing)
+      - [Common load balancer tools](#common-load-balancer-tools)
+    - [Message brokers](#message-brokers)
+      - [Quality attributes of message brokers](#quality-attributes-of-message-brokers)
+      - [Popular message broker tools](#popular-message-broker-tools)
+    - [API gateways](#api-gateways)
+      - [Popular API gateways](#popular-api-gateways)
+      - [API Gateway vs Load Balancer](#api-gateway-vs-load-balancer)
+    - [Content Delivery Networks](#content-delivery-networks)
+      - [Popular CDN providers](#popular-cdn-providers)
+  - [Data storage at global scale](#data-storage-at-global-scale)
+    - [Relational databases](#relational-databases)
+      - [Database schema](#database-schema)
+      - [Structured Query Language](#structured-query-language)
+      - [Rise of Relational databases](#rise-of-relational-databases)
+      - [Advantages of Relational databases](#advantages-of-relational-databases)
+      - [Properties of  Relational databases](#properties-of-relational-databases)
+      - [Drawbacks of Relational databases](#drawbacks-of-relational-databases)
+    - [Non-relational databases](#non-relational-databases)
+    - [Key-Value Stores](#key-value-stores)
+  - [Document Stores](#document-stores)
+    - [Graph Databases](#graph-databases)
+    - [Database optimization techniques](#database-optimization-techniques)
+      - [Technique 1 - Database Indexing](#technique-1-database-indexing)
+      - [Technique 2 - Database Replication](#technique-2-database-replication)
+      - [Technique 3 - Database Sharding or Partitioning](#technique-3-database-sharding-or-partitioning)
+    - [CAP theorem](#cap-theorem)
+    - [Scalable unstructured data storage](#scalable-unstructured-data-storage)
+      - [Storage solution 1 - Distributed File System or DFS](#storage-solution-1-distributed-file-system-or-dfs)
+      - [Storage solution 2 - Object stores](#storage-solution-2-object-stores)
+  - [Software architectural patterns](#software-architectural-patterns)
+    - [Three-Tier Architecture](#three-tier-architecture)
+      - [The Core Concept](#the-core-concept)
+      - [The "Monolith" Connection](#the-monolith-connection)
+      - [Pros and cons](#pros-and-cons)
+    - [Microservices architecture](#microservices-architecture)
+      - [The Architecture (The Layers)](#the-architecture-the-layers)
+      - [Why is it Needed?](#why-is-it-needed)
+      - [Pros and cons](#pros-and-cons)
+      - [One database per microservice](#one-database-per-microservice)
+      - [Real World Use Case](#real-world-use-case)
+      - [Summary](#summary)
+    - [Event-Driven Architecture](#event-driven-architecture)
+      - [Why is it needed?](#why-is-it-needed)
+      - [Why do Microservices use it?](#why-do-microservices-use-it)
+    - [Event-Driven Patterns](#event-driven-patterns)
+    - [Message delivery semantics and guarantees](#message-delivery-semantics-and-guarantees)
+    - [Strategy for processing infinite streams of events](#strategy-for-processing-infinite-streams-of-events)
+      - [Tumbling Window](#tumbling-window)
+- [Count events every 10 seconds](#count-events-every-10-seconds)
+      - [Hopping Window](#hopping-window)
+- [Window Size: 10s, Hop: 5s](#window-size-10s-hop-5s)
+      - [Sliding Window](#sliding-window)
+- [Alert if > 5 events in last 60 seconds](#alert-if-5-events-in-last-60-seconds)
+      - [Session Window](#session-window)
+      - [Comparison](#comparison)
+    - [Observability in Microservices architecture](#observability-in-microservices-architecture)
+      - [The Three Pillars](#the-three-pillars)
+    - [Migrating from a monolith to a microservice architecture](#migrating-from-a-monolith-to-a-microservice-architecture)
+      - [The Strategy: The "Strangler Fig" Pattern](#the-strategy-the-strangler-fig-pattern)
+      - [How to Decompose? (Finding Boundaries)](#how-to-decompose-finding-boundaries)
+      - [Handling the Database (The Hardest Part)](#handling-the-database-the-hardest-part)
+      - [Steps & Tips for Migration](#steps-tips-for-migration)
+    - [Microservices principles and best practices](#microservices-principles-and-best-practices)
+  - [Big Data](#big-data)
+    - [Processing Strategies: Batch vs. Stream](#processing-strategies-batch-vs-stream)
+      - [Batch Processing (The "Laundry" Method)](#batch-processing-the-laundry-method)
+      - [Stream Processing (The "Dishwasher" Method)](#stream-processing-the-dishwasher-method)
+    - [The Lambda Architecture](#the-lambda-architecture)
+      - [The Three Layers](#the-three-layers)
+    - [OLTP vs OLAP](#oltp-vs-olap)
+      - [Why separate them? The Big Data Strategy](#why-separate-them-the-big-data-strategy)
+      - [Row vs. Columnar Storage - The Secret Sauce](#row-vs-columnar-storage-the-secret-sauce)
+      - [When to use what?](#when-to-use-what)
+    - [Map-Reduce for Big Data processing](#map-reduce-for-big-data-processing)
+  - [Reliability, Error Handling, and Recoverability patterns](#reliability-error-handling-and-recoverability-patterns)
+    - [Throttling & Rate Limiting (The Bouncer)](#throttling-rate-limiting-the-bouncer)
+    - [Retry Pattern (The "Try Again")](#retry-pattern-the-try-again)
+    - [Circuit Breaker Pattern (The Fuse)](#circuit-breaker-pattern-the-fuse)
+    - [Dead Letter Queue (DLQ) (The Graveyard)](#dead-letter-queue-dlq-the-graveyard)
+    - [Transactional Outbox Pattern](#transactional-outbox-pattern)
+  - [Deployment patterns](#deployment-patterns)
+  - [Other patterns](#other-patterns)
 
 ## Definition of software architecture
 
@@ -2449,3 +2520,2289 @@ Data centres can be closer to the user but that is not the bottleneck for a clie
 5. GCP CDN
 6. Azure CDN
 
+## Data storage at global scale
+
+### Relational databases
+
+Data is modelled as a Table i.e Rows and Columns
+
+The columns are predetermined and each of them have:
+1. A name
+2. A type
+3. A set of constraints (Optionally)
+
+A row in the table is identified uniquely by what is known as a **Primary Key** (PK)
+- PK can be a single column value, or
+- A set of columns (Composite)
+
+```
+Table Name: Users
+
++------------+----------------+---------------+-------------------+
+|  Columns   |                |               |                   | --> (Fields/Attributes)
+| (Header)   |   user_id      |   username    |      email        |
++------------+----------------+---------------+-------------------|
+|            |      1         |    alice      |   alice@mail.com  | --> Row 1 (Record)
+|    Rows    +----------------+---------------+-------------------+
+| (Data)     |      2         |    bob        |   bob@mail.com    | --> Row 2 (Record)
+|            +----------------+---------------+-------------------+
+|            |      3         |    charlie    |   charlie@mail.com| --> Row 3 (Record)
++------------+----------------+---------------+-------------------+
+```
+
+#### Database schema
+
+A relational database has a **Schema**
+- It gives the database a ***structure*** ahead of time
+- Gives us knowledge of what each column must have
+- We can apply a *robust* query language like SQL to *analyze* and *update* the data
+
+#### Structured Query Language
+
+We can perform queries on relational databases using SQL (Structured Query Language)
+- Different DBs have their own SQL implementation
+- However, ***common SQL operations are standardized*** across the various relational DBs
+
+#### Rise of Relational databases
+
+Relational databases *eliminate the need for data duplication.* This is done by a process called ***normalization***. It became a proven way to hold data i.e store once, reference multiple times (This is usually done via something called a "Foreign Key" / FK)
+
+Data storage is growing much more than ever before! -- Relational DBs save on these costs!
+
+**Note**: We can perform a **`JOIN`** operation to get data from different tables using the Foreign keys
+```
+   TABLE A: USERS                     TABLE B: ORDERS
+   +----+----------+                  +----------+---------+-------+
+   | ID |   Name   |                  | Order_ID | User_ID | Price |
+   +----+----------+                  +----------+---------+-------+
+   | 1  |  Alice   | <--- MATCH --->  |   101    |    1    |  $50  |
+   | 2  |   Bob    |       (X)        |   102    |    1    |  $20  |
+   | 3  |  Charlie |                  |   103    |    2    |  $80  |
+   +----+----------+                  +----------+---------+-------+
+       (Charlie has no                  (Matches Alice & Bob only)
+        orders, so he
+        is excluded)
+
+                    ||
+                    ||  (JOIN Operation)
+                    \/
+
+             RESULT TABLE
+   +----------+----------+-------+
+   |   Name   | Order_ID | Price |
+   +----------+----------+-------+
+   |  Alice   |   101    |  $50  |
+   |  Alice   |   102    |  $20  |
+   |   Bob    |   103    |  $80  |
+   +----------+----------+-------+
+```
+
+#### Advantages of Relational databases
+
+1. Ability to form complex and flexible queries
+2. Efficient storage
+3. Natural structure of data for humans
+4. ACID transaction guarantees
+
+#### Properties of  Relational databases
+
+**Transaction**: A transaction is a sequence of database operations that should appear as a single operation to an external observer i.e A transaction should appear as a whole or not have happened at all. No in-between! --> This is "Atomicity" of the ACID transactions
+
+*ACID transactions*
+1. **Atomicity**: "All or Nothing". If any part of the transaction fails, the entire operation is cancelled (rolled back)
+```
+       Transaction: Transfer $100
+      /                          \
+ [Debit User A]             [Credit User B]
+    (Success)                  (FAIL!)
+        \                         /
+         \                       /
+          -----> ROLLBACK <-----
+          (Undo Debit on A. Result: No change)
+```
+2. **Consistency**: "Follow the Rules". The database must always remain in a valid state (e.g., no negative balances, data types match)
+```
+Rule: "Balance cannot be < 0"
+
+   Start: Balance $50
+          |
+   Attempt: Withdraw $100
+          |
+      [ DB CHECK ]
+          |
+      "VIOLATION!" -> REJECT Transaction
+          |
+   End: Balance $50 (State remains valid)
+```
+3. **Isolation**: "Don't Interfere". Multiple transactions running at the same time should not see each other's half-finished work
+```
+User 1 (Buying last ticket)     User 2 (Buying last ticket)
+               |                                 |
+        [Read: 1 Left]                    [Read: 1 Left]
+               |                                 |
+        [Write: 0 Left]                   [Write: 0 Left]
+               |                                 |
+       (Locked by User 1)           (BLOCKED - Must Wait)
+               |                                 |
+           [COMMIT]                              |
+                                         (Unblocked: Reads 0)
+                                         (Fail: Sold Out)
+```
+4. **Durability**: "Saved means Saved". Once a transaction says "Success," the data is safe on the hard drive, even if the power goes out 1ms later
+```
+  Client -> "COMMIT"
+        |
+        v
+ [Write to Disk Log]  <-- The "Checkpoint"
+        |
+      (Crash!)
+        |
+    (System Restart)
+        |
+ [Read Disk Log] -> Replay data -> Data is Safe.
+```
+
+#### Drawbacks of Relational databases
+
+1. Rigid schema or structure
+	- Schema needs to be defined ahead of its time
+	- Change of schema would require *downtime for maintenance* which is not ideal
+		- Need to *plan ahead* our schema in advance so as to *not change it* as much as possible
+2. Hard to maintain or *scale*
+3. Slower read operations
+
+### Non-relational databases
+
+Relatively new concept
+- Popular in the 200s
+- **Solves** the *disadvantages* of Relational databases
+
+**Benefits**
+1. It allows ***logical grouping of data without forcing all the records to have the same schema*** (Flexible schema)
+2. ***Support more data structures*** (JSON/XML, lists, ...) than just the tables (Like Relational databases force you to)
+	- This is more intuitive for programmers since it aligns closely with the data structures they use in their respective programming languages
+	- ***Eliminates the need for ORMs*** to translate the business logic in a programminc language into the data modelling language
+
+**Drawbacks**
+1. We ***lose the ability to easily analyze records*** since they have flexible schemas
+2. ***Analyzing multiple groups of records becomes very hard***! Why? There are *no* JOINs
+3. ***ACID transaction are rarely supported***
+
+### Key-Value Stores
+
+**Concept**: The simplest NoSQL type, functioning like a ***giant dictionary or hash map***. Every item is stored as a specific *key* associated with a *value* (which can be a string, number, or binary object). ***You can only retrieve data if you know the exact key***
+```
++-------+       +-------------------------+
+|  KEY  | ----> |         VALUE           |
++-------+       +-------------------------+
+| "u123"| ----> | {"name": "Sid", "age":25} |
+| "sess"| ----> | "A8d9-31kL-99zX"        |
++-------+       +-------------------------+
+```
+- **Pros**: 
+	- ***Extremely fast lookups*** (`O(1)`)
+	- Simple data model
+	- Scales horizontally easily
+- **Cons**: 
+	- ***No complex queries*** (cannot "search" by value content)
+	- No relationships
+- **When to Use**:
+	- User sessions
+	- Caching (Redis  - It is an **in-memory** key-value store)
+	- Shopping carts
+	- User preferences
+- **CAP Tie-in**: **Usually AP (Available & Partition Tolerant)**. Systems like DynamoDB or Cassandra allow eventual consistency to ensure the system is always up, even if nodes disconnect
+
+## Document Stores
+
+**Concept**: Stores data in *semi-structured formats* like JSON or XML. Unlike rows in SQL, ***each document can have a unique structure (schema-less)***, and ***documents can contain nested structures (lists, sub-documents)***
+```
+Collection: Users
++--------------------------------+
+| _id: 101                       |
+| name: "Alice"                  |
+| contacts: [email, phone]       | <--- Nested Array
++--------------------------------+
+      |
++--------------------------------+
+| _id: 102                       |
+| name: "Bob"                    |
+| address: {city: "NY", zip:99}  | <--- Nested Object
++--------------------------------+
+```
+- **Pros**: 
+	- ***Flexible schema*** (good for agile dev)
+	- Data is self-contained
+	- Intuitive for developers (maps to code objects)
+- **Cons**: 
+	- ***Queries can be slower than key-value***
+	- ***Data duplication is common to avoid joins***
+- **When to Use**:
+	- Content management
+	- User profiles
+	- Catalogs
+	- Blogging platforms (MongoDB)
+- **CAP Tie-in**: **Often CP (Consistent & Partition Tolerant)**. MongoDB, for example, defaults to strong consistency (you always read the latest write), sacrificing availability during a primary node failure
+
+### Graph Databases
+
+**Concept**: Designed to treat relationships as first-class citizens. Data is stored as Nodes (entities like People) connected by Edges (relationships like `"FRIEND_OF"`)
+```
+   (Alice) --[FRIEND_OF]--> (Bob)
+      ^                       |
+      |                       |
+   [OWNS]                  [WORKS_AT]
+      |                       |
+      v                       v
+   (Car)                  (Google)
+```
+- **Pros**: 
+	- ***Blazing fast for deep relationship queries*** (e.g., "friends of friends")
+	- Intuitive for connected data
+- **Cons**: 
+	- ***Difficult to scale horizontally*** (sharding a graph is hard)
+	- Steep learning curve for query languages (Cypher, Gremlin)
+- **When to Use**: 
+	- Social networks
+	- Recommendation engines
+	- Fraud detection rings
+	- Knowledge graphs
+- **CAP Tie-in**: Typically CP (Consistent & Partition Tolerant) or CA (Consistent & Available). Graph databases like Neo4j prioritize data integrity (ACID compliance) over partition tolerance, making them harder to cluster across loose networks
+
+### Database optimization techniques
+
+#### Technique 1 - Database Indexing
+
+A **database index** is a helper table, created from a particular column or group of columns
+
+- ***Speeds up retrieval operations***
+- ***Locates the desired records in a sub-linear time***
+- Without indexing, these operations may:
+	- Full table scan
+	- Take a long time for large tables
+
+```
+      [ INDEX TABLE (B-Tree) ]                 [ ACTUAL DATA TABLE ]
+      (Sorted Helper Structure)                (Random Storage on Disk)
+
+      +---------+-----------+                   +-----+-------------+
+      | Key(ID) | Pointer   |                   | ID  | Name        |
+      +=========+===========+                   +=====+=============+
+      | 005     | -> Row 2  |------------------>| 005 | Bob         |
+      +---------+-----------+                   +-----+-------------+
+      | 102     | -> Row 1  |------------------>| 102 | Alice       |
+      +---------+-----------+                   +-----+-------------+
+      | 550     | -> Row 500|------+            | ... | ...         |
+      +---------+-----------+       |           +-----+-------------+
+      | 999     | -> Row 3  |       +---------->| 550 | Dave        |
+      +---------+-----------+                   +-----+-------------+
+                                                | 999 | Carl        |
+      ^                                         +-----+-------------+
+      |
+      SEARCH STRATEGY (Binary Search):
+      1. Start at middle. Is 550 > 102? Yes. (Ignore top half)
+      2. Jump to 550. Found!
+      3. Follow Pointer to Row 500.
+
+      Performance: O(log N) (Sub-linear)
+      Impact: Retrieval is instant; no bottleneck.
+```
+
+**Drawbacks of a full table scan**: 
+- These operations *if performed frequently on large tables* can:
+	- Become a performance bottleneck
+	- Impact our user's experience
+
+```
+      [ DATABASE TABLE (Unsorted Heap) ]
+      (The database must read every row from top to bottom)
+
+      Row 1:   [ ID: 102 | Name: Alice ]  <-- (Is this 550? No.)
+      Row 2:   [ ID: 005 | Name: Bob   ]  <-- (Is this 550? No.)
+      Row 3:   [ ID: 999 | Name: Carl  ]  <-- (Is this 550? No.)
+       ...           ...
+      Row 500: [ ID: 550 | Name: Dave  ]  <-- (Found it! After 500 checks)
+       ...           ...
+      Row 1000:[ ID: 888 | Name: Eve   ]
+
+      Performance: O(N) (Linear)
+      Impact: High CPU/IO usage. Slows down the entire system.
+```
+
+**Index table data structures**:
+1. Hash map
+2. B-Tree (A self-balanced tree)
+3. Memtable (Used in LST-Trees with SSTables)
+
+**Composite indexes**: Instead of making an index from one column, we can make index using more than one column too! This helps include more columns in the index, making reads faster. Caveat: If `(A,B,C)` is your composite index, you can only perform an index scan for `(A,B,C)`, `(A,B)`, or `(A)` (*prefixcontaining searches only*)
+
+**Indexing trade-offs**
+- Reads are fast!
+- Writes are slow
+- Additional space is required to store the indexes
+
+**Note**: Indexing is also used extensively in non-relational databases such as "Document stores"
+
+#### Technique 2 - Database Replication
+
+A *single* database is a problem while scaling: A **single point of failure (SPOF)**
+
+```
+    [ Application Servers ]
+             |   |
+             |   | (Read/Write)
+             v   v
+      +-----------------+
+      |  Single DB      |  <-- "I am overloaded!"
+      |  (Instance A)   |      "I just crashed!"
+      +-----------------+
+              |
+              X  <-- (Total System Failure)
+```
+
+**Database replication** solves this! There are two types
+- Master-slave / Active-passive: There is one leader accepting writes while replicas perform reads. When leader dies, a new one is elected from among the replicas
+- Leaderless / Active-active: There is no leader. All accept writes and reads. Conflicts are resolved using various techniques such as using a consensus (quorum) 
+```
+             [ Application Servers ]
+             /          |          \
+    (Write) /           | (Read)    \ (Read)
+           v            v            v
+  +-----------+    +-----------+    +------------+
+  |  MASTER   |    |  SLAVE 1  |    |  SLAVE 2   |
+  | (Writes)  |--->| (Read Only)|   | (Read Only)|
+  +-----------+    +-----------+    +------------+
+        |                ^                ^
+        |                |                |
+        +----------------+----------------+
+             (Data Replication Stream)
+        "Copy this new row to Slaves"
+```
+
+**Drawbacks of database replication**:
+- *Higher complexity* when it comes to operations like write, delete, update
+- It is not a trivial task to make sure *concurrent modifications to same records*:
+	- Do not conflict with each other
+	- Provide guarantees in terms of consistency and correctness
+
+```
+TIME      ACTION
+ |
+ v  1. WRITE (Update User: "Bob")
+    [ App ] --------------------> [ MASTER DB ]
+       |                            |  (Current: "Bob")
+       |                            |
+       |                            | (Network Delay / Lag)
+       |                            v
+    2. READ (Get User)            [ SLAVE DB ]
+    [ App ] -------------------->   (Current: "Alice") <--- STALE DATA!
+       |                               ^
+       |                               |
+       |                          (Update arrives 100ms later)
+       |                               |
+       v                          [ SLAVE DB ]
+                                    (Now: "Bob")
+```
+
+Support for replication:
+- **Non-Relational databases**: Replication is supported **Out-of-the-Box!**
+- **Relational databases**: Replication support varies among different implementations
+
+*Note: Replication turns our database into a distributed system!*
+
+#### Technique 3 - Database Sharding or Partitioning
+
+**Database sharding**: We split our data to be stored in different instances of the databases. Each instance is typically stored on a different computer
+
+```
+      [ HUGE DATASET (1 TB) ]
+      (Too big for one machine!)
+                |
+                |  (SHARDING / PARTITIONING)
+                v
+      +-------------------+           +-------------------+
+      |    SHARD  #1      |           |    SHARD  #2      |
+      |   (Server A)      |           |   (Server B)      |
+      |                   |           |                   |
+      |  Users: [A - M]   |           |  Users: [N - Z]   |
+      |  (500 GB Data)    |           |  (500 GB Data)    |
+      +-------------------+           +-------------------+
+```
+
+**Why shard?** (Very difficult for one instance to store massively large amounts of data)
+- We can *scale our database* to store more data
+- Different queries can be performed in *parallel*
+- We get both:
+	- Better performance
+	- Higher scalability
+
+***Parallelism example***:
+```
+ [ User Query: "Alice" ]         [ User Query: "Zack" ]
+             |                               |
+             |                               |
+             v                               v
+    +-----------------+             +-----------------+
+    |   SHARD #1      |             |   SHARD #2      |
+    | (Processing...) |             | (Processing...) |
+    +-----------------+             +-----------------+
+             ^                               ^
+             |                               |
+      ( CPU / RAM )                   ( CPU / RAM )
+      Resource Pool A                 Resource Pool B
+```
+
+Support for sharding:
+- **Non-Relational databases**: A *first class feature* in non-relational databases since records are decoupled from each other (since more denormalized, nested, and with more duplication). It is natural to implement sharding on these systems
+- **Relational databases**: Replication support varies among different implementations. Since `JOIN`s are difficult when a database is sharded i.e fetching related data from distributed servers, it is more challenging to implement
+
+```
+            [ Application Server ]
+          (Needs to join "Alice" + "Orders")
+                /           \
+               / (1. Get ID) \ (2. Find Orders?) <--- COMPLEXITY!
+              v               v
+    +-----------------+   +-----------------+
+    |    SHARD #1     |   |    SHARD #2     |
+    |  (Holds Alice)  |   | (Holds Orders?) |
+    +-----------------+   +-----------------+
+
+    Problem: The database engine cannot do a simple "JOIN"
+    because the data is on a physically different hard drive
+    over the network. The App must manually stitch it together.
+```
+
+*Note: Sharding/Partitioning turns our database into a distributed system (similar to replication)!*
+
+### CAP theorem
+
+*CAP theorem*: In the presence of a network partition, a distributed database cannot guarantee both **Consistency** and **Availability** and has to ***choose only one of them***
+
+We can only provide both consistency and availability when:
+- There is no network partition
+- Our replicas can freely communicate with each other
+
+`C` = Consistency
+
+`A` = Availability
+
+`P` = Partition tolerance
+
+```
+        CONSISTENCY (C)
+            /   \
+           /     \
+          /       \
+    (CA) /         \ (CP)
+        /           \ 
+       /             \ 
+      /               \
+     /_________________\
+AVAILABILITY (A)     PARTITION TOLERANCE (P)
+           (AP)
+```
+
+**Consistency**: Every read request receives the **most recent write** OR an **error**!
+- This means that all clients see the same value at the same time regardless of which database instance the client is talking to
+
+**Availability**: Every request receives the **a non-error value**!
+- Clients may get *different versions* of a particular record
+- All requests return successfully with *a value*
+
+**Partition tolerance**: System continues to operate despite an arbitrary number of messages being lost or delayed by the network between different computers
+
+**CAP theorem interpretation**
+1. `CP`: No availability
+2. `AP`: No consistency
+
+**Note**: **`CA`** is **not possible** since Partition tolerance can never be guaranteed in a distributed environment (A cable may break, humans may unplug devices, servers may crash, hardware faults, etc... cannot stop them from happening now and then)
+- We can have a centrailzed database to provide Partition tolerance but it does not scale and hence, impractical when talking about large-scale systems
+
+**When should we choose consistency, CP?**
+- Imagine an online ordering store. Multiple users should see the same inventory count for a product. If one of them buys the last one, for example, another should not be able to place an order for the same item when the stock is empty for it
+
+```
+System chooses to error out rather than show wrong data.
+
+     [Client Write v2]                 [Client Read?]
+             |                                |
+             v                                v
+      +-------------+                 +-------------+
+      |   Node 1    |    Network      |   Node 2    |
+      | (Data: v2)  | --X-Broken-X--  | (Data: v1)  |
+      +-------------+                 +-------------+
+             |                                |
+    (Updates cannot reach Node 2)             |
+                                              v
+                                       "ERROR / TIMEOUT"
+                                     (Sacrifice Availability
+                                      to ensure Consistency)
+```
+
+**When should we choose availability, AP?**
+- Imagine counting the likes for a post. Many users might like a post but that does not mean we should not display the post until the most recent like has been shared with all instances. It is okay to display the post and show like count as 100 instead of 103 (most recent count)
+
+```
+System chooses to answer immediately, even if the data is old.
+
+     [Client Write v2]                 [Client Read?]
+             |                                |
+             v                                v
+      +-------------+                 +-------------+
+      |   Node 1    |    Network      |   Node 2    |
+      | (Data: v2)  | --X-Broken-X--  | (Data: v1)  |
+      +-------------+                 +-------------+
+             |                                |
+    (Updates cannot reach Node 2)             |
+                                              v
+                                         "Data is v1"
+                                      (Sacrifice Consistency
+                                       to ensure Availability)
+```
+
+### Scalable unstructured data storage
+
+**Unstructured data**: Data that does NOT follow a particular ***structure, schema, or model***
+- Ex: Audio & video files, PDFs, images
+- Known as a **Blob** (Binary Large Object)
+
+**Where to store unstructured data?**
+- Some DBs allow storing Blobs
+- However, neither Relational nor Non-Relational DBs are optimized for storing Blobs
+	- Additionally, they have a size limit for data e.g a record  (~1MB)
+
+**Use cases for unstructured data**
+1. Video/audio i.e entertainment or media files (compressed and stored)
+2. Web assets that need to load when a webpage is opened (Ex: logo, article image, CSS/JS bundles)
+3. **Database backup files** - these are large, so they are saved or archived in a *binary* format to save space (decompressed when accessed)
+4. Sensor data from IoT devices (Machine learning and surveillance)
+
+Blobs:
+- Very big
+- Datasets are also very big
+
+```
+   [ Video.mp4 ]  \
+   [ Image.png ]   \     +-----------------------+
+   [ Report.pdf ]   ---> |  BLOB (Binary Chunk)  |
+   [ Backup.zip ]  /     | 101010110010101011011 |
+   [ IoT_Log.txt ]/      +-----------------------+
+                            ^
+                            |
+           "No strict Schema, Rows, or Columns"
+```
+
+#### Storage solution 1 - Distributed File System or DFS
+
+Instead of using a single storage device, we use a *network of storage devices* connected to each other and provide:
+- Replication
+- Strong / Eventual consistency
+- Autohealing
+
+Benefits:
+1. No need for special API
+2. Modify files easily (Ex: modify a doc, append logs to a file)
+3. **Very efficient** and **high performance I/O operations**
+
+Limitations:
+- ***Number*** of files is **limited** (**a scalability issue**)
+- No easy access through Web APIs (REST+HTTP). Ex: Not easy to display a file on a web app through a web server, it needs special abstractions
+
+```
+ [Root Directory /]
+             |
+    +--------+--------+
+    |                 |
+ [Logs/]           [Media/]  <-- Hierarchical Folders
+    |                 |
+  sys.log           movie.mkv
+    |                 |
+    v                 v
+ +------+         +-------+
+ |Block1|         |Block A|
+ +------+         +-------+
+    |                 |
+    v                 v
+[Server 1]        [Server 2] ... [Server N]
+ (Blocks distributed & Replicated across network)
+```
+
+#### Storage solution 2 - Object stores
+
+A **scalable solution** for storing blobs/unstructured data
+
+**Benefits:**
+1. **Linear scalability**
+2. **No limit on the number of files** we can create
+3. **Very high limit on a single object size** (~5-10TB)
+4. Provides HTTP + REST **API**
+5. Supports **versioning** out-of-the-box
+
+**Object store abstractions:**
+- Objects are not stored in a hierarchical file structure
+- They are stored in a *flat* structure called **buckets** (No limit on storage within a bucket except for our budget)
+
+**Object contains:**
+- An object ID
+- The content
+- Metadata (Information about the content. Ex: file size, format, etc)
+- **Access control list (ACL)**: **Permissions that specify who can read/write or override the object permission**
+
+Popular object stores (Cloud):
+- Google Cloud Storage (GCS on GCP)
+- Amazon S3
+- Azure Blob
+- Alibaba OSS
+
+Usually, the top tiers in these tools provide **High Availability (HA)**
+
+Note: Open source tools exist to store Objects on-premise if Cloud solutions' costs are too expensive!
+
+**Scalability**:
+Object stores use **data replication *under the hood***! (High Scale)
+
+**Drawbacks:**
+- Objects are **immutable**
+	- We can ***only replace*** an existing object with a new version
+	- Has ***negative performance implications*** (Cannot store log files and append data to them)
+- ***No easy file-system like access*** that DFSes provide
+	- Access through SDK / API
+- ***Lower I/O performance*** compared to DFS
+
+```
+    [Client App / Browser]
+             |
+             v  (HTTP/REST API: PUT / GET / DELETE)
+             |
+   +-----------------------+
+   |   Object Storage      |
+   |      (Gateway)        |
+   +-----------------------+
+             |
+   +---------+-----------+------------------+
+   | Bucket: "Videos"    | Bucket: "Backups"|
+   +---------+-----------+------------------+
+             |                    |
+    +-----------------+           v
+    | Object ID: "v1" |     +------------------+
+    |-----------------|     | Object ID: "b99" |
+    | [METADATA]      |     |------------------|
+    | Size: 5GB       |     | [DATA BLOB]      |
+    | Type: .mp4      |     | 101010...        |
+    | ACL: Public     |     +------------------+
+    |-----------------|
+    | [DATA BLOB]     |
+    | 1101001...      |
+    +-----------------+
+```
+
+```
+FEATURE          |   DFS (File System)        |   OBJECT STORE (S3/GCS)
+-----------------|----------------------------|--------------------------
+Structure        |  Hierarchy (Tree/Folders)  |  Flat (Buckets & IDs)
+Access Method    |  OS Mount / File Driver    |  REST API (HTTP)
+Modifiable?      |  YES (Edit/Append)         |  NO (Write Once, Read Many)
+Scalability      |  High (Petabytes)          |  Massive (Exabytes)
+Best Use Case    |  Big Data Processing (Logs)|  Media hosting, Backups,
+                 |  active working files.     |  Static Web Assets.
+```
+
+## Software architectural patterns
+
+Patterns are used because they save time since they have been formed after other folks in the industry faced similar issues and came up with them
+
+Patterns also prevent us from making our architecture a "Big ball of mud" (Messy, tightly coupled, difficult to understand, every server talks to every other server, and so on)
+
+Patterns provide a vocabulary and helps other engineers follow the system
+
+### Three-Tier Architecture
+
+Three-Tier Architecture: The most common way to build web applications
+
+#### The Core Concept
+
+Instead of writing all your code in one giant file, you ***split your application into three distinct layers, each with a specific job***
+
+Think of a Restaurant:
+- Waiter (**Presentation Tier**): Takes your order and shows you the food. (Doesn't cook)
+- Kitchen (**Application Tier**): Receives the order, cooks the food, follows recipes. (The brains)
+- Pantry (**Data Tier**): Stores the raw ingredients (vegetables, meat). (The storage)
+
+**The Three Layers**
+- **Tier 1: Presentation Layer (The Frontend)**
+	- What it is: The user interface. It’s what the user touches and sees on their screen
+	- Tech: HTML, CSS, React, Mobile Apps
+	- Job: Collects inputs (clicks, text) and displays outputs (images, data). It is "dumb"—it doesn't know how to calculate taxes, it just shows the final number
+- **Tier 2: Application Layer (The Backend / Logic)**
+	- What it is: The brains of the operation
+	- Tech: Java (Spring), Python (Django), Node.js
+	- Job: It processes data. If you try to log in, this layer checks if your password matches. It calculates prices, runs rules, and talks to the database
+- **Tier 3: Data Layer (The Database)**
+	- What it is: The long-term memory
+	- Tech: MySQL, PostgreSQL, MongoDB
+	- Job: Stores and retrieves data. It doesn't care why you need the data, it just gives it to the Application Layer
+
+```
+(1) CLICK LOGIN
+          |
+          v
++-----------------------------+
+|  TIER 1: PRESENTATION       |  <-- "Client"
+|  (Browser / Mobile App)     |      (React / iOS)
++-----------------------------+
+          |
+          | (2) Send HTTP Request (username/pass)
+          v
++-----------------------------+
+|  TIER 2: APPLICATION        |  <-- "Server"
+|  (The Logic / API)          |      (Java / Python)
+|                             |
+|  * Checks logic             |
+|  * Hashes password          |
++-----------------------------+
+          |
+          | (3) Query: SELECT * FROM users...
+          v
++-----------------------------+
+|  TIER 3: DATA               |  <-- "Database"
+|  (Storage)                  |      (SQL / NoSQL)
++-----------------------------+
+```
+
+#### The "Monolith" Connection
+
+In the early stages of a startup, these three layers often live inside a Monolith!
+
+What is a Monolith here? It means that while the code is separated into layers (folders for UI, Logic, DB scripts), the ***Application Layer (as per the OSI model) runs as a single giant program on one server***
+
+```
+      USER
+       |
+       v
++-----------------------+
+|     THE SERVER        |
+| +-------------------+ |
+| |   Presentation    | |  <-- HTML is generated here
+| +-------------------+ |
+|         |             |
+| +-------------------+ |
+| |   Application     | |  <-- All logic in one process
+| +-------------------+ |
++-----------------------+
+           |
+           v
++-----------------------+
+|     DATABASE          |
++-----------------------+
+```
+
+#### Pros and cons
+
+**Pros**
+1. Simplicity: Easy to develop and test locally. You just run one app
+2. Security: The database is hidden behind the Application layer. Users can't touch the DB directly
+3. Performance: Since the Logic and UI often live on the same server in a monolith, communication is fast
+
+**Drawbacks**
+1. **Scalability**: If the "Logic" part gets too heavy, you have to duplicate the entire server to handle more traffic
+2. **Rigidity**: If you want to change the Application tech (e.g., Java to Python), you have to rewrite the whole middle tier
+3. **Single Point of Failure**: In a Monolith, if one line of code crashes the Logic layer, the whole website goes down
+
+### Microservices architecture
+
+In software, **Microservices** means *breaking one big application into many small, independent mini-applications that talk to each other*
+
+Imagine a Swiss Army Knife (The Monolith). It has a knife, a corkscrew, and scissors all glued together. If you want to sharpen the knife, you have to take the whole tool to the shop. If the scissors break, you might have to throw the whole thing away.
+
+Now imagine a Toolbox (Microservices). You have a separate hammer, a separate screwdriver, and a separate wrench. If the hammer breaks, you just buy a new hammer. The screwdriver still works. If you need a better wrench, you upgrade just the wrench
+
+#### The Architecture (The Layers)
+
+In a microservices world, we don't just have one server. *We have a **swarm** of services*
+
+The Flow:
+1. **Client**: The user's phone or browser
+2. **API Gateway**: The "Receptionist." It takes all requests and routes them to the right service
+3. **Microservices**: The workers. Each does one specific job
+4. **Databases**: Crucial difference! Each service has its own database. Service A cannot touch Service B's database directly
+```
+      (User App)
+           |
+           v
++-----------------------+
+|     API GATEWAY       |  <-- The Entry Point
+| (Routes traffic)      |
++-----------------------+
+      /    |    \
+     /     |     \  (HTTP / gRPC calls)
+    v      v      v
++------+ +------+ +------+
+| USER | | CART | | SHIP |  <-- The Microservices
+| SERV | | SERV | | SERV |
++------+ +------+ +------+
+   |        |        |
+   v        v        v
+(UserDB) (CartDB) (ShipDB)  <-- Separate Databases
+```
+
+#### Why is it Needed?
+
+The Monolith (the old way) has a major flaw: ***Coupling***. In a monolith, if the "Shipping" feature has a bug that crashes the server, the "Login" feature also goes down. *The whole site dies*
+
+**Microservices** are needed for **Decoupling**.
+- **Scale**: If millions of people are browsing products but only 5 people are buying, you can create 100 copies of the Catalog Service and keep only 1 Payment Service. In a monolith, you'd have to clone the whole giant thing
+- **Speed**: One team can work on the Cart while another works on Payments. They don't block each other
+
+#### Pros and cons
+
+**Pros**
+- **Scalability**: You can scale only the specific services that are hot or busy, rather than the entire application
+- **Resilience**: The system prevents total failure. If one service (e.g., "Reviews") crashes, other parts (e.g., "Checkout") continue to work
+- **Tech Freedom**: Different teams can use different technology stacks (e.g., Java for Search, Python for AI) without needing to agree on a single language
+
+**Drawbacks**
+- **Complexity**: Managing the infrastructure becomes difficult as you move from one big server to many small servers
+- **Network Latency**: Communication between services happens over the network (HTTP/gRPC), which is significantly slower than internal function calls in a monolith
+- **Data Consistency**: Because databases are often separated, ensuring data stays in sync across services is difficult (e.g., handling scenarios where Payment succeeds but Shipping fails)
+
+#### One database per microservice
+
+The Core Reason: **Decoupling**
+- The #1 rule of microservices is ***independence***. If Service A and Service B share the same database, they are married. If Team A changes a table name (e.g., `user_id` to `uuid`), Team B's code breaks. Both teams must constantly hold meetings to agree on every database change. By giving each service its own database, Team A can change their schema whenever they want without breaking Team B
+
+```
+    [Service A]      [Service B]
+        |                |
+        |                |
+    +------------------------+
+    |    SHARED DATABASE     |  <-- Single Point of Failure
+    | (Table A)    (Table B) |      & Bottleneck
+    +------------------------+
+```
+
+```
+   [Service A]                   [Service B]
+        |                             |
+        v                             v
+ +-------------+               +-------------+
+ |   DB  (A)   |               |   DB  (B)   |
+ |   (SQL)     |               |  (NoSQL)    |
+ +-------------+               +-------------+
+```
+
+**"Polyglot Persistence"** (The Right Tool for the Job)
+- Since the databases are separate, they don't even have to be the same type of database
+- Payment Service: Needs strict transactions --> Uses MySQL (SQL)
+- Catalog Service: Needs flexible product attributes --> Uses MongoDB (NoSQL)
+- Social Service: Needs friend connections --> Uses Neo4j (Graph)
+
+In a shared monolith database, everyone is forced to use the same technology (usually SQL), even if it's bad for their specific use case
+
+**Scalability & Fault Isolation**
+- ***Scaling***: If the "Order Service" is getting hammered with millions of writes, you can upgrade just that database to a bigger server. You don't need to pay to upgrade the "User Database" which might be idle
+- ***Isolation***: If a bad query crashes the "Order Database," the "User Service" stays alive. In a shared DB, one bad query can take down the entire company
+
+#### Real World Use Case
+
+E-Commerce (e.g., Amazon)
+- When you load a product page on Amazon, you aren't talking to one server. You are hitting ~100 microservices at once
+- - Single page load exmaple:
+```
+Request: "Show me the iPhone 15 Page"
+        |
+        v
+   [API Gateway]
+        |
+   +----+--------------------------+-----------------------+
+   |                               |                       |
+   v                               v                       v
+[Inventory Service]         [Pricing Service]       [Review Service]
+"Do we have stock?"         "What is the cost?"     "Fetch 5 stars"
+   |                               |                       |
+   v                               v                       v
+(Stock DB: Yes, 5 left)     (Price DB: $999)        (NoSQL DB: Great phone!)
+```
+
+#### Summary
+
+- Monolith: Easy to build, hard to scale
+- Microservices: Hard to build, easy to scale
+
+Rule of Thumb: Don't start with microservices. Start with a monolith, and break it up only when your team grows too big to manage one code base
+
+### Event-Driven Architecture
+
+In a traditional system (***Request-Response***), when Service A wants Service B to do something, it calls it directly and waits on the phone until B is done
+
+**In Event-Driven Architecture**, Service A doesn't tell anyone what to do. Instead, it just shouts, "Hey! Something happened!" (an Event) and goes back to work. It doesn't care who listens
+
+Analogy:
+- Request-Response: You call a friend and ask, "Please come to my party." You wait for them to answer "Yes/No"
+- Event-Driven: You send an invite. You don't wait. Your friend sees the invite (Event) whenever they check their mail and decides to come
+
+There are three main parts to this system:
+1. **Producer (Emitter)**: The service where the action happens. It creates the *event*
+2. **Message Broker**: The "Middleman" or "Post Office." It *receives the event and holds it safe*
+3. **Consumer**: The service that *waits for events*. When it sees one, it *wakes up and does its job*
+
+```
+ [ PRODUCER ]              [ MESSAGE BROKER ]             [ CONSUMER ]
+  (Order Service)           (RabbitMQ / Kafka)            (Shipping Service)
+       |                            |                            |
+       | 1. "Order Placed!"         |                            |
+       | (The Event)                |                            |
+       +--------------------------> |                            |
+       |                            |                            |
+       |                            | 2. "Hey, new event!"       |
+       |                            +--------------------------> |
+       |                            |                            | 3. Process Logic
+       |                            |                            |    (Ship Item)
+```
+
+#### Why is it needed?
+
+To understand why we need it, let's look at what happens without it.
+
+**Scenario A: The Bad Way (Direct HTTP Calls)**
+- The Order Service calls the Shipping Service directly
+- Problem 1: If Shipping is down, the Order fails. The user sees an error
+- Problem 2: The Order Service has to wait (latency)
+```
+ [Order Service] --(Wait...)--> [Shipping Service (CRASHED!)]
+      |
+      v
+   "ERROR 500: Cannot order"
+```
+
+**Scenario B: The Good Way (Event-Driven)**
+- The Order Service drops a message in the Broker and immediately tells the user "Success!"
+- Benefit: If Shipping is down, the message just sits in the Broker (Queue) waiting. When Shipping comes back online 1 hour later, it processes the message. **No data is lost**
+```
+ [Order Service] --(Drop Message)--> [ Broker ]           [Shipping Service (CRASHED)]
+      |                               |                       (Offline)
+      v                               v
+"Success! Order Placed"          [Message Saved]
+                                      |
+                               (Later, when online)
+                                      |
+                                      +----------------> [Shipping Service (ONLINE)]
+```
+
+#### Why do Microservices use it?
+
+Microservices architectures use EDA primarily for **Decoupling** and **Buffering**
+
+1. **Decoupling (Independence)**. In a large company like Uber or Netflix, the team building the "Signup Service" shouldn't need to know about the "Welcome Email Service.
+	- With EDA: The Signup Service just says "New User!"
+	- Any team can add a new Consumer (e.g., "Analytics Service" or "Coupon Service") to listen to that event without touching the Signup Service code.
+
+2. **Handling Spikes (Traffic Buffering)**. Imagine a flash sale (Black Friday). 1 million users order in 1 second
+	- Without Broker: The Shipping Service explodes and crashes under the load
+	- With Broker: The ***Broker acts like a Buffer*** (***Dam***). It catches all 1 million requests. The Shipping Service processes them at its own pace (e.g., 500 per second) until the queue is empty
+
+```
+ HUGE TRAFFIC              BUFFER                 SAFE PROCESSING
+      |||                      |                         |
+      vvv                      |                         v
+[ 1M Orders ]  ----->  [ MESSAGE BROKER ]  ----->  [ Shipping ]
+                       [ |||||||||||||| ]          (Takes 1 at a time)
+                       [ |||||||||||||| ]
+```
+
+### Event-Driven Patterns
+
+**The Saga Pattern (The "Undo" Button)**
+
+**The Problem**: In a Microservices world, a single "transaction" (like booking a trip) involves multiple services (Flight, Hotel, Car). If the Flight books successfully, but the Hotel is full, you can't just "cancel" the database transaction because they are different databases. You have a partial data mess
+
+**The Solution (Saga)**: Break the long transaction into a chain of small local transactions. If one fails, you run a "Compensating Transaction" (an undo step) to reverse the previous steps.
+
+Happy path:
+```
+[Order Service] ---> [Payment Service] ---> [Shipping Service]
+   (Success)            (Success)              (Success)
+```
+The Failure Path (Rollback) Imagine Shipping fails. The Saga runs backwards to clean up.
+```
+1. [Order Service] Created Order #101.
+        |
+        v
+2. [Payment Service] Charged $50.
+        |
+        v
+3. [Shipping Service] ERROR! Out of Stock!
+        |
+        v
+   (TRIGGER SAGA ROLLBACK)
+        |
+        v
+4. [Payment Service] **REFUND** $50. (Compensating Action)
+        |
+        v
+5. [Order Service] **CANCEL** Order #101. (Compensating Action)
+```
+
+**CQRS (Command Query Responsibility Segregation)**
+
+**The Problem**: In a traditional database, the same model is used for writing and reading. ***Writes need complex validation*** (normalized data). ***Reads need fast joins and dashboards*** (denormalized data). **Using one database for both creates a bottleneck**
+
+**The Solution (CQRS)**: Split the system into *two* parts:
+1. **Command Side (Write)**: Optimized for updates/inserts. Uses a normalized database (e.g., PostgreSQL)
+2. **Query Side (Read)**: Optimized for fast viewing. Uses a NoSQL DB or Cache (e.g., Elasticsearch, Redis)
+3. **Sync**: Events update the Read side ***asynchronously***
+
+```
+      [ USER / CLIENT ]
+        /             \
+       / (Writes)      \ (Reads)
+      v                 v
++-------------+    +-------------+
+| COMMAND API |    |  QUERY API  |
++-------------+    +-------------+
+      |                   ^
+      v                   |
+ [ WRITE DB  ]       [ READ DB   ]
+ (Postgres)          (ElasticSearch)
+      |                   ^
+      |                   |
+      +----(Events)-------+
+      "Item Created"
+      "Item Updated"
+```
+
+**Event Sourcing (The "Ledger")**
+
+**The Problem**: In a normal database (CRUD), you only store the ***current state***
+
+Table: `User: { Name: "Bob", Balance: $100 }`. If Bob had $50 yesterday, that information is lost forever. You don't know how he got to $100
+
+**The Solution (Event Sourcing)**: Don't store the current state. ***Store the history of events that led to the state***. To find the current balance, you ***replay*** (add up) the events
+
+Traditional DB:
+```
+| ID | Name | Balance |
+|----|------|---------|
+| 1  | Bob  | $100    |  <-- You only see this.
+```
+Event Sourced DB (The Log):
+```
+Event Stream:
+1. [UserCreated]  Name: Bob, Balance: $0
+2. [Deposited]    Amount: $50
+3. [Deposited]    Amount: $60
+4. [Withdrawn]    Amount: $10
+-----------------------------------------
+Current State (Calculated): $0 + 50 + 60 - 10 = $100
+```
+
+|Pattern|Best For...     |
+|-------|----------------|
+|Saga   |Complex flows across microservices (e.g., Booking a vacation: Flight + Hotel + Car)|
+|CQRS   |Systems with high read traffic and complex search requirements (e.g., Amazon Product Search vs. Amazon Inventory Admin)|
+|Event Sourcing|Systems requiring strict audit trails or "undo/replay" capability (e.g., Banking, Accounting, Legal systems)|
+
+### Message delivery semantics and guarantees
+
+These are the "promises" a messaging system (like Kafka or RabbitMQ) makes about whether your message will arrive safely
+
+1. ***At-Most-Once (Fire and Forget)***
+	- The Promise: "I will try to send the message once. If it gets lost, too bad. I won't try again."
+	- How it works: The Producer sends a message and immediately moves on. It doesn't wait for a confirmation receipt
+	- Risk: ***Data loss***
+	- Performance: ***Highest*** (no waiting)
+	- Use Case:
+		- ***IoT Sensor Data***: If you miss one temperature reading out of 10,000 sent every second, it doesn't matter
+		- ***Log Files***: Losing one line of a debug log is usually acceptable
+```
+ [ Producer ]                      [ Broker ]
+     |                                 |
+     | --(Msg: "Update View Count")--> X (Lost in network!)
+     |                                 |
+     | (Does not retry)                |
+     v
+(Continues working...)
+```
+	
+2. ***At-Least-Once (The Standard)***
+	- The Promise: "I guarantee the message will arrive. However, in rare cases, it might arrive twice"
+	- How it works: The Producer sends a message and waits for an ACK (Acknowledgement)
+		- If the ACK is received -> Success
+		- If the ACK is lost (network failure), the Producer thinks the message failed and sends it again
+	- Risk: ***Duplicate messages***. (The ***consumer must be Idempotent to handle this***—meaning processing the same message twice doesn't break anything)
+	- Performance: ***Medium*** (Retries cost time)
+	- Use Case:
+		- ***Most Systems***: Payment processing, Order creation. ***It is better to process an order twice (and filter the duplicate later) than to lose the order entirely***
+```
+ [ Producer ]                         [ Broker ]
+     |                                    |
+     | --(Msg: "Charge $10")------------> | (Saved!)
+     |                                    |
+     |             (Network Cut!)         |
+     | X <-------(ACK: "Got it")--------- |
+     |                                    |
+     | (Didn't get ACK, waiting...)       |
+     | (Timeout! Retrying...)             |
+     |                                    |
+     | --(Msg: "Charge $10")------------> | (Saved Again!)
+     v                                    v
+                                   [ "Charge $10", "Charge $10" ]
+                                   (Duplicate Created)
+```
+3. **Exactly-Once (The Holy Grail)**
+	- The Promise: "The message will arrive exactly one time. No loss, no duplicates"
+	- How it works: This is ***very hard to achieve***. It usually requires a ***transactional coordination*** between the Producer and the Broker (like "Transaction ID" checks)
+	- The system tracks unique IDs. If it sees `ID #101` again, it discards it automatically
+	- Risk: ***Complexity and slowness***
+	- Performance: ***Lowest*** (Heavy overhead)
+	- Use Case:
+		- ***Financial Trading***: You cannot buy a stock twice just because of a network glitch
+		- ***Voting Systems***: Every vote must count exactly once
+```
+ [ Producer ]                         [ Broker ]
+     |                                    |
+     | --(ID: 101, Msg: "Vote A")-------> | (Checks ID Log...)
+     |                                    | "New ID. Save it."
+     |                                    |
+     | <---------(ACK lost)-------------- X
+     |                                    |
+     | --(ID: 101, Msg: "Vote A")-------> | (Checks ID Log...)
+     |        (Retry)                     | "Saw 101 already. Ignore."
+     v                                    v
+                                    [ "Vote A" ] (Only 1 stored)
+```
+
+|Guarantee|Reliability     |Duplicates?|Performance|Best For...                         |
+|---------|----------------|-----------|-----------|------------------------------------|
+|At-Most-Once|Low             |No         |Fast       |Analytics, Logging, Sensors         |
+|At-Least-Once|High            |Yes        |Medium     |Payments, Orders (Needs Idempotency)|
+|Exactly-Once|Very High       |No         |Slow       |Stock Trading, Accounting           |
+
+### Strategy for processing infinite streams of events
+
+**The Problem: Infinite Data** You cannot "sum up" a stream that never ends. You can't say "Count all clicks" because new clicks keep coming forever. 
+
+**Solution**: You *split* the stream into *chunks* called **Windows**
+
+#### Tumbling Window
+
+- **Concept**: ***Fixed-size chunks that do not overlap***. As soon as one finishes, the next one starts
+- Analogy: A train. As soon as one car ends, the next one begins. You can only be in one car
+- Use Case: "Count requests per minute." (`00:00-00:01`, `00:01-00:02`)
+
+```
+Stream:  [e1, e2]   [e3, e4]   [e5]
+            |          |         |
+Windows: |00-10s|   |10-20s|  |20-30s|
+         +------+   +------+  +------+
+```
+
+```python
+# Count events every 10 seconds
+def tumbling_window(stream):
+    bucket = []
+    window_start = time.now()
+    
+    for event in stream:
+        if time.now() - window_start >= 10_seconds:
+            print(f"Count: {len(bucket)}") # Process Window
+            bucket = []                     # Clear Bucket
+            window_start = time.now()       # Start New
+        bucket.append(event)
+```
+
+#### Hopping Window
+
+**Concept**: ***Fixed-size chunks that overlap***. The window "hops" forward by a smaller step than its size
+
+Analogy: You are analyzing the "last 1 hour" of data, but you update the report every "5 minutes"
+
+Result: ***A single event can belong to multiple windows***
+
+Use Case: "Show me the moving average of stock price for the last 10 minutes, updated every 1 minute"
+
+```
+Events:      e1    e2    e3    e4
+Time:   0s---5s---10s---15s---20s
+             |     |
+W1:     [0---------10]
+W2:          [5---------15]
+W3:                [10--------20]
+```
+
+```python
+# Window Size: 10s, Hop: 5s
+windows = []
+
+def process_event(event):
+    current_time = event.timestamp
+    
+    # Add event to ALL active windows it belongs to
+    # (In reality, optimized systems don't duplicate data like this)
+    for w in windows:
+        if w.start <= current_time < w.end:
+            w.add(event)
+            
+    # Create new windows periodically
+    if current_time % 5 == 0:
+        windows.append(Window(start=current_time, end=current_time + 10))
+```
+
+#### Sliding Window
+
+**Concept**: The ***window slides continuously*** (or specifically triggers on every event). It ***looks backwards*** from the *current* event
+
+Difference from Hopping:
+- Hopping jumps in fixed steps (e.g., every 5 mins)
+- ***Sliding moves smoothly with the data***
+
+Use Case: "Alert me immediately if there are more than 5 errors in the last minute." (You don't wait for the minute to end; you check on every error)
+
+```
+Events:       e1.......e2.......e3 (Current)
+              |        |        |
+Lookback:     [<-- 1 min -------]
+              (From e3 backwards)
+```
+```python
+# Alert if > 5 events in last 60 seconds
+event_queue = deque() # Double-ended queue
+
+def on_new_event(event):
+    now = time.time()
+    event_queue.append(now)
+    
+    # Remove events older than 60s from the left
+    while event_queue and (now - event_queue[0] > 60):
+        event_queue.popleft()
+        
+    if len(event_queue) > 5:
+        trigger_alert()
+```        
+
+#### Session Window
+
+**Concept**: **Dynamic size**. The ***window stays open as long as events are coming***. It ***closes only after a gap of inactivity (timeout)***
+
+Analogy: A user browsing a website. They click, click, click (Session 1). Then they leave for lunch. They come back 1 hour later and click (Start of Session 2)
+
+Use Case: User behavior analysis ("How long did they play the game?")
+
+```
+Events:   [e1, e2, e3]                    [e4, e5]
+Time:     10:00.......10:05..............11:00....11:02
+               |                              |
+               v                              v
+Window 1: [10:00-10:05]               Window 2: [11:00-11:02]
+(Closed because no events             (New session started
+ for >30 mins)                         after long gap)
+```
+```python
+last_event_time = 0
+current_session = []
+TIMEOUT = 30 * 60 # 30 mins
+
+def process_event(event):
+    global last_event_time, current_session
+    
+    if (event.time - last_event_time) > TIMEOUT:
+        # Gap detected! Close old session
+        save_session(current_session)
+        current_session = [] # Start new
+        
+    current_session.append(event)
+    last_event_time = event.time
+```    
+
+#### Comparison
+
+```
+     Low Cost                                       High Cost
+     (Efficient)                                   (Expensive)
+         |                                              |
+    [ Tumbling ] -------- [ Hopping ] ------------- [ Sliding ]
+         |                                              |
+    (Misses patterns                            (Catches everything,
+     at boundaries)                              eats RAM/CPU)
+```
+
+|Window Type|The Good (Pros) |The Bad (Cons)|Real World Example|
+|-----------|----------------|--------------|------------------|
+|Tumbling   |**Simplest**. Fast and easy to build. No double-counting.|**Blind Spots**. If an event happens right on the cut-off line, you might miss the pattern.|"Hourly Report" (09:00-10:00)|
+|Hopping    |**Smoother**. Catches patterns that happen on the edge of windows.|**Wasteful**. Processes the same data twice (or more). Uses more CPU.|"Trending Now" (Last 1 hr, updated every 5m)|
+|Sliding    |**Fastest**. Alerts you immediately when a threshold is hit.|**Expensive**. Needs huge memory to track every single event timestamp.|"Fraud Alert" (5 failures in any 10s)|
+|Session    |**Human**. Tracks actual behavior (starts/stops) instead of arbitrary time.|**Unpredictable**. Hard to code because you never know when a session will end.|"User Analytics" (How long was a user online?)|
+
+
+### Observability in Microservices architecture
+
+**What is Observability?**
+
+If Monitoring tells you "The system is dead," Observability tells you "Why it died"
+
+- In a Monolith, you just look at one log file
+- In Microservices, a single user request hits 20 different services. If the user says "It's slow," you need to know *which of those 20 services is the bottleneck*. You can't just check 20 different log files manually
+
+#### The Three Pillars
+
+To make a system observable, you need three types of data:
+1. **Logs**: "What happened?" (Events)
+2. **Metrics**: "Is it healthy?" (Numbers)
+3. **Tracing**: "Where did the request go?" (The Path)
+
+Pillar 1: Distributed Logging (The "Event Diary")
+- The Problem: You have 50 services. If Service A errors out, you don't want to SSH into Server A to read a text file
+- The ***Solution***: All services send their logs to a ***Central Log Aggregator*** (like ELK Stack - Elasticsearch, Logstash, Kibana). You search one dashboard to see logs from all servers
+- ***Key***: You need a **Correlation ID**. This is a random ID (e.g., `req-123`) attached to the user's request at the start. Every service adds this ID to its log. This *lets you filter the central dashboard*: `show logs where id="req-123"`
+```
+[Service A] --(Log: "User login")--> \
+                                      \
+[Service B] --(Log: "DB Error")------> [ Log Collector ] ---> [ Dashboard ]
+                                      /  (Logstash)           (Kibana)
+[Service C] --(Log: "Payment OK")--> /
+```
+
+Pillar 2: Metrics (The "Health Score")
+- The Problem: Logs are text. They are hard to count. You need to know trends like "Are errors increasing?" or "Is CPU high?"
+- The **Solution**: ***Services calculate numbers (aggregates) over time*** and ***send them to a Time-Series Database (like Prometheus)***
+- Examples: "Requests per second", "CPU usage", "Memory usage"
+- Use Case: You set an Alert: "If CPU > 90% for 5 minutes, page the on-call engineer."
+```
+ [ Service A ]
+ (Memory: 40%)  <------- (Pull) ----- [ Prometheus ]
+ (CPU: 10%   )                        (Stores history)
+                                           |
+                                           v
+                                     [ Grafana ]
+                                     (Pretty Charts)
+```
+
+Pillar 3: Distributed Tracing (The "Map")
+- The Problem: The user says "Checkout is slow"
+	- Service A took 10ms
+	- Service B took 10ms
+	- Service C took 5000ms (The culprit!)
+- Metrics tell you "It is slow"
+- Tracing tells you Service C is the reason
+- The ***Solution***: ***A Trace visualizes the lifespan of a request as it hops between microservices***. It looks like a waterfall chart
+- Tools: Jaeger, Zipkin
+```
+Request: "Buy Item" (Total: 5120ms)
+|
+|-- [API Gateway] (10ms)
+    |
+    |-- [Auth Service] (50ms)
+    |
+    |-- [Order Service] (50ms)
+        |
+        |-- [Payment Service] (10ms)
+        |
+        |-- [Inventory Service] (5000ms) <--- THE BOTTLENECK!
+```
+
+### Migrating from a monolith to a microservice architecture
+
+**The Goal: Moving Without Breaking**
+
+Migrating to microservices is like renovating a house while you are still living in it. You cannot just "tear it down" and build a new one because the business still needs to run. You must do it piece by piece
+
+**The "Big Bang" Mistake**: *Never try to rewrite the whole system from scratch at once*. It almost always fails because the old system keeps changing while you write the new one
+
+#### The Strategy: The "Strangler Fig" Pattern
+
+The most famous migration pattern is the "Strangler Fig"
+- **Concept**: A strangler fig tree grows around an old tree. Eventually, the old tree dies, and the new tree stands alone
+- **In Software**: You ***build new features as microservices and slowly peel old features out of the monolith one by one***
+
+**The Strangler Process**
+
+***Phase 1: The Monolith (Start) All traffic hits the Big App***
+```
+     [ User ]
+         |
+         v
+    [ Monolith ]
+   (Auth, Order, User)
+         |
+    [ Big DB ]
+```
+
+***Phase 2: Add an API Gateway (The Interceptor)*** 
+- Put a "Front Door" (Gateway) before the monolith. This lets you control traffic
+```
+     [ User ]
+         |
+         v
+  [ API Gateway ]
+         |
+         v
+    [ Monolith ]
+```
+
+***Phase 3: Strangle One Service (e.g., User Profile)***
+- Build a new "User Service." 
+- Tell the Gateway to send /users requests to the new service, and everything else to the Monolith
+```
+     [ User ]
+         |
+         v
+  [ API Gateway ]
+     /       \
+    / (Old)   \ (/users)
+   v           v
+[ Monolith ] [ User Service ] (New!)
+(Auth, Order)       |
+     |           [ User DB ]
+  [ Big DB ]
+```
+
+***Phase 4: Repeat Until Done***
+- Keep moving pieces until the Monolith is empty (or very small)
+
+#### How to Decompose? (Finding Boundaries)
+
+How do you decide what piece to break off first? You look for Seams.
+
+**Approach A**: **By Business Capability (Vertical Slice)**. Group things by what they do for the business
+- Shipping
+- Billing
+- Inventory
+
+**Approach B**: **By Subdomain (DDD - Domain Driven Design)**.Group things by the "language" they speak
+- ***Core Domain***: The unique money-maker (e.g., The matching algorithm for Uber)
+- ***Supporting Domain***: Important but generic (e.g., The notification system)
+
+**Tip**: 
+- Start with ***Edge Services (things with few dependencies)***
+	- Good Start: "Notification Service" (Just sends emails, doesn't need much data)
+	- Bad Start: "Core Pricing Engine" (Deeply tangled in everything)
+
+#### Handling the Database (The Hardest Part)
+
+Code is easy to move. ***Data is hard***. You cannot rip the data out easily because the Monolith still needs it
+
+*Pattern*: **Dual Write (The Transition)** 
+- When you move the "User" table to a new service, the Monolith might still try to read it
+	- Step 1: The Monolith writes to ***both*** the Old Table and the New Service
+	- Step 2: Move the "Read" traffic to the New Service
+	- Step 3: Stop writing to the Old Table
+
+```
+    [ Monolith ]
+       /    \
+      /      \ (Sync Call)
+     v        v
+[ Old DB ]  [ User Service ] -> [ New User DB ]
+```
+
+#### Steps & Tips for Migration
+
+- Stop the Bleeding: Stop adding new code to the Monolith. Any new feature must be a microservice
+- Decouple the UI: If your frontend is baked into the backend (e.g., JSP/Thymeleaf), separate it into a Single Page App (React/Angular) first
+- Prioritize:
+	- High Change Frequency: Move parts that change often (so you can deploy them fast)
+	- Resource Hogs: Move parts that use too much RAM/CPU (e.g., Image processing) so they don't crash the main app
+	- Accept Data Duplication: It is okay to have user_id and user_email stored in the Order Service's DB and the User Service's DB. Do not try to make one perfect normalized DB across the world
+
+*Summary*
+1. Do: Use the Strangler Fig pattern
+2. Do: Put an API Gateway in front early
+3. Don't: Share databases
+4. Don't: Rewrite from scratch
+
+### Microservices principles and best practices
+
+**The DRY Principle (Don't Repeat Yourself) vs. Shared Libraries**
+
+The Standard Rule: In coding, we are taught "Don't Repeat Yourself." If you write the same code twice, put it in a shared library.
+
+**The Microservices Exception**: ***In Microservices, DRY can be dangerous***. If Service A and Service B both use a shared library common-utils.jar, they are now "married"
+
+- If Service A needs to change common-utils to add a feature, it might break Service B
+- You end up in ***Dependency Hell***, where you cannot deploy Service A because Service B isn't ready for the library update
+- Best Practice: ***Duplication is better than Coupling***. It is okay to copy-paste a small Date Helper function into two different services if it keeps them independent
+- *When to use Shared Libraries: Only for **infrastructure concerns** that rarely change (e.g., Logging clients, Auth tokens), never for business logic*
+
+```
+// Bad!
+
+[ Service A ]       [ Service B ]
+      \               /
+       \             /
+      [ SHARED-LIB.JAR ]
+      (Contains Logic)
+             |
+    "I changed the Lib!"
+    (Both Services Break)
+```
+```
+// Good!
+
+  [ Service A ]       [ Service B ]
+(Has DateUtil.java) (Has DateUtil.java)
+      |                   |
+  (Independent)       (Independent)
+```
+
+**Databases: The "Shared Nothing" Architecture**
+
+Principle: **Database-per-Service**. We discussed this before, but the principle here is Data Sovereignty. A service must be the only thing that can touch its data
+
+Why?
+- **Schema Evolution**: If the "Shipping Team" wants to rename a column, they shouldn't need to email the entire company to ask for permission
+- **Performance**: A bad query in the "Reporting Service" shouldn't crash the "Checkout Service"
+
+Best Practice: If Service A needs data from Service B, it must ***ask via API*** (or listen for Events). It cannot run a SQL query on B's database
+
+```
+   [ TEAM A ]                 [ TEAM B ]
+       |                          |
+       v                          v
+ +-------------+            +-------------+
+ |  Service A  | --(API)--> |  Service B  |
+ +-------------+            +-------------+
+       |   (Allowed)              |
+       v                          v
+ [ DB A (Private) ]         [ DB B (Private) ]
+       ^                          ^
+       |                          |
+       X (FORBIDDEN!) ------------+
+```
+
+**Structured Autonomy (Team Organization)**
+
+Principle: **Conway's Law**. ***"Software structure reflects the organization structure"***
+
+If you have a separate "DBA Team," "Frontend Team," and "Backend Team," you will build a Monolith. In Microservices, you ***organize teams vertically (Cross-Functional Teams)***
+
+Structured Autonomy:
+- You Build It, You Run It: The team that writes the code is also the team that gets woken up at 3 AM if it crashes. This forces them to write better code
+- Freedom of Choice: The team chooses the best tool for the job (e.g., Python vs. Java), provided they maintain it themselves
+
+```
+// Horizontally sliced:
+
+ [   UI Team   ] (Handover) -> [ Backend Team ] (Handover) -> [ DB Team ]
+      |                            |                            |
+      v                            v                            v
+(Slow releases, lots of meetings, "It's not my fault" culture)
+```
+```
+// Vertically sliced (Microservices):
+
+     [ PRODUCT TEAM A ]            [ PRODUCT TEAM B ]
+ (Product + UI + Dev + Ops)    (Product + UI + Dev + Ops)
+           |                              |
+           v                              v
+   [ SERVICE A (Full Stack) ]    [ SERVICE B (Full Stack) ]
+```
+
+**API Management (The "Contract")**
+
+Principle: The Interface is King. Since services talk over the network, ***your API (REST/gRPC) is a strict contract. You cannot break it***
+
+Best Practices:
+- **Versioning**: Never change an existing endpoint. Create a new version (`/v1/user -> /v2/user`)
+- **API Gateway**: Use a Gateway to handle "Cross-Cutting Concerns" like Authentication, Rate Limiting, and SSL termination. Do not write this logic inside every microservice
+- **Consumer-Driven Contracts**: Before you change your API, run tests provided by the people using your API to ensure you don't break them
+
+```
+     [ External Clients ]
+              |
+              v
+     +------------------+
+     |   API GATEWAY    | <--- Handles Auth, Rate Limits, Routing
+     +------------------+
+          /       \
+         /         \  (Clean Internal Traffic)
+        v           v
+  [ Service A ]  [ Service B ]
+  (Focuses only   (Focuses only
+   on logic)       on logic)
+```
+
+## Big Data
+
+**What is "Big Data"?**
+
+In System Design, "Big Data" doesn't just mean "a lot of files." It refers to data that **breaks the 3 V's rule**, meaning a normal database (like MySQL on one computer) crashes if it tries to handle it
+1. **Volume**: Too big to fit on one hard drive (Petabytes)
+2. **Velocity**: Coming in too fast to write to disk (Millions of events/sec)
+3. **Variety**: It's messy (JSON, CSV, Videos, Logs all mixed together)
+
+### Processing Strategies: Batch vs. Stream
+
+To handle this data, we have two main approaches
+
+#### Batch Processing (The "Laundry" Method)
+
+You ***wait for data to pile up, then process it all at once***!
+- Analogy: You wait for the laundry basket to fill up before running the washing machine
+- Tech: Hadoop MapReduce, Spark
+- Pros: ***Very accurate***, can process huge history
+- Cons: ***Slow***. You get the answer hours later
+
+```
+Data -> [ Wait... ] -> [ Wait... ] -> [ PROCESS HUGE CHUNK ] -> Result
+       (09:00 AM)     (12:00 PM)          (End of Day)
+```
+
+#### Stream Processing (The "Dishwasher" Method)
+
+You ***process every piece of data the moment it arrives***.
+- Analogy: You wash a dirty plate immediately after dinner
+- Tech: Apache Kafka, Flink, Storm
+- Pros: ***Instant results (Real-time)***
+- Cons: ***Hard to look back at history***; complex to handle late data
+
+```
+Data -> [ Process ] -> Result
+Data -> [ Process ] -> Result
+Data -> [ Process ] -> Result
+(Continuous Flow)
+```
+
+### The Lambda Architecture
+
+The Problem:
+- Batch is accurate but slow
+- Stream is fast but sometimes approximate (or hard to re-calculate history)
+
+**The Solution (Lambda Architecture)**: ***Why not do both?*** The Lambda Architecture is a *design pattern* that splits data into two paths: ***a Hot Path (Speed)*** and ***a Cold Path (Batch)***.
+
+#### The Three Layers
+
+1. Batch Layer (The Cold Path):
+	- Stores the "Master Dataset" (immutable history)
+	- Pre-computes comprehensive views every few hours
+	- Goal: Accuracy & Completeness
+2. Speed Layer (The Hot Path):
+	- Processes *only the recent data* (e.g., the last hour) *that the Batch Layer hasn't touched yet*
+	- Goal: Low Latency
+3. ***Serving Layer (The Merge)***: When a user asks a question, ***this layer combines the answer from the Batch Layer (History) and the Speed Layer (Real-time)***
+
+**`Final Answer = Batch View + Real-time View`**
+
+```
+                    [ DATA SOURCE ]
+                           |
+            +--------------+--------------+
+            |                             |
+            v                             v
+    1. [ BATCH LAYER ]            2. [ SPEED LAYER ]
+    (Hadoop / S3)                 (Kafka / Storm)
+    "Process all history"         "Process last 1 hour"
+            |                             |
+            v                             v
+    [ Batch Views ]               [ Real-time Views ]
+    (Database A)                  (Database B)
+            |                             |
+            +-------------+---------------+
+                          |
+                          v
+                 3. [ SERVING LAYER ]
+                 "Query: Batch + Speed"
+                          |
+                          v
+                      [ USER ]
+```
+
+Example: ***YouTube View Counter***
+- Imagine you are building the "View Count" for a YouTube video
+- Speed Layer:
+	- User clicks video -> `Counter +1` immediately
+	- The user sees "105 views" instantly
+	- Risk: Might double-count if the network is glitchy, but it's fast
+- Batch Layer:
+	- Every night, it takes all the raw logs of the day
+	- It filters out bots, spam clicks, and duplicate reloads
+	- It calculates the perfectly accurate count
+- ***Serving Layer*** (Next Morning):
+	- ***The system overwrites the "Fast Estimate" with the "Batch Accurate Count"***
+	- The view count might jump from 10,500 (Speed estimate) down to 10,200 (Batch corrected)
+
+**Pros and cons of Lambda**
+
+Pros	
+- **Resilient**: If the Real-time layer crashes, the Batch layer fixes the data later
+- **Accurate**: You get the speed of streaming + the accuracy of batching
+
+Cons	
+- **Complexity**: You have to write code twice (once for Batch, once for Stream). This violates the DRY principle
+- **Maintenance**: You have to manage two complex distributed systems
+
+### OLTP vs OLAP
+
+The Analogy: The ***Cashier vs The Manager***
+
+OLTP is the Cashier
+- Job: Handle one customer at a time, very fast
+- Task: "Sell one coffee." "Update one inventory item."
+- Goal: Don't keep the customer waiting
+
+OLAP is the Manager
+- Job: Sit in the back office and look at all receipts from the last 10 years
+- Task: "Which coffee sold the best in winter 2023?"
+- Goal: Find trends to make better decisions
+
+#### Why separate them? The Big Data Strategy
+
+In a Big Data architecture, ***you never run analytics on your OLTP database***
+
+The Golden Rule: **Performance Isolation**. If a Data Scientist runs a massive query ("Sum all orders for 10 years") on your live MySQL database (OLTP), the CPU hits 100%. Suddenly, users cannot log in or buy products. *The site freezes*
+
+The Strategy: ***Move data from the fast transactional system (OLTP) to a dedicated big data system (OLAP) via a pipeline***
+
+```
+       [ USERS ]
+           |
+           v (Small, fast writes)
+ +----------------------+
+ |      OLTP DB         |  <-- "Source of Truth"
+ | (MySQL / Postgres)   |      (Optimized for writing rows)
+ +----------------------+
+           |
+           |  ETL Pipeline (Extract, Transform, Load)
+           |  (Runs every night or streams via Kafka)
+           v
+ +----------------------+
+ |   OLAP / Data Lake   |  <-- "Big Data Storage"
+ | (Snowflake / HDFS)   |      (Optimized for reading columns)
+ +----------------------+
+           |
+           v (Huge, slow reads)
+    [ DATA ANALYST ]
+    (Tableau / BI Tools)
+```
+
+#### Row vs. Columnar Storage - The Secret Sauce
+
+
+The physical storage strategy ***changes drastically*** between OLTP and Big Data OLAP
+
+**OLTP uses Row Storage**:
+- It stores data line-by-line
+- Why? It's fast to "Write a new User". You just append one line
+
+*OLTP (Row Store) on Disk:*
+| ID | Name | Age |
+| --- | --- | --- |
+| 1 | Alice | 25 | | 2 | Bob | 30 |
+
+```
+[1, Alice, 25]  [2, Bob, 30] ...
+```
+*(Good for fetching Alice's FULL profile)*
+
+**OLAP uses Columnar Storage**:
+- It stores data column-by-column
+- Why? 
+	- ***Big Data queries usually ask for specific fields*** (e.g., "Average Age")
+	- Columnar storage lets the DB read only the "Age" column and ignore "Name," "Address," "Password," etc. This scans terabytes of data 100x faster
+
+| ID | Name | Age |
+| --- | --- | --- |
+| 1 | Alice | 25 | | 2 | Bob | 30 |
+
+```
+[1, 2]  [Alice, Bob]  [25, 30] ...
+```
+*(Good for calculating Average Age - just read the last block!)*
+
+***Table comparison***
+
+|Feature|OLTP (Transaction)|OLAP (Big Data Analysis)|
+|-------|------------------|------------------------|
+|Primary Task|Recording transactions (`INSERT`/`UPDATE`)|Analyzing patterns (`SELECT`/`SUM`)|
+|Data Source|Original source (The App)|Copy of data (From ETL)|
+|Volume |Gigabytes (Current data).|Petabytes (All history)|
+|Speed  |Milliseconds     |Seconds to Minutes     |
+|Storage|Row-oriented     |Column-oriented (Parquet, ORC)|
+|Strategy|ACID Compliant (Must be safe) |Eventual Consistency is okay |
+
+
+- Batch is traditionally associated with OLAP (Historical Analytics)
+- Stream is used for both (Real-time Analytics and Event-Driven Systems)
+- OLTP is almost always Real-Time / Synchronous
+
+#### When to use what?
+
+- "Design a Bank Backend": You need OLTP (PostgreSQL/Oracle). ACID compliance is non-negotiable
+- "Design a YouTube Analytics Dashboard": You need OLAP (BigQuery/ClickHouse). You are aggregating billions of views
+- "Design the whole system": You use OLTP to catch the user's click, and an ETL pipeline to move that click into an OLAP warehouse for the monthly report
+
+### Map-Reduce for Big Data processing
+
+"MapReduce" ***splits a huge task into tiny tasks***, **runs them in parallel on many computers**, and ***combines the results***
+
+Google Search Indexing: ***MapReduce was invented by Google to process the entire internet***
+- **Map**: Read a webpage and list all words (keywords)
+- **Shuffle**: Group all pages that contain the word "Python"
+- **Reduce**: Create the index list: `"Python" -> [Page A, Page B, Page C]`
+
+The Concept: Counting a Giant Piggy Bank
+- Imagine you have a truck filled with coins. You want to know the total value
+- One Person: It will take weeks
+- *MapReduce*: You dump the coins on a table and ask 3 friends to help
+
+**Step 1: SPLIT (Divide the Work)**
+- You pour a small pile of coins in front of each friend
+```
+   [ TRUCKLOAD OF COINS ]
+           |
+   ---------------------
+   |         |         |
+[Pile 1]  [Pile 2]  [Pile 3]
+(Friend A) (Friend B) (Friend C)
+```
+
+**Step 2: MAP (Identify & Tag)**
+- Each friend looks at their pile and shouts out what they see, one by one. They don't do math yet; they just identify the coin
+- Friend A sees a Quarter -> Writes `(Quarter, 1)`
+- Friend A sees a Penny -> `Writes (Penny, 1)`
+```
+   Friend A        Friend B        Friend C
+   --------        --------        --------
+ (Quarter, 1)    (Dime, 1)       (Quarter, 1)
+ (Penny, 1)      (Quarter, 1)    (Penny, 1)
+ (Quarter, 1)    (Penny, 1)      (Dime, 1)
+```
+
+**Step 3: SHUFFLE (Sort & Group)**
+- This is the most important part. You (the System) run around and put all the "Quarter" slips in one bucket, all "Penny" slips in another
+```
+     |             |            |
+     |             |            | (Sorting...)
+     v             v            v
+
+ [ Quarter Bucket ]   [ Penny Bucket ]   [ Dime Bucket ]
+    (Quarter, 1)         (Penny, 1)         (Dime, 1)
+    (Quarter, 1)         (Penny, 1)         (Dime, 1)
+    (Quarter, 1)         (Penny, 1)
+    (Quarter, 1)
+```
+
+**Step 4: REDUCE (Count the Piles)**
+- Now, you ask a "Counter" (Reducer) to sum up each bucket
+```
+ [ Quarter Reducer ]  [ Penny Reducer ]  [ Dime Reducer ]
+        |                    |                  |
+   1+1+1+1 = 4          1+1+1 = 3          1+1 = 2
+        |                    |                  |
+        v                    v                  v
+  Total: $1.00         Total: $0.03       Total: $0.20
+```
+
+|Phase |Analogy         |What the Computer Does|
+|------|----------------|----------------------|
+|Split |Pouring piles of coins.|Dividing a 1TB file into 100MB blocks.|
+|Map   |Identifying "This is a Quarter."|Parsing data and outputting (Key, Value).|
+|Shuffle|Putting Quarters in the Quarter bucket.|Moving data across the network so keys stay together.|
+|Reduce|Counting the stack of Quarters.|Summing up the values for each key.|
+
+**Why is this useful for System Design?**
+1. **Scalability**: If the file gets 2x bigger, you just add 2x more computers (Workers). The logic doesn't change
+2. **Fault Tolerance**: If "Worker 2" crashes while counting, the Master Node notices and simply gives "Worker 2's" book to "Worker 4". The whole job doesn't fail!
+
+## Reliability, Error Handling, and Recoverability patterns
+
+### Throttling & Rate Limiting (The Bouncer)
+
+What is it? Control how many requests a user or service can make in a specific time
+- **Rate Limiting**: ***Capping a specific user*** (e.g., "You can only tweet 100 times an hour")
+- **Throttling**: ***Slowing down everyone*** to save the server from crashing under load
+
+Why? To prevent one angry user or a bot from eating up all the server's resources, causing a denial of service for everyone else
+
+```
+     [ User A ]  [ User B ]  [ User C ]
+          |           |           |
+          v           v           v
+      +-----------------------------------+
+      |      RATE LIMITER / GATEWAY       |
+      |   "User A: OK"   "User C: STOP!"  |
+      +-----------------------------------+
+              |           |
+              v           v
+      [     Backend Service      ]
+```
+
+### Retry Pattern (The "Try Again")
+
+What is it? When a request fails, don't give up immediately. Wait a bit and try again
+- Crucial Logic: **Use Exponential Backoff**
+	- Don't retry instantly (`0s`). Wait `1s`, then `2s`, then `4s`, then `8s`. *This gives the failing server time to recover*
+		- Why? Networks are glitchy. Sometimes a failure is just a 1-millisecond blip
+
+```
+ [ Service A ] --(1. Request)--> [ Service B (Busy!) ]
+      |                                ^
+      | (Fail! Wait 1s...)             |
+      |                                |
+      +-----(2. Retry)-----------------+
+      |                                |
+      | (Fail! Wait 2s...)             |
+      |                                |
+      +-----(3. Retry)-----------------+
+                                       |
+                                    (Success!)
+```
+
+### Circuit Breaker Pattern (The Fuse)
+
+What is it? ***If a service fails repeatedly (e.g., 10 times in a row), stop calling it entirely***. Just ***return an error immediately***
+
+Why different from Retry? 
+- Retry is for *glitches*
+- Circuit Breaker is for ***outages***
+- If Service B is dead, retrying 1,000 times just wastes time and makes things worse
+
+The 3 States:
+- **Closed (Normal)**: Traffic flows freely
+- **Open (Broken)**: Traffic is blocked. *Immediate error*
+- **Half-Open (Test)**: Let 1 request through to *see* if the service is fixed
+
+```
+ [ Service A ] ----> [ Circuit Breaker ] -X-> [ Service B (DEAD) ]
+                          |
+    (Detects 5 failures)  |
+                          v
+                  [ SWITCH OPENS ]
+                          |
+[ Service A ] ----> [ Circuit Breaker ]
+                          |
+                          v
+                 "Error: Service Unavailable"
+           (Service B is not even touched)
+```
+
+### Dead Letter Queue (DLQ) (The Graveyard)
+
+What is it? A ***special queue where we put messages that failed to process even after retries***. Instead of deleting the message (data loss) or blocking the whole queue (clogging), we move the "poison" message aside to look at later
+
+Why? So ***engineers can debug why that specific order failed without stopping the rest of the business***
+
+```
+       [ Message Queue ]
+       |   |   |   |   |
+       v   v   v   v   v
+    +---------------------+
+    |      Consumer       | <--- (Processing...)
+    +---------------------+
+              |
+        (Order #99 Fails 5x!)
+              |
+              v
+    +---------------------+
+    |  DEAD LETTER QUEUE  |  <-- "Graveyard"
+    | [ Order #99 ]       |
+    +---------------------+
+              ^
+              |
+      (Engineer inspects later)
+```
+
+|Pattern|Role            |Analogy|
+|-------|----------------|-------|
+|Rate Limiting|**Prevention**. Stops the system from getting overloaded.|The Club Bouncer.|
+|Retry  |**Recovery**. Handles temporary network glitches.|Reloading a webpage.|
+|Circuit Breaker|**Protection**. Stops the system from wasting time on dead services.|Electrical Fuse.|
+|DLQ    |**Analysis**. Saves failed data so it isn't lost.|The "Undeliverable Mail" bin.|
+
+### Transactional Outbox Pattern
+
+The ***gold standard for reliability*** in *microservices*
+
+**The Problem: The "Dual Write" Danger**
+
+In an Event-Driven system, when a user creates an order, you need to do two things:
+1. Save the order to your Database
+2. Publish an "OrderCreated" event to the Message Broker (Kafka/RabbitMQ) so the Shipping Service knows about it
+
+The Trap: If you do these as two separate steps, one might fail
+
+Scenario A: ***Database succeeds, Broker fails***
+- You have the order in your DB
+- You never sent the event
+- Result: The user paid, but the item never ships
+
+Scenario B: ***Broker succeeds, Database fails***
+- You sent the event "Order Created!"
+- The DB transaction rolls back (maybe a constraint error)
+- Result: The Shipping Service ships a free item that doesn't exist in your records
+
+```
+      [ User ]
+         |
+         v
+    [ Order Service ]
+         |
+    +----+----------------+
+    |                     |
+    v (1. Write)          v (2. Publish)
+ [ Database ]        [ Kafka ]
+ (Success)           (CRASH!)
+    ^                     ^
+    |_____________________|
+      NOT ATOMIC! (Inconsistent State)
+```
+
+**The Solution: Transactional Outbox**
+
+The Trick: Instead of sending the message to Kafka directly, you ***save the message into your own database first***
+
+***Since you are writing to the same database***, you can ***wrap both*** the "`Order Insert`" and the "`Event Insert`" in a **Single ACID Transaction**. It is impossible for one to succeed and the other to fail
+
+***Step 1: The Local Transaction***: When the user orders, you insert two rows into the DB in one go
+
+Table: Orders
+| ID | User | Item | 
+| :--- | :--- | :--- | 
+| 101 | Bob | Laptop |
+
+Table: Outbox
+| ID | Event_Type | Payload | Status | 
+| :--- | :--- | :--- | :--- | 
+| 99 | OrderCreated | {"id":101...} | **PENDING** |
+
+Safe write:
+```
+     [ User ]
+         |
+         v
+    [ Order Service: ---(Start Transaction)--- ]
+         |                                     |
+         v                                     v
+   INSERT INTO Orders...               INSERT INTO Outbox...
+         |                                     |
+         +------------------+------------------+
+                            |
+                   (COMMIT TRANSACTION)
+                            |
+                    [ SQL Database ]
+            (Both exist, or neither exists.)
+```
+
+***Step 2: The Relay (The Sweeper)***: Now the data is safe in your DB. You ***need a separate background process (The Relay) to pick it up and send it to Kafka***
+- Read: The Relay polls the Outbox table for "PENDING" events
+- Publish: It pushes them to Kafka
+- Delete/Mark: Once Kafka says "Received" (ACK), the Relay deletes the row from the Outbox
+
+```
+    [ SQL Database ]                  [ Message Broker ]
+    |  (Outbox Table)                       (Kafka)
+    |  [Event 99]                              ^
+    +-------+                                  |
+            | (1. Poll)                        |
+            v                                  |
+    [ Message Relay ] -------------------------+
+    (Background Worker)      (2. Publish)
+            |
+            | (3. Mark as Sent)
+            v
+    [ SQL Database ]
+    (Update Outbox set Status='SENT')
+```
+
+**Why is this reliable?**
+
+- **Atomicity**: The event is guaranteed to be saved if the order is saved
+- **Retry**: If the Relay crashes or Kafka is down, the event sits safely in the Outbox table. The Relay will just pick it up again when it restarts
+- **At-Least-Once Delivery**: The Relay might send the message, crash, and restart before marking it as "SENT." It will send it again. This creates a duplicate.
+	- *Requirement*: Your consumers must be **Idempotent** (handle duplicates gracefully)
+
+## Deployment patterns 
+
+Here are explanations for each pattern:
+
+**Rolling Deployment**
+
+You update your instances incrementally rather than all at once. You deploy the new version to a small batch of servers (e.g., `20%`), wait for them to stabilize, and then move to the next batch.
+- Goal: **Zero downtime**. If errors occur, only a small percentage of capacity is affected
+- Trade-off: ***The old and new versions must coexist briefly, requiring backward compatibility***
+
+**Blue-Green Deployment**
+
+You maintain two identical environments: **Blue (Live)** and **Green (Idle)**. You ***deploy the new version to the Green environment and test it fully***. Once ready, you switch the Load Balancer to route all traffic to Green instantly
+- Goal: **Instant rollout and instant rollback** (just switch the router back to Blue)
+- Trade-off: Requires **double the infrastructure resources (cost)**
+
+**Canary Release vs A/B Testing**
+
+These look similar (splitting traffic) but have different goals
+- **Canary Release (Safety)**: You ***route a tiny percentage of traffic*** (e.g., `1%`) to the new version to catch crashes or bugs early. If the "canary" survives, you roll out to the rest. It is about ***risk mitigation***
+- **A/B Testing (Business)**: You route 50% of users to Version A and 50% to Version B to see which one performs better (e.g., higher conversion rate). It is about ***user behavior***
+
+**Chaos Engineering**
+
+This is the ***practice of intentionally breaking parts of your system in production*** (e.g., killing a server, severing a database connection) to ***ensure the system can recover automatically without human intervention***
+- Goal: Build **confidence** in the system's **resilience** (e.g., Netflix's Chaos Monkey)
+
+## Other patterns
+
+**Materialized View Pattern**
+
+Instead of running a **complex query** (joins, aggregations) every time a user requests data, the system **pre-computes** the result and **stores it in a physical table** (the "Materialized View")
+- The application reads directly from this pre-computed table
+- Standard View: A virtual table that runs the query on-the-fly (high CPU)
+- ***Materialized View***: *A physical table containing the cached result of the query (high Storage)*
+
+```
+ [ User Request ]
+      |
+      v (Read)
+[ Materialized View ]  <---- (Fast, O(1) Lookup)
+|  ID  |  Total    |
+| 101  |  $500.00  |
++------+-----------+
+      ^
+      | (Async Update / Batch Job)
+      |
+[ Primary Database ]
+(Complex Joins & Sums happen here)
+```
+- Pros: ***Extremely fast read performance***; offloads complex processing from the transactional database
+- Cons: ***Data is eventually consistent (stale)*** until the view is refreshed
+
+**Sidecar & Ambassador Patterns**
+
+These patterns involve ***deploying a secondary container/process alongside the main application container within the same host or pod***
+
+A. **Sidecar Pattern**
+- Concept: ***Extends the functionality of the main application without modifying its code***. The sidecar ***shares the same lifecycle and resources*** (disk/network) as the main app.\
+- Use Cases: Log shipping, configuration synchronization, monitoring agent
+```
+Host / Pod
++----------------------------+
+|  [ Main Service ]          |
+|  (Business Logic)          |
+|       | writes logs        |
+|       v                    |
+|  [ Sidecar Agent ]         |
+|  (Reads logs -> Sends to   |
+|   Central Log Server)      |
++----------------------------+
+```
+B. **Ambassador Pattern**
+- Concept: A ***specific type of sidecar that acts as a proxy for outbound network connections***. The main application connects to "localhost," and the Ambassador handles the actual network routing, security, and resiliency
+- Use Cases: Adding mTLS encryption, circuit breaking, or service discovery lookups outside the application code
+```
+Host / Pod
++----------------------------+
+|  [ Main Service ]          |
+|       | (HTTP localhost)   |
+|       v                    |
+|  [ Ambassador Proxy ]      |
+|  (Adds Retry logic, SSL)   |
++-------+--------------------+
+        | (Secure HTTPS)
+        v
+ [ External Service ]
+```
+
+*Pros and cons of Sidecar and Ambassador patterns*
+
+*Sidecar Pattern*: 
+- Why it’s needed: To ***decouple "infrastructure" logic from "business" logic***. You shouldn't have to write SSL or Logging code in Java, Python, and Go separately
+- Problem Solved: ***Cross-cutting concerns***. It handles logging, metrics (Prometheus), SSL termination, and configuration reloading without touching the main application code
+- Trade-off: ***Resource Overhead***. Every pod now needs extra CPU/Memory for the sidecar, even if the app is idle
+
+*Ambassador Pattern*
+- Why it’s needed: The ***application shouldn't care about the complexity of the external world*** (e.g., "Which database shard do I call?")
+- Problem Solved: ***Connectivity Complexity***. The app simply talks to localhost, and the Ambassador handles smart routing, retries, circuit breaking, or translating protocols (e.g., HTTP to gRPC)
+- Trade-off: ***Latency***. Every request makes an extra local network hop before leaving the server
+
+**Backends for Frontends (BFF) Pattern**
+
+Instead of having a single, general-purpose API Backend that serves all clients, you ***create a dedicated backend service for each specific frontend interface*** (e.g., Mobile, Web, 3rd Party)
+
+Each BFF is tailored to the specific needs of its client (e.g., formatting data, stripping unused fields to save bandwidth)
+
+```
+ [ Mobile App ]                 [ Desktop Web ]
+      |                              |
+      v                              v
+[ Mobile BFF ]                 [ Web BFF ]
+(Optimized: JSON,              (Optimized: HTML/Full Data,
+ small payload)                 aggregates multiple calls)
+      |                              |
+      +-------------+----------------+
+                    |
+                    v
+          [ Downstream Microservices ]
+          (User, Cart, Inventory)
+```
+
+- Pros: ***Optimized performance for specific clients*** (no over-fetching); ***allows frontend teams to iterate independently***
+- Cons: ***Code duplication across different BFFs***; ***increases the number of services to manage***
+
+*Hybrid architecture of API Gateway + BFF*
+
+- API Gateway (The "Bouncer"): Handles cross-cutting infrastructure concerns (SSL termination, DDoS protection, Rate Limiting, Global Authentication). It sits at the very edge
+- BFF (The "Concierge"): Handles logic (Aggregating data, formatting JSON, removing fields). ***It sits behind the Gateway***
+
+Why combine them? If you only use BFFs without a Gateway in front, you have to implement SSL certificates, Rate Limiting logic, and Firewall rules inside every single BFF
+
+```
+        [ Mobile App ]        [ Web App ]
+             |                   |
+             v                   v
+    +-----------------------------------------+
+    |           GLOBAL API GATEWAY            |
+    | (SSL, DDoS, Rate Limiting, Auth Check)  | <--- "The Shield"
+    +-----------------------------------------+
+             |                   |
+             v                   v
+    +-----------------+  +-----------------+
+    |   MOBILE BFF    |  |    WEB BFF      | <--- "The Shapers"
+    | (Aggregates)    |  | (Aggregates)    |
+    +-----------------+  +-----------------+
+             \             /
+              \           /
+               v         v
+         [ Microservices Cluster ]
+```
+
+*BFF vs GraphQL*
+
+- BFF Approach (Fixed Menus): The Mobile App calls a specific "Mobile API." The server has hard-coded logic to send back only the name
+- GraphQL Approach (Buffet): Both apps call the ***same*** server. The Mobile App just asks for less
+
+BFF example
+```
+        [ Mobile App ]                         [ Web Browser ]
+            |                                      |
+            | GET /mobile/user/1                   | GET /web/user/1
+            v                                      v
+    +-------------------+                  +-------------------+
+    |    MOBILE BFF     |                  |     WEB BFF       |
+    | (Code: return     |                  | (Code: return     |
+    |  { name } only)   |                  |  { name, bio,     |
+    +-------------------+                  |    friends[] })   |
+            |                              +-------------------+
+            v                                      |
+      { "name": "Ali" }                            v
+                                         { "name": "Ali",
+                                           "bio": "Dev",
+                                           "friends": [...] }
+```
+
+GraphQL example:
+```
+       [ Mobile App ]                         [ Web Browser ]
+            |                                      |
+            | POST /graphql                        | POST /graphql
+            | Query: { name }                      | Query: { name, bio, friends }
+            v                                      v
+    +----------------------------------------------------------+
+    |                     GRAPHQL SERVER                       |
+    |          (One endpoint to rule them all)                 |
+    +----------------------------------------------------------+
+            |                                      |
+            v                                      v
+      { "name": "Ali" }                  { "name": "Ali",
+                                           "bio": "Dev",
+                                           "friends": [...] }
+```
+
+- *Use BFF if*: You want to keep your backend logic simple (REST) but need to optimize performance for specific devices
+- *Use GraphQL if*: You have many different clients with constantly changing data needs, and you want to avoid writing new API endpoints for every little UI change
