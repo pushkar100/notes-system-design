@@ -21,9 +21,21 @@ System design questions by order of importance while preparing:
 17. Design a Distributed Job Scheduler – Task Management / Infrastructure
 18. Design a Payment System – Financial Consistency / Transactions
 19. Design Dropbox / Google Drive – File Synchronization / Storage
-20. Design a URL Shortener (TinyURL) – Basic Scalability / API Design
+20. Design a URL Shortener (Bitly or TinyURL) – Basic Scalability / API Design
 21. Design a Metrics & Monitoring System – Observability / Time-Series Data
 22. Design a Real-Time Gaming Leaderboard – Ranking / High-Speed Updates
 23. Design a Distributed Cache (Redis) – Infrastructure / Caching Strategies
 24. Design a Content Moderation System – Workflow Orchestration / ML Pipelines
 25. Design a Distributed Message Queue (Kafka) – Infrastructure / Log Storage
+26. Design a Local Delivery Service
+27. Design Tinder
+28. Design LeetCode
+29. Design FB Live Comments
+30. Design FB Post Search
+31. Design a News Aggregator
+32. Design Strava
+33. Design Online Auction
+34. Design a Price Tracking Service
+35. Design Robinhood
+
+
