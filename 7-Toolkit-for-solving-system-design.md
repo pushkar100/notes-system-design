@@ -123,6 +123,20 @@ Solution: ***Think about which of the following are important or relevant to the
 **Tip**: ***Ask "System should have/be ..."*** questions to *each* of these quality attributes and check if it makes sense! 
 - Ex: "System should have low latency" --> true? why? why not? ... and make a choice
 
+***Basic type of questions to ask:***
+1. **Scale & Volume**: Determine _throughput_ (RPS) and _data volume_ (total storage and/or stored for how many years)
+  - Ex: "What is the scale of traffic we expect?" or "Are we designing for average load or peak spikes?"
+3. **Speed**: Latency & Performance
+  - Ex: "What is the maximum acceptable latency this system can add to a user's request?" "It needs to be invisible to the user. Less than 20ms."
+4. **CAP Trade-off**: "Availability vs. Consistency" Questions (_This is the most "senior" part of the interview. You must explicitly discuss the CAP theorem trade-offs_)
+  - Decide if you prioritize 100% uptime or 100% data accuracy
+  - Ex: "In the event of a network failure, is it better to (Option A: Fail) or (Option B: Be inaccurate)?"
+5. **Safety Net**: Fault Tolerance & Reliability. Define "Fail-Open" vs. "Fail-Closed."
+  - Ex: "If this entire system crashes, what happens to the main application?" "We can't lose money. Let the traffic through."
+  - Ex: Derived NFR: High Reliability / Fail-Open Strategy. The client client/middleware must have a circuit breaker that bypasses the limiter if it times out.
+6. **Geography**: Determine data locality (Ex: If you need edge computing or a centralized data center)
+  - Ex: "Do the rate limits apply globally (e.g., 100 req/hour anywhere in the world) or per region?" "Globally. If I use 50 requests in the US and fly to Asia, I only have 50 left."
+
 **Quality attributes**:
 1. **Performance (Latency)**: ***Is it fast enough?*** (Never use "average" as it hides outliers. Always use Percentiles like `p95`, `p99`)
 	- Ex: "The home feed must render within 200ms for 99% of users (p99)"
