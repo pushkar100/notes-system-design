@@ -296,3 +296,8 @@ clientDetail {
 - We need either (1) Locking mechanism or (2) Conflict free write/read method
 - Luckily, Redis can be used with a tool called **LuaScript** that guarantees a atomicity for a series of operations (Transaction)
   - We can also use **sorted sets data structure** in Redis
+ 
+## Practical rate limiting
+
+- https://newsletter.systemdesign.one/p/rate-limiter
+- https://medium.com/@linz07m/ubers-go-rate-limiter-a-leaky-bucket-implementation-20639db69982
