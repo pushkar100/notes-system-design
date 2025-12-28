@@ -285,8 +285,12 @@ clientDetail {
 
 ### Wondering about unique constraints to the question
 
-Since rate limiting can be done on user IDs, **How do we handle "hot keys"?**
+**If Rate Limiter i.e Redis was SHARDED:** Since rate limiting can be done on user IDs, **How do we handle "hot keys"?**
 - Example: A particular user ID bombards requests over and over. Yes, we block him but how do we not let one Redis shard take the heat until the user is blocked? (`user id -> consistently hashed -> hits Redis shard A only -> Shard is locked/hardware wears out over time`)
 - *Approach 1*: Use random prefix/suffix attachment. Ex: `<user_id>_1`, `<user_id_2` so that different shards store the limits
 	- Drawback: We need to read the total / accurate requests for that user by collecting requests so far from different shards. That is okay if the system needs to be highly available but not consistent (Few seconds delay in knowing limit has been reached, only for this hot key, is okay)
 - *Approach 2*: Reduce the limits per user or particularly for that malicious user. Limit is reached much sooner and user is blocked even before the shard is hit
+
+**Hard part: How can we handle concurrenmt writes to Redis by two immediate requests? i.e Race Condition**
+- We need either (1) Locking mechanism or (2) Conflict free write/read method
+- Luckily, Redis can be used with a tool called **LuaScript** that guarantees a atomicity for a series of operations (Transaction)
