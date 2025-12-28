@@ -166,7 +166,7 @@ Identify attributes *specific* to the question:
 
 ## Defining our core entities
 
-Think *"objects"* and *"users"*
+**Noun extraction**: Think *"objects"* and *"users"*
 
 These are the entities that are:
 1. ***Persisted in our database*** (stored), AND
@@ -175,6 +175,18 @@ These are the entities that are:
 **Example**: short url, long url, user (the one creating them)
 
 **Note**: DO NOT list the entire data model just yet! (Ex: No `id` or `user_id` and other attributes, just the names)
+
+
+Here is the "Noun Extraction applied to a Rate Limiter:
+1. The Story Sentence: "A Client makes a request to a specific API Route; the system checks a Rule and updates the current Counter."
+2. The Extracted Entities:
+
+- Client (The Identity): Who are we limiting?
+- Fields: user_id, ip_address, api_key.
+- Rule (The Configuration): What is the limit?
+- Fields: route_path (e.g., /login), max_requests, window_size_seconds.
+- Counter (The State): How many have they used?
+- Fields: client_id, current_count, window_start_timestamp
 
 ## Designing our API
 
