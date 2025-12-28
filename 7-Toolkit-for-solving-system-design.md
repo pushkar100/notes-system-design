@@ -92,7 +92,7 @@ YOU DO NOT NEED A LONG LIST OF 'ALL' FEATURES. ***YOU ONLY NEED AROUND 3 CORE FE
 1. **Who or What**: **`"The [Actor] should be able to / can do [Action]"`**
 2. **How**: The "Core Action & Policy" i.e algorithms (Ex: "What specific algorithms or rules govern X" or "Do we need to support different tiers of service?"
 3. **The Result**: Define the ***API response*** and ***user experience*** (Ex: What does the client see when he is rate limited? 429 too many reqs?)
-4. **Where?**: Determine if this is a library, a sidecar, or a standalone service (Ex: Is this rate limiter protecting a single monolithic service, or is it a distributed gateway?)
+4. **Where? Understand the scale of the service**: Determine if this is a library, a sidecar, or a standalone service (Ex: Is this rate limiter protecting a single monolithic service, or is it a distributed gateway?)
 
 **Actors can be**:
 1. Your *primary user* (Ex: Passenger in a ride hailing app)
