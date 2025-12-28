@@ -136,6 +136,7 @@ clientDetail {
 
 *FR 3: Different throttling mechanisms*
 - We can have a different throttling mechanism configured per ID/IP/Key
+  - We maintain a **counter** for each (Ex: count for `user_id_123 = 40`)
 - Mechanisms:
 	1. ***Token bucket algorithm*** (Good for bursts or sudden spikes)
 	2. ***Leaky bucket algorithm*** (Good for a consistent stream of request)
@@ -222,7 +223,7 @@ clientDetail {
 - Cluster management for *High Availability*:
 	- **Replication** is needed. Redis does it using the ***Master-Slave (Leader based replication)***
 		- You run a Primary node and one or more Replicas
-		- Writes: Only goes to the Primary
+		- Writes: Only goes to the Primary i.e **Counter** is written to the master only! (Counter can be read by others though) 
 		- Reads: Can be distributed across Replicas to handle heavy traffic
 		- If Primary dies, a Replica is promoted to keep the system alive
 	
