@@ -2713,9 +2713,9 @@ If `W + R > N`, strong consistency is guaranteed because there must be at least 
 
 How to configure N, W, and R to fit our use cases? Here are some of the possible setups:
 1. If `R = 1` and `W = N`, the system is optimized for a **fast read**
-2. If W = 1 and R = N, the system is optimized for **fast write**
+2. If `W = 1` and `R = N`, the system is optimized for **fast write**
 3. If `W + R > N`, **strong consistency** is guaranteed (Usually N = 3, W = R = 2)
-4. If W + R <= N, **strong consistency is not guaranteed**
+4. If `W + R <= N`, **strong consistency is not guaranteed**
 
 Depending on the requirement, we can tune the values of W, R, N to achieve the desired level of consistency
 
