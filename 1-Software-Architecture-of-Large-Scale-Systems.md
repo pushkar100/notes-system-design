@@ -1,3 +1,4 @@
+
 # Software Architecture of Large Scale Systems
 
 [Course link](https://www.udemy.com/course/software-architecture-design-of-modern-large-scale-systems)
@@ -5,6 +6,7 @@
 ## Table of Contents
 
 - [Software Architecture of Large Scale Systems](#software-architecture-of-large-scale-systems)
+  - [Table of Contents](#table-of-contents)
   - [Definition of software architecture](#definition-of-software-architecture)
   - [Levels of abstraction](#levels-of-abstraction)
   - [Advantages of distributed services](#advantages-of-distributed-services)
@@ -123,6 +125,8 @@
       - [Why is it needed?](#why-is-it-needed)
       - [Why do Microservices use it?](#why-do-microservices-use-it)
     - [Event-Driven Patterns](#event-driven-patterns)
+      - [The SAGA Pattern or the Undo button](#the-saga-pattern-or-the-undo-button)
+      - [CQRS or Command Query Responsibility Segregation](#cqrs-or-command-query-responsibility-segregation)
     - [Message delivery semantics and guarantees](#message-delivery-semantics-and-guarantees)
     - [Strategy for processing infinite streams of events](#strategy-for-processing-infinite-streams-of-events)
       - [Tumbling Window](#tumbling-window)
@@ -3511,7 +3515,7 @@ Microservices architectures use EDA primarily for **Decoupling** and **Buffering
 
 ### Event-Driven Patterns
 
-**The Saga Pattern (The "Undo" Button)**
+#### The SAGA Pattern or the Undo button
 
 **The Problem**: In a Microservices world, a single "transaction" (like booking a trip) involves multiple services (Flight, Hotel, Car). If the Flight books successfully, but the Hotel is full, you can't just "cancel" the database transaction because they are different databases. You have a partial data mess
 
@@ -3542,7 +3546,58 @@ The Failure Path (Rollback) Imagine Shipping fails. The Saga runs backwards to c
 5. [Order Service] **CANCEL** Order #101. (Compensating Action)
 ```
 
-**CQRS (Command Query Responsibility Segregation)**
+The Saga Pattern is a ***way to manage data consistency across microservices in distributed transactions***. Instead of one big lock on a database, you break the transaction into smaller, local steps. If one step fails, you run "compensating transactions" (undo steps) to fix the data
+
+There are two ways to coordinate these steps: **Choreography** and **Orchestration**
+1. **Choreography** (**Decentralized**): In Choreography, there is *no* central leader. Each microservice knows what to do and reacts to events published by other services. It is like a dance troupe where every dancer knows their part and reacts to the music or the person next to them.
+	- How it works:
+		- Service A does its work and emits an event (e.g., "Order Created")
+		- Service B listens for that event, does its work, and emits a new event
+		- Service C listens for that, and so on
+```
+      (Start)
+         |
+    [Order Service]
+         |
+         | "OrderCreated" Event
+         v
+    [Payment Service]
+         |
+         | "PaymentProcessed" Event
+         v
+   [Inventory Service]
+         |
+         | "StockReserved" Event
+         v
+      (Finish)
+```
+2. **Orchestration**: In Orchestration, there is a ***central coordinator*** (the Orchestrator or Saga Manager). This manager tells every service what to do and when. It is like an orchestra conductor waving the baton to tell the violins when to play
+	- How it works:
+		- The Orchestrator receives a request
+		- It sends a command to Service A ("Create Order"). Service A replies "Done"
+		- It sends a command to Service B ("Process Payment"). Service B replies "Done"
+		- If Service B fails, the Orchestrator sends a command to Service A ("Undo Order")
+
+|Feature              |Choreography                                                                |Orchestration                                                                                                       |
+|---------------------|----------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
+|Team Size            |Small, autonomous teams.                                                    |Larger teams needing strict control.                                                                                |
+|Complexity           |Low (2-4 services).                                                         |High (4+ services).                                                                                                 |
+|Visibility           |Low (Need log aggregation).                                                 |High (Dashboard visible).                                                                                           |
+|Maintenance          |Harder as system grows.                                                     |Easier to maintain logic in one place.                                                                              |
+
+Case Study: When would you choose one over the other?
+- Scenario: An E-commerce Checkout System
+	- Start with Choreography if: You are a startup with only 3 services: Order, Payment, and Email
+	- Why? It is overkill to build a dedicated Orchestrator for a linear flow (Order -> Pay -> Email)
+	- Choreography is faster to build and deploy
+	- Switch to Orchestration if: 
+		- Your business grows. Now, a checkout involves: Order, Payment, Inventory, Shipping, Fraud Check, Loyalty Points, and Referral Bonuses
+		- The Problem with Choreography here: If the "Fraud Check" fails, who tells "Loyalty Points" to rollback? Who tells "Inventory" to restock? In choreography, every service has to listen to "FraudFailed" events, creating a massive, tangled web of logic
+		- The Solution: You introduce an Order Orchestrator. It calls the services step-by-step. If Fraud Check fails at step 5, the Orchestrator simply runs the "Compensate" command for steps 4, 3, 2, and 1
+
+*Summary Rule of Thumb*: Use ***Choreography for simple, linear flows where visibility isn't critical***. Use ***Orchestration for complex flows where you need centralized control, easy rollbacks, and clear status tracking***
+
+#### CQRS or Command Query Responsibility Segregation
 
 **The Problem**: In a traditional database, the same model is used for writing and reading. ***Writes need complex validation*** (normalized data). ***Reads need fast joins and dashboards*** (denormalized data). **Using one database for both creates a bottleneck**
 
