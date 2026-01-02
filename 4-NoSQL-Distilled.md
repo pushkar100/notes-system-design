@@ -648,6 +648,16 @@ Quorum (W+R>N) | You need tunable consistency (choosing between speed and "fresh
 | Read-Your-Writes | You want to prevent a user from thinking their post was deleted after they just hit "Save." | 
 | Vector Clocks | You have a leaderless system (like DynamoDB or Riak) and need to handle merge conflicts. | 
 
+Using vector clocks, it is easy to tell that a version X is an ancestor (i.e. no conflict) of version Y if the version counters for **each participant in the vector clock of Y is greater than or equal to the ones in version X**. For example, the vector clock `D([s0, 1], [s1, 1])]` is an ancestor of `D([s0, 1], [s1, 2])`. Therefore, no conflict is recorded
+
+Similarly, you can tell that a version X is a sibling (i.e., a conflict exists) of Y if there is **any participant in Y's vector clock who has a counter that is less than its corresponding counter in X**. For example, the following two vector clocks indicate there is a conflict: `D([s0, 1], [s1, 2])` and D([s0, 2], [s1, 1])`.
+
+Even though vector clocks can resolve conflicts, there are two notable downsides. First, vector clocks add complexity to the client because it needs to implement conflict resolution logic.
+
+Second, the [server: version] pairs in the vector clock could grow rapidly. To fix this problem, we set a threshold for the length, and if it exceeds the limit, the oldest pairs are removed. This can lead to inefficiencies in reconciliation because the descendant relationship cannot be determined accurately. However, based on Dynamo paper [4], Amazon has not yet encountered this problem in production; therefore, it is probably an acceptable solution for most companies.
+
+
+
 ## Key-Value stores
 
 ### What is a Key-Value Store
