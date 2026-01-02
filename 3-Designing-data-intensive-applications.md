@@ -2705,6 +2705,20 @@ Read from (R=2):       [ 2 ] [ 3 ]
 Intersection: Node [ 2 ] has the new data!
 ```
 
+`W = 1` does not mean data is written on one server. For instance, with the configuration in Figure 6, data is replicated at s0, s1, and s2. W = 1 means that the coordinator must receive at least one acknowledgment before the write operation is considered as successful. For instance, if we get an acknowledgment from s1, we no longer need to wait for acknowledgements from s0 and s2. A coordinator acts as a proxy between the client and the nodes.
+
+The configuration of W, R and N is a typical tradeoff between latency and consistency. If W = 1 or R = 1, an operation is returned quickly because a coordinator only needs to wait for a response from any of the replicas. If W or R > 1, the system offers better consistency; however, the query will be slower because the coordinator must wait for the response from the slowest replica.
+
+If `W + R > N`, strong consistency is guaranteed because there must be at least one overlapping node that has the latest data to ensure consistency.
+
+How to configure N, W, and R to fit our use cases? Here are some of the possible setups:
+1. If `R = 1` and `W = N`, the system is optimized for a **fast read**
+2. If W = 1 and R = N, the system is optimized for **fast write**
+3. If `W + R > N`, **strong consistency** is guaranteed (Usually N = 3, W = R = 2)
+4. If W + R <= N, **strong consistency is not guaranteed**
+
+Depending on the requirement, we can tune the values of W, R, N to achieve the desired level of consistency
+
 #### Limitations of Quorum Consistency
 
 Even if `W + R > N`, **edge cases can break strict consistency**
