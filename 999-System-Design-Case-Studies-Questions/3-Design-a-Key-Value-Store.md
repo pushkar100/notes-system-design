@@ -257,6 +257,31 @@ SCENARIO: N=3 (Replicas), W=2 (Write Quorum)
                     |
           5. Success to Client
 ```
+Not writing directly to memory within a node for the write path (performance):
+```
+                                  [ Client ]
+                                      |
+                                      | 1. put(key, value)
+                                      v
+                         +--------------------------+
+                         |     Coordinator Node     |
+                         +------------+-------------+
+                                      |
+              +-----------------------+-----------------------+
+              |                                               |
+              | 2. Append (Disk I/O)                          | 3. Write (RAM)
+              v                                               v
+    +-------------------+                           +-------------------+
+    |    Commit Log     |                           |     MemTable      |
+    | (Write Ahead Log) |                           | (In-Memory Map)   |
+    +-------------------+                           +-------------------+
+              |                                               |
+              +-----------------------+-----------------------+
+                                      |
+                                      | 4. Return Success
+                                      v
+                                  [ Client ]
+```
 
 Node Internal Design: Read-Heavy Optimization
 ```
@@ -278,6 +303,43 @@ Node Internal Design: Read-Heavy Optimization
   |   +--------------------------+    +-----------------------+   |
   |                                                               |
   +---------------------------------------------------------------+
+```
+
+Read path: More complex because the data could be in RAM or in one of many files on the disk. The system uses a Bloom Filter to avoid searching every file unnecessarily.
+```
+                                 [ Client ]
+                                      |
+                                      | 1. get(key)
+                                      v
+                         +--------------------------+
+                         |     Coordinator Node     |
+                         +------------+-------------+
+                                      |
+        +-----------------------------+
+        |                             |
+        | 2. Check Memory?            |
+        v                             |
+  +-----------+                       |
+  | MemTable  |--[Found?]--> (Return Value)
+  +-----------+                       |
+        | (Not Found)                 |
+        v                             |
+        +-----------------------------+
+        |                             |
+        | 3. Check Disk?              |
+        v                             |
+  +--------------+                    |
+  | Bloom Filter |                    |
+  +--------------+                    |
+        | (Maybe in SSTable 2?)       |
+        v                             v
+  +--------------+            +--------------+
+  |  SSTable 1   |            |  SSTable 2   | <--- 4. Fetch from Disk
+  +--------------+            +--------------+
+                                      |
+                                      | 5. Return Value
+                                      v
+                                  [ Client ]
 ```
  
 Failure Handling: Hinted Handoff
