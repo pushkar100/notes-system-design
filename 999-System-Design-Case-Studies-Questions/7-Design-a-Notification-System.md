@@ -328,7 +328,7 @@ Notification service is also responsible for:
 **Complete whiteboard diagram**
 
 ```
-(1) Trigger
+                                    (1) Trigger
                                          |
 +---------------------+       +----------v----------+
 |  Internal Services  | ----> |    Load Balancer    |
