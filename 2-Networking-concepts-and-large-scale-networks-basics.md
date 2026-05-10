@@ -928,6 +928,39 @@ Content-Type: text/html
 - HTTP port used is `80`
 - HTTPS port used is `443`
 
+In HTTP, a **stateless protocol** means the server does **not retain any information** about previous requests; every request is treated as a completely new, independent transaction.. Stateless Communication Flow:
+```text
+      Client                                     Server
+        |                                          |
+        |--- Request 1: "Who am I?" -------------->|
+        |                                          |
+        |<-- Response 1: "I don't know you." ------|
+        |                                          |
+        |--- Request 2: "My name is Pushkar." ---->|
+        |                                          |
+        |<-- Response 2: "Nice to meet you." ------|
+        |                                          |
+        |--- Request 3: "Who am I?" -------------->|
+        |                                          |
+        |<-- Response 3: "I don't know you." ------| (Server forgot Request 2)
+        |                                          |
+```
+Because the server has no "memory" of Request 2, Request 3 fails to identify you unless you explicitly include your identity (like a **JWT** or **Session ID**) in every single message.
+
+Why Statelessness is Good
+1. Massive Scalability: Because the server doesn't need to "remember" who you are, any server in a cluster can handle your request. This makes it easy to add more servers to handle millions of users
+2. High Reliability: If one server crashes, your session isn't lost. Your next request simply goes to a different server that can process it immediately
+3. Lower Resource Usage: Servers don't have to waste memory (RAM) storing thousands of active user "sessions," allowing them to process data much faster
+4. Simpler Caching: It is much easier for Content Delivery Networks (CDNs) to store and serve data because the response depends only on the request, not a hidden "state" on the server
+5. Easy Debugging: Since each request is independent, engineers can reproduce errors much faster without having to reconstruct a long history of a user's previous actions.
+
+|Feature        |Stateless (HTTP)             |Stateful (Traditional)              |
+|---------------|-----------------------------|------------------------------------|
+|Server Memory  |Low (No session storage)     |High (Stores every user's state)    |
+|Scalability    |Easy (Add more servers)      |Hard (Requires "Sticky Sessions")   |
+|Fault Tolerance|High (Any server can pick up)|Low (Session is lost if server dies)|
+|Complexity     |Simple server, complex client|Complex server, simple client       |
+
 **HTTP 1.1 vs 2 vs 3**
 
 * HTTP/1.1: sequential requests, many TCP connections
