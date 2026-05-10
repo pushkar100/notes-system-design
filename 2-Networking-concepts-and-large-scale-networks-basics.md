@@ -1339,7 +1339,7 @@ Expires: Thu, 14 Dec 2025 10:00:00 GMT
 	- Example: `Strict-Transport-Security: max-age=31536000; includeSubDomains`
 	- `max-age` = how long the browser should enforce HTTPS (in seconds).
 	- `includeSubDomains` = applies this rule to all subdomains too.
-3. `ontent-Security-Policy (CSP)` – Controls what content (scripts, images, etc.) the browser is allowed to load, preventing attacks like XSS (cross-site scripting).
+3. `Content-Security-Policy (CSP)` – Controls what content (scripts, images, etc.) the browser is allowed to load, preventing attacks like XSS (cross-site scripting).
 	 - Example: `Content-Security-Policy: default-src 'self'; script-src 'self' cdn.example.com`
 	 - `'self'` = only allow content from the same origin/domain.
 	 - `cdn.example.com` = explicitly allow scripts from this CDN.
