@@ -1,6 +1,151 @@
 # Networking Concepts and Large Scale Networks Basics
 
 ## Table of Contents
+- [Networking Concepts and Large Scale Networks Basics](#networking-concepts-and-large-scale-networks-basics)
+   * [Table of Contents](#table-of-contents)
+   * [Networking layers](#networking-layers)
+      + [OSI Model ](#osi-model)
+      + [TCP/IP model](#tcpip-model)
+   * [Transport layer protocols and issues](#transport-layer-protocols-and-issues)
+      + [TCP — Transmission Control Protocol](#tcp-transmission-control-protocol)
+         - [TCP 3-way handshake](#tcp-3-way-handshake)
+         - [TCP 4-way handshake](#tcp-4-way-handshake)
+      + [Head-of-Line HOL Blocking ](#head-of-line-hol-blocking)
+         - [The Problem: HTTP/1.1 and Application HOL Blocking](#the-problem-http11-and-application-hol-blocking)
+         - [The Solution: Application-Layer Multiplexing (HTTP/2)](#the-solution-application-layer-multiplexing-http2)
+         - [The Limitation: Why it is only a "Partial" Fix](#the-limitation-why-it-is-only-a-partial-fix)
+         - [The Fatal Flaw](#the-fatal-flaw)
+         - [Summary of the "Partial" Help in HTTP 2](#summary-of-the-partial-help-in-http-2)
+      + [User Datagram Protocol](#user-datagram-protocol)
+      + [Head-of-Line blocking in HTTP 2 vs HTTP 3](#head-of-line-blocking-in-http-2-vs-http-3)
+   * [Transport Layer Security](#transport-layer-security)
+      + [Understanding  TLS](#understanding-tls)
+         - [TLS certificate or cert](#tls-certificate-or-cert)
+         - [TLS 1.2 vs TLS 1.3](#tls-12-vs-tls-13)
+         - [Drawbacks of TLS](#drawbacks-of-tls)
+         - [TLS optimizations](#tls-optimizations)
+         - [TLS Pros & Cons](#tls-pros-cons)
+         - [TLS termination](#tls-termination)
+   * [Application layer and protocols](#application-layer-and-protocols)
+      + [Hypertext Transfer Protocol](#hypertext-transfer-protocol)
+         - [HTTP 1.1](#http-11)
+         - [HTTP 2](#http-2)
+         - [HOL differences between HTTP 1 and HTTP 2](#hol-differences-between-http-1-and-http-2)
+         - [HTTP 3 and QUIC](#http-3-and-quic)
+      + [Domain sharding](#domain-sharding)
+      + [HTTPS](#https)
+      + [HTTP optimisations](#http-optimisations)
+      + [HTTP header basics](#http-header-basics)
+         - [Common ***request*** headers](#common-request-headers)
+         - [Common ***response*** headers](#common-response-headers)
+         - [Headers for ***caching***](#headers-for-caching)
+         - [Headers for ***security***](#headers-for-security)
+   * [Server side caching vs  CDN caching](#server-side-caching-vs-cdn-caching)
+      + [Server side caching](#server-side-caching)
+      + [CDNs](#cdns)
+         - [Cache invalidation strategies](#cache-invalidation-strategies)
+         - [Asset compression in the cache](#asset-compression-in-the-cache)
+   * [Polling](#polling)
+      + [Short Polling (The "Nagging" Approach)](#short-polling-the-nagging-approach)
+      + [Long polling ](#long-polling)
+      + [Comparison of polling with other mechanisms](#comparison-of-polling-with-other-mechanisms)
+   * [Server push](#server-push)
+      + [Use Case](#use-case)
+      + [Benefits](#benefits)
+      + [Drawbacks](#drawbacks)
+      + [Prerequisites](#prerequisites)
+   * [103 Early Hints](#103-early-hints)
+      + [Use Case](#use-case-1)
+      + [Benefits](#benefits-1)
+      + [Drawbacks](#drawbacks-1)
+      + [Prerequisites](#prerequisites-1)
+   * [Server-Sent Events](#server-sent-events)
+   * [Server-Sent Events (SSE)](#server-sent-events-sse)
+      + [Use Case](#use-case-2)
+      + [Benefits](#benefits-2)
+      + [Drawbacks](#drawbacks-2)
+      + [Prerequisites](#prerequisites-2)
+   * [WebSockets](#websockets)
+      + [Websocket handshake process](#websocket-handshake-process)
+      + [Websockets and load balancers](#websockets-and-load-balancers)
+      + [Challenges scaling websockets in a distributed system](#challenges-scaling-websockets-in-a-distributed-system)
+      + [Server push vs SSE vs Web sockets](#server-push-vs-sse-vs-web-sockets)
+   * [WebRTC](#webrtc)
+      + [How WebRTC works](#how-webrtc-works)
+   * [MAC address](#mac-address)
+   * [IP address](#ip-address)
+      + [IPv4 vs IPv6](#ipv4-vs-ipv6)
+      + [Public vs private IPs](#public-vs-private-ips)
+   * [NAT](#nat)
+   * [Subnetting](#subnetting)
+   * [CIDR](#cidr)
+   * [DNS](#dns)
+      + [Types of DNS and DNS components](#types-of-dns-and-dns-components)
+      + [DNS request flow and hierarchy](#dns-request-flow-and-hierarchy)
+      + [Types of DNS requests](#types-of-dns-requests)
+      + [DNS caching](#dns-caching)
+      + [DNS in large scale systems](#dns-in-large-scale-systems)
+   * [Load balancers](#load-balancers)
+      + [Choosing a load balancing strategy](#choosing-a-load-balancing-strategy)
+      + [L4 vs L7 load balancers](#l4-vs-l7-load-balancers)
+      + [Consistent hashing](#consistent-hashing)
+      + [Consistent hashing in load balancers](#consistent-hashing-in-load-balancers)
+   * [API gateways](#api-gateways)
+      + [API gateways vs Load balancers](#api-gateways-vs-load-balancers)
+   * [Proxy and reverse proxy](#proxy-and-reverse-proxy)
+      + [Forward proxy or proxy](#forward-proxy-or-proxy)
+      + [Reverse proxy](#reverse-proxy)
+      + [Reverse proxy vs Load balancer](#reverse-proxy-vs-load-balancer)
+      + [Reverse proxy vs API gateway](#reverse-proxy-vs-api-gateway)
+   * [Cryptography](#cryptography)
+      + [Types of cryptography](#types-of-cryptography)
+      + [RSA](#rsa)
+   * [Service mesh](#service-mesh)
+      + [Service mesh vs Load Balancer vs API Gateway](#service-mesh-vs-load-balancer-vs-api-gateway)
+   * [Client Server model](#client-server-model)
+      + [3 components of the client server model](#3-components-of-the-client-server-model)
+      + [Steps of a client server interaction](#steps-of-a-client-server-interaction)
+      + [3 types of communication in the client server model](#3-types-of-communication-in-the-client-server-model)
+      + [Request response cycle](#request-response-cycle)
+      + [Stateless vs stateful servers](#stateless-vs-stateful-servers)
+      + [Caching helps performance of client server models](#caching-helps-performance-of-client-server-models)
+      + [How LBs work in a client-server model](#how-lbs-work-in-a-client-server-model)
+      + [Scaling a client server model for high traffic scale](#scaling-a-client-server-model-for-high-traffic-scale)
+      + [Security challenges in client server model](#security-challenges-in-client-server-model)
+   * [Beyond REST APIs](#beyond-rest-apis)
+      + [Benefits and drawbacks of classic REST APIs](#benefits-and-drawbacks-of-classic-rest-apis)
+      + [GraphQL](#graphql)
+         - [Benefits](#benefits-3)
+         - [How it works](#how-it-works)
+         - [Core Components](#core-components)
+         - [Data Flow](#data-flow)
+         - [Responsibilities](#responsibilities)
+         - [Popular tools](#popular-tools)
+         - [Drawbacks of GraphQL](#drawbacks-of-graphql)
+         - [GraphQL use cases](#graphql-use-cases)
+         - [Common System Design Interview Questions](#common-system-design-interview-questions)
+      + [gRPC](#grpc)
+         - [Benefits](#benefits-4)
+         - [Drawbacks ](#drawbacks-3)
+         - [Use cases of gRPC](#use-cases-of-grpc)
+         - [gRPC working in detail](#grpc-working-in-detail)
+         - [Diagrams for easy understanding](#diagrams-for-easy-understanding)
+         - [Protocol buffers explained](#protocol-buffers-explained)
+   * [Web sessions](#web-sessions)
+      + [Standard Cookie-Based Session or Stateful sessions](#standard-cookie-based-session-or-stateful-sessions)
+      + [Token-Based or Stateless Sessions](#token-based-or-stateless-sessions)
+      + [Scaling session management](#scaling-session-management)
+   * [Common data serialization formats](#common-data-serialization-formats)
+         - [TOON](#toon)
+   * [CORS](#cors)
+
+<!-- TOC end -->
+
+<!-- TOC --><a name="networking-concepts-and-large-scale-networks-basics"></a>
+# Networking Concepts and Large Scale Networks Basics
+
+<!-- TOC --><a name="table-of-contents"></a>
+## Table of Contents
 
 - [Networking Concepts and Large Scale Networks Basics](#networking-concepts-and-large-scale-networks-basics)
   - [Networking layers](#networking-layers)
@@ -1745,6 +1890,50 @@ Server → Client : HTML + CSS + JS (pushed)
 | :--- | :--- |
 | **Browser** | Must support **HTTP/2** or **HTTP/3** and have the "Push" setting enabled (most modern browsers do). |
 | **Server** | Must support **HTTP/2/3**, utilize an **encrypted (HTTPS)** connection, and be configured to identify which assets to push (usually via `Link` headers). |
+
+## 103 Early Hints
+
+**103 Early Hints** is a modern HTTP status code that allows a server to send a "preliminary" response to the client while it is still busy generating the main HTML. This tells the browser to start downloading critical assets (like CSS and JS) during the server's "think time."
+
+```text
+      Client (Browser)                           Server
+           |                                        |
+           |--- 1. Request: "index.html" ---------->|
+           |                                        |
+           |                                  (Server is busy
+           |                                   calculating/DB lookup)
+           |                                        |
+           |<-- 2. 103 Early Hints -----------------|
+           |    (Link: </style.css>; rel=preload)   |
+           |                                        |
+[Browser starts downloading style.css]              |
+           |                                        |
+           |                                  (Server finishes
+           |                                   generating HTML)
+           |                                        |
+           |<-- 3. 200 OK (Full index.html) --------|
+           |                                        |
+```
+
+### Use Case
+* **Dynamic Pages:** Websites where the server needs significant time to generate HTML (e.g., personalized dashboards, search results, or e-commerce carts).
+* **Performance Optimization:** Reducing the **Largest Contentful Paint (LCP)** by fetching critical render-blocking resources as early as possible.
+
+### Benefits
+* **Zero Wasted Time:** Converts the server's idle "think time" into active download time for the browser.
+* **No Over-Pushing:** Unlike Server Push, the browser can check its **local cache** first. If it already has the file, it simply ignores the hint, saving bandwidth.
+* **Better Compatibility:** It is much easier for CDNs (like Cloudflare) to implement than the now-deprecated Server Push.
+
+### Drawbacks
+* **Server Support:** Requires the server and application framework to be capable of sending "informational" 103 responses before the final header.
+* **Network Overhead:** It technically adds an extra small packet to the stream, though the performance gains almost always outweigh this.
+
+### Prerequisites
+
+| Side | Requirement |
+| :--- | :--- |
+| **Browser** | Must support **HTTP/2** or **HTTP/3** and the 103 status code (supported by Chrome, Edge, and most modern engines). |
+| **Server** | Must be configured to emit the **103 Early Hints** response and use `Link` headers with `rel=preload` or `rel=preconnect`. |
 
 ## Server-Sent Events
 
