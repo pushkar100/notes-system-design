@@ -1935,6 +1935,36 @@ Server → Client : HTML + CSS + JS (pushed)
 | **Browser** | Must support **HTTP/2** or **HTTP/3** and the 103 status code (supported by Chrome, Edge, and most modern engines). |
 | **Server** | Must be configured to emit the **103 Early Hints** response and use `Link` headers with `rel=preload` or `rel=preconnect`. |
 
+```
+       BROWSER                                           SERVER (or CDN)
+          |                                                 |
+          |------- 1. GET /index.html (Navigate) ---------->|
+          |                                                 |
+          |                                        [ START THINK TIME ]
+          |                                        (DB Queries, Logic...)
+          |                                                 |
+          |<------ 2. HTTP/2 103 Early Hints ---------------|
+          |           Link: </style.css>; rel=preload       |
+          |           Link: </main.js>; rel=preload         |
+          |                                                 |
+          | [ 3. BROWSER PRELOADS ]                         |
+          |--- GET /style.css ---->                         | (Server still 
+          |--- GET /main.js   ---->                         |  processing...)
+          |                                                 |
+          |<-- (style.css Data) ---                         |
+          |<-- (main.js Data)   ---                         |
+          |                                                 |
+          |                                        [ END THINK TIME ]
+          |                                        (HTML is ready)
+          |                                                 |
+          |<------ 4. HTTP/2 200 OK ------------------------|
+          |           (Full index.html Body)                |
+          |                                                 |
+          | [ 5. IMMEDIATE RENDER ]                         |
+          | (Styles/Scripts are already in cache!)          |
+          v                                                 v
+```
+
 ## Server-Sent Events
 
 ## Server-Sent Events (SSE)
