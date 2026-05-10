@@ -2039,6 +2039,32 @@ Server → Browser : event2
 | **Browser** | Supports the `EventSource` API (Available in all modern browsers). |
 | **Server** | Must keep the HTTP response open indefinitely and set the header: `Content-Type: text/event-stream`. |
 
+**SSE v/s Long polling**
+
+When you are building a real-time system—like a live activity feed for your booking engine or a notification service, you have to choose how the server "talks" to the client.
+- **Long Polling** is the old-school "workaround" for real-time updates
+- **Server-Sent Events (SSE)** is the modern, standardized way to stream data
+
+Why SSE is Efficient
+1. Single Long-Lived Connection: Unlike long polling, which closes and re-opens a connection for every update, SSE opens one connection and keeps it open.
+  - Example: In a live stock ticker, SSE establishes one connection to stream price updates, while long polling would require a new HTTP handshake every few seconds.
+2. Lower Header Overhead: Every HTTP request in long polling includes hundreds of bytes of headers (cookies, user-agents). SSE sends these headers once at the start.
+  - Example: Sending a 10-character message ("Price: 100") via long polling might require 500 bytes of headers; via SSE, it only requires the 10 bytes of data.
+3. Built-in Reconnection: SSE has native browser support to automatically reconnect if the signal drops.
+  - Example: If a user’s internet flickers while watching a sports score feed, the browser handles the reconnection logic silently, whereas long polling requires the client-side JavaScript to detect the failure and restart the loop.
+4. Server-Side Resources: SSE is less memory-intensive for modern asynchronous servers.
+  - Example: A server can handle thousands of concurrent SSE streams easily, while long polling forces the server to manage a constant cycle of "Request -> Process -> Response -> Close" for every user.
+
+|Feature        |Long Polling                         |Server-Sent Events (SSE)           |
+|---------------|-------------------------------------|-----------------------------------|
+|Communication  |Request -> Wait -> Response          |Single persistent stream           |
+|Direction      |Semi-Bidirectional (via new requests)|Unidirectional (Server to Client)  |
+|Latency        |Higher (new connection overhead)     |Very Low (immediate push)          |
+|Efficiency     |Low (heavy HTTP header overhead)     |High (lightweight text stream)     |
+|Reconnection   |Must be handled manually by code     |Built-in automatic reconnection    |
+|Browser Support|Universal (works on everything)      |Modern browsers (all except IE)    |
+|Scaling        |Harder (many short-lived connections)|Easier (handles persistent streams)|
+
 ## WebSockets
 
 **Concept**: Full-duplex, persistent TCP connection
