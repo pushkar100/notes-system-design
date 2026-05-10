@@ -1686,7 +1686,7 @@ Summary: Short Polling is **"Chatty"** (wasteful network calls). Long Polling is
 <!-- TOC --><a name="server-push"></a>
 ## Server push
 
-It is an *HTTP/2 feature*
+**Server Push** is a feature originally introduced in **HTTP/2** that allows a server to send resources to a browser **before the browser explicitly requests them**.
 
 **Concept**: Server proactively sends resources to the client before requested
 
@@ -1708,6 +1708,43 @@ Server → Client : HTML + CSS + JS (pushed)
 **Enterprise Tools**
 - Nginx, Apache HTTP/2
 - CDNs (Cloudflare, Fastly)
+
+```text
+      Client (Browser)                           Server
+           |                                        |
+           |--- 1. Request: "index.html" ---------->|
+           |                                        |
+           |                                  (Server logic:
+           |                                   "They will need 
+           |                                   styles.css too!")
+           |                                        |
+           |<-- 2. PUSH_PROMISE: "styles.css" ------|
+           |                                        |
+           |<-- 3. Response: "index.html" ----------|
+           |                                        |
+           |<-- 4. Pushed Data: "styles.css" -------|
+           |                                        |
+```
+
+### Use Case
+* **Critical Assets:** Loading essential **CSS**, **JavaScript**, or **font files** that are required to render the "Above the Fold" content of a page.
+* **Predictable Resources:** Any asset the server knows with **100% certainty** the client will request immediately after parsing the HTML.
+
+### Benefits
+* **Reduced Latency:** Eliminates the "Request-Response" round trip for sub-resources.
+* **Faster Rendering:** Critical styles arrive simultaneously with the HTML, preventing "Flash of Unstyled Content" (FOUC).
+
+### Drawbacks
+* **Wasted Bandwidth:** If the browser already has the file in its **local cache**, the server pushes it anyway, wasting data.
+* **Complex Implementation:** Over-pushing too many assets can actually clog the connection and **slow down** the initial HTML delivery.
+* **Deprecation:** Due to these inefficiencies, many modern browsers (like Chrome) and servers have deprecated or disabled HTTP/2 Server Push in favor of **103 Early Hints**.
+
+### Prerequisites
+
+| Side | Requirement |
+| :--- | :--- |
+| **Browser** | Must support **HTTP/2** or **HTTP/3** and have the "Push" setting enabled (most modern browsers do). |
+| **Server** | Must support **HTTP/2/3**, utilize an **encrypted (HTTPS)** connection, and be configured to identify which assets to push (usually via `Link` headers). |
 
 ## Server-Sent Events
 
