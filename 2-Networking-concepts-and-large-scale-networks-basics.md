@@ -340,6 +340,78 @@ This:
 * Use QUIC (UDP-based) ✅ real solution: Runs over UDP, has multiple independent streams, packet loss in one stream doesn’t block others (HTTP/3)
 * Reduce packet loss (mitigation, not cure)
 
+#### The Problem: HTTP/1.1 and Application HOL Blocking
+
+Before multiplexing, HTTP/1.1 used pipelining over a single TCP connection. 
+- The rule was strict: responses must be returned in the exact order the requests were received.
+
+If Request A requires a massive database query, and Request B is a simple image fetch, Request B must wait for A to finish before a single byte of B is sent. 
+
+```text
+HTTP/1.1 Pipelining (Application HOL Blocking)
+
+Server Processing & Transmission:
+Time --->
+[===== Request A (Heavy SQL Query) =====] [Request B (Fast)]
+                                          ^
+                                          |
+                        Request B is blocked entirely by A.
+```
+
+#### The Solution: Application-Layer Multiplexing (HTTP/2)
+
+Application-layer multiplexing solves this by abandoning the strict sequential order. Instead of sending full responses one by one, the application layer (HTTP/2) chops every response up into tiny chunks called **Frames**. 
+
+It assigns a "Stream ID" to each frame and interleaves them onto the single TCP connection. 
+
+```text
+HTTP/2 Multiplexing (Solves Application HOL Blocking)
+
+Stream 1 (Heavy Req A): [A1] [A2] [A3] [A4]
+Stream 2 (Fast Req B):  [B1] [B2]
+
+Interleaved onto a single TCP Connection:
+Time --->
+[A1] [B1] [A2] [B2] [A3] [A4]
+```
+
+**Why this works:** The heavy computation or large payload of Request A no longer blocks Request B. The application on the receiving end reads the Stream IDs, reassembles the frames independently, and processes Request B immediately while Request A is still trickling in. 
+
+#### The Limitation: Why it is only a "Partial" Fix
+
+This is where the abstraction leaks. HTTP/2 multiplexing is an application-layer concept. 
+- **TCP does not know what a "Frame" or a "Stream" is.** 
+
+To TCP, the connection is just a dumb, sequential pipe of raw bytes. TCP guarantees strict, in-order delivery of those bytes. **If a network packet is lost in transit, TCP will completely halt the delivery of all subsequent bytes to the application layer until that specific packet is retransmitted and received.**
+
+```text
+The TCP Network Wall (TCP HOL Blocking - The Unsolved Part)
+
+Let's group the multiplexed frames into TCP Network Packets:
+Packet 1: Contains [A1, B1]
+Packet 2: Contains [A2, B2]  <--- DROPPED IN TRANSIT
+Packet 3: Contains [A3, A4]
+
+Receiver OS TCP Buffer:
++---------------------------------------------------+
+| Received Pkt 1: Passed to HTTP/2                  |
+| Received Pkt 3: Held in OS buffer. CANNOT pass up!|
++---------------------------------------------------+
+```
+
+#### The Fatal Flaw
+
+Even though Packet 3 successfully arrived and contains the rest of Stream A, the TCP layer refuses to hand it over to the application layer because Packet 2 is missing. 
+
+Because Stream B's data (`B2`) was inside the lost Packet 2, the loss of that packet has effectively blocked Stream A (`A3`, `A4`) from being processed. **One lost packet blocks the entire pipeline for all multiplexed streams.**
+
+#### Summary of the "Partial" Help in HTTP 2
+
+*   **What it fixes:** It eliminates server-side queueing and payload-size blocking. A slow database query on Stream A will never block the transmission of Stream B.
+*   **What it fails to fix:** It cannot survive network instability. Because it forces multiple independent streams through a single TCP byte-stream, a single dropped network packet causes collateral damage, freezing every active application stream until the packet is recovered.
+
+*(Note: This exact limitation is why the industry created HTTP/3 over QUIC. QUIC replaces TCP with UDP and moves the multiplexing down to the transport layer, so a lost packet for Stream A strictly affects Stream A, leaving Stream B completely uninterrupted.)*
+
 ### User Datagram Protocol
 
 Core idea: **Fast, connectionless, best-effort delivery**
