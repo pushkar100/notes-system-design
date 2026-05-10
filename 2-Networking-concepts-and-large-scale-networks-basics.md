@@ -1748,19 +1748,15 @@ Server → Client : HTML + CSS + JS (pushed)
 
 ## Server-Sent Events
 
-SSE stands for Server-Sent Events
+## Server-Sent Events (SSE)
+
+**Server-Sent Events** is a standard that allows servers to push **real-time updates** to web pages over a single, long-lived HTTP connection. Unlike WebSockets, which are bi-directional, SSE is **unidirectional** (Server to Client only).
 
 **Concept**: Browser opens one-way, long-lived connection
 
 **How it works**: Server pushes text/event-stream updates
 
 **Use case:** live notifications, stock tickers
-
-```
-Browser → Server : GET /events (HTTP)
-Server → Browser : event1
-Server → Browser : event2
-```
 
 **Pros**
 - Simple (HTTP-based)
@@ -1776,6 +1772,53 @@ Server → Browser : event2
 - Node.js `EventSource` API
 - Spring `SSEEmitter`
 - Django `Channels`
+
+```
+Browser → Server : GET /events (HTTP)
+Server → Browser : event1
+Server → Browser : event2
+```
+
+```text
+      Client (Browser)                           Server
+           |                                        |
+           |--- 1. Request: "Connect me!" --------->|
+           |    (Accept: text/event-stream)         |
+           |                                        |
+           |<-- 2. Response: 200 OK ----------------|
+           |    (Content-Type: text/event-stream)   |
+           |                                        |
+           |           (Connection Stays Open)      |
+           |                                        |
+           |<-- 3. Event: "New Price: $10" ---------|
+           |                                        |
+           |<-- 4. Event: "New Price: $12" ---------|
+           |                                        |
+           |          (Server keeps pushing...)     |
+           v                                        v
+```
+
+### Use Case
+* **Live Dashboards:** Real-time stock prices, crypto tickers, or server monitoring metrics.
+* **Social Feeds:** Pushing new notifications or timeline updates without a page refresh.
+* **Progress Bars:** Showing the real-time status of a long-running backend task (like a video encode or a large file upload).
+
+### Benefits
+* **Simpler than WebSockets:** Operates over standard **HTTP**, meaning it works with existing firewalls and load balancers without special configuration.
+* **Automatic Reconnection:** Browsers automatically attempt to reconnect if the connection drops, and servers can use a "Last-Event-ID" to resume from where they left off.
+* **Low Overhead:** Efficient for the server because it doesn't require a constant "polling" loop from the client.
+
+### Drawbacks
+* **Unidirectional:** The client cannot send data back to the server over the same connection; it would need to make a separate POST request.
+* **Connection Limits:** Browsers often limit the number of open SSE connections to **6 per domain** (though this is less of an issue with HTTP/2).
+* **Text-Only:** Natively designed for UTF-8 text data; sending binary files requires extra encoding steps (like Base64).
+
+### Prerequisites
+
+| Side | Requirement |
+| :--- | :--- |
+| **Browser** | Supports the `EventSource` API (Available in all modern browsers). |
+| **Server** | Must keep the HTTP response open indefinitely and set the header: `Content-Type: text/event-stream`. |
 
 ## WebSockets
 
