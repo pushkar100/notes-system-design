@@ -140,6 +140,16 @@
    * [Common data serialization formats](#common-data-serialization-formats)
       + [TOON](#toon)
    * [CORS](#cors)
+   * [HTTP status codes](#http-status-codes)
+      + [The Universal Language of the Web](#the-universal-language-of-the-web)
+      + [The 5 Structural Categories](#the-5-structural-categories)
+      + [Comprehensive Breakdown of Vital Status Codes](#comprehensive-breakdown-of-vital-status-codes)
+         - [**1xx Informational Codes**](#1xx-informational-codes)
+         - [**2xx Success Codes**](#2xx-success-codes)
+         - [**3xx Redirection Codes**](#3xx-redirection-codes)
+         - [**4xx Client Error Codes**](#4xx-client-error-codes)
+         - [**5xx Server Error Codes**](#5xx-server-error-codes)
+      + [Summary Checklist for API Design](#summary-checklist-for-api-design)
 
 ## Networking layers
 
@@ -4747,3 +4757,118 @@ def hello():
 	- You configure CORS at the Gateway level. The Gateway intercepts the browser's `OPTIONS` request and replies with the correct headers, so your backend code stays clean
 - **JSONP (Legacy - Obsolete)**:
 	- Old trick using `<script>` tags (which are allowed cross-origin) to fetch data. Do not use this in 2025! It has security flaws!
+
+## HTTP status codes
+
+### The Universal Language of the Web
+
+HTTP status codes are standardized three-digit answers issued by a server in response to a client's request (e.g., a browser trying to load a webpage). They act as a diagnostic bridge, communicating whether a request was successful, if it needs to be redirected, or if an error occurred on either the client or server side.
+
+Status codes are divided into five distinct blocks based on their first digit, establishing a clear hierarchy of meaning.
+
+### The 5 Structural Categories
+
+| Category | Class | Definition & Purpose | Common Example |
+| :--- | :--- | :--- | :--- |
+| **`1xx`** | Informational | The request was received, and the process is continuing. | `101 Switching Protocols` |
+| **`2xx`** | Success | The action was successfully received, understood, and accepted. | `200 OK` |
+| **`3xx`** | Redirection | Further action must be taken by the client to complete the request. | `301 Moved Permanently` |
+| **`4xx`** | Client Error | The request contains bad syntax or cannot be fulfilled by the client. | `404 Not Found` |
+| **`5xx`** | Server Error | The server failed to fulfill an apparently valid request. | `500 Internal Server Error` |
+
+### Comprehensive Breakdown of Vital Status Codes
+
+#### **1xx Informational Codes**
+These codes indicate a provisional response. The browser should continue with its request or ignore the response if it is already finished.
+
+*   **`100 Continue`**
+    *   **Meaning:** The server has received the initial part of the request (like headers) and the client should proceed to send the rest of the payload (like a large file body).
+    *   **When to use:** Optimizing large file uploads to check if the server will accept the request headers before wasting bandwidth sending the actual data.
+*   **`101 Switching Protocols`**
+    *   **Meaning:** The requester has asked the server to switch protocols, and the server has agreed to do so.
+    *   **When to use:** Upgrading an HTTP connection into a persistent, bidirectional WebSocket connection for real-time data communication.
+
+#### **2xx Success Codes**
+These codes confirm that the client's request was successfully processed by the server.
+
+*   **`200 OK`**
+    *   **Meaning:** The standard success response for a valid HTTP request. The payload returned depends on the request method (e.g., HTML text for a `GET`, an confirmation entity for a `POST`).
+    *   **When to use:** The standard default for successful page loads and simple read queries.
+*   **`201 Created`**
+    *   **Meaning:** The request was successful, and as a result, a brand new resource has been successfully created on the backend database.
+    *   **When to use:** When a user submits a registration form or creates a new database item via a `POST` or `PUT` request. The response typically includes a `Location` header pointing to the new resource.
+*   **`202 Accepted`**
+    *   **Meaning:** The request has been accepted for processing, but the processing has not been completed yet. It is explicitly non-committal.
+    *   **When to use:** Asynchronous or batch processing architectures. If a client requests a heavy video-transcoding job, the server replies with `202` immediately, offloading the processing to a background worker queue rather than keeping the connection open.
+*   **`204 No Content`**
+    *   **Meaning:** The server successfully processed the request, but there is no payload data to return in the response body.
+    *   **When to use:** Executing a successful `DELETE` operation or sending a minor telemetry save ping where the client does not need an updated page layout or payload response.
+
+
+
+#### **3xx Redirection Codes**
+These codes tell the client that the requested resource has shifted location and provides instructions on where to look next.
+
+*   **`301 Moved Permanently`**
+    *   **Meaning:** The target resource has been assigned a brand new permanent URI. Any future links to this resource should use the newly returned URI.
+    *   **When to use:** SEO restructuring or changing domain names entirely (e.g., forwarding traffic from `old-domain.com` to `new-domain.com`). Search engine crawlers will automatically update their indexing to favor the new address.
+*   **`302 Found` (Temporary Redirect)**
+    *   **Meaning:** The target resource resides temporarily under a different URI. Because the redirection can change dynamically, the client must continue using the original URI for future requests.
+    *   **When to use:** Temporary marketing landing pages or routing users through dynamic localization checks before sending them to a main path.
+*   **`304 Not Modified`**
+    *   **Meaning:** Tells the client's browser that the resource has not changed since the last time it was cached. The server does not send the response body, forcing the browser to load its local cached copy.
+    *   **When to use:** Optimizing performance and saving network bandwidth using conditional caching headers like `If-Modified-Since` or `If-None-Match` (ETags).
+
+#### **4xx Client Error Codes**
+These codes signify that something went wrong with the incoming request itself, meaning the client needs to fix the payload before retrying.
+
+*   **`400 Bad Request`**
+    *   **Meaning:** The server cannot process the request due to something perceived as a client error (e.g., malformed request syntax, missing required payload parameters).
+    *   **When to use:** Validating incoming JSON bodies in REST APIs. If a required field like `"email"` is missing from a payload submission, return a `400` error accompanied by an explicit validation string.
+*   **`401 Unauthorized`**
+    *   **Meaning:** Semantically, this means **Unauthenticated**. The client must authenticate itself (log in) to receive the requested response.
+    *   **When to use:** When an unauthenticated anonymous user attempts to view a private account dashboard without passing a valid session cookie or Authorization bearer token.
+*   **`403 Forbidden`**
+    *   **Meaning:** The client's identity is known, but they **do not have authorization privileges** to view or modify the resource. 
+    *   **When to use:** Enforcing Role-Based Access Control (RBAC). If a standard user attempts to access an administrative endpoint like `/api/admin/system-purge`, return a `403` to explicitly block access.
+*   **`404 Not Found`**
+    *   **Meaning:** The server cannot find the requested resource path. It does not indicate whether the resource is missing temporarily or permanently.
+    *   **When to use:** When a user types a broken URL string or attempts to query an asset ID from a database table that does not exist.
+*   **`429 Too Many Requests`**
+    *   **Meaning:** The user has sent too many requests in a given amount of time ("rate limiting").
+    *   **When to use:** Protecting infrastructure from denial-of-service (DoS) attacks, brute-force password guessing, or abusive web scrapers.
+
+#### **5xx Server Error Codes**
+These codes indicate that the client's request was completely valid, but the server encountered an internal problem and crashed while trying to fulfill it.
+
+*   **`500 Internal Server Error`**
+    *   **Meaning:** A generic catch-all error message indicating that the server encountered an unexpected condition that prevented it from fulfilling the request.
+    *   **When to use:** Uncaught runtime code exceptions in the backend applications (e.g., a null-pointer exception, an unhandled database disconnection error).
+*   **`502 Bad Gateway`**
+    *   **Meaning:** The server, while acting as a gateway or proxy, received an invalid response from the upstream application server it tried to contact.
+    *   **When to use:** Commonly seen when using a reverse proxy setup (like Nginx or an AWS Application Load Balancer) where the proxy is running fine, but the core Node.js/Java backend application running behind it has crashed or frozen.
+*   **`503 Service Unavailable`**
+    *   **Meaning:** The server is currently not ready to handle the request. This is usually a temporary state.
+    *   **When to use:** When a server is brought down for scheduled maintenance scripts or when an underlying node is experiencing severe traffic overloads causing its CPU/Memory thresholds to bottleneck completely.
+*   **`504 Gateway Timeout`**
+    *   **Meaning:** The server, while acting as a gateway or proxy, did not receive a timely response from the upstream backend application server.
+    *   **When to use:** When a backend database query freezes or takes longer to execute than the timeout threshold configured on the edge proxy or CDN (e.g., Cloudflare terminating a request because the application took more than 30 seconds to reply).
+
+### Summary Checklist for API Design
+
+When architecting web APIs or backends, mapping the correct code sets bounds for clear, scannable error handling.
+
+```text
+Incoming Request
+       │
+       ├──► Malformed JSON syntax? ──────────────────────► 400 Bad Request
+       ├──► Token missing/invalid? ──────────────────────► 401 Unauthorized
+       ├──► Authenticated, but no permission? ───────────► 403 Forbidden
+       ├──► Resource doesn't exist in DB? ───────────────► 404 Not Found
+       │
+       ├──► Everything valid! Code runs...
+       │      │
+       │      ├──► Database item created? ───────────────► 201 Created
+       │      ├──► Data fetched successfully? ───────────► 200 OK
+       │      └──► Uncaught code exception crash? ──────► 500 Internal Error
+```
