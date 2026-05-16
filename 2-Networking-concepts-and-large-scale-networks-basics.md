@@ -138,7 +138,7 @@
       + [Token-Based or Stateless Sessions](#token-based-or-stateless-sessions)
       + [Scaling session management](#scaling-session-management)
    * [Common data serialization formats](#common-data-serialization-formats)
-         - [TOON](#toon)
+      + [TOON](#toon)
    * [CORS](#cors)
 
 ## Networking layers
