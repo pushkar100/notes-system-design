@@ -49,7 +49,6 @@
       + [Code Snippet](#code-snippet)
       + [Pros, Cons, and Usage](#pros-cons-and-usage)
    * [HttpOnly flag to prevent client-side JS from reading the cookie](#httponly-flag-to-prevent-client-side-js-from-reading-the-cookie)
-         - [What, Why, and How](#what-why-and-how)
       + [Visualizing the Concept](#visualizing-the-concept)
       + [Code Snippet](#code-snippet-1)
       + [Pros, Cons, and Usage](#pros-cons-and-usage-1)
@@ -1379,9 +1378,6 @@ app.get('/login', (req, res) => {
 ## HttpOnly flag to prevent client-side JS from reading the cookie
 
 Example: `Set-Cookie: session_id=abc123xyz789; Secure; HttpOnly; SameSite=Strict; Max-Age=3600` 
-
-<!-- TOC --><a name="what-why-and-how"></a>
-#### What, Why, and How
 
 *   **What:** `HttpOnly` is an attribute added to a browser cookie by the backend server. It strictly forbids client-side scripts (like JavaScript) from accessing the cookie's data.
 *   **Why:** It is a targeted defense against **Cross-Site Scripting (XSS)** attacks. If an attacker successfully injects malicious JavaScript into your website, their first move is usually to run `document.cookie` to steal the user's session token and hijack their account. The `HttpOnly` flag neutralizes this specific threat because the browser will refuse to hand the cookie over to the script.
