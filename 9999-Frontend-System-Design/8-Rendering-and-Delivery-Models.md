@@ -37,7 +37,7 @@ Here is how the industry has tackled this over time:
 1. CSR (Client-Side Rendering) - The Original SPA Way
 2. SSR + Hydration (Server-Side Rendering)
 3. SSG (Static Site Generation)
-4. ISR (Incremental Static Regeneration)'
+4. ISR (Incremental Static Regeneration)
 5. Server Components (RSC in React / App Router)
 
 <!-- TOC --><a name="prerequisite-the-early-days-of-mpas-leading-to-spas"></a>
