@@ -35,6 +35,10 @@
       + [2. CSS Blocks Rendering (and JavaScript Execution)](#2-css-blocks-rendering-and-javascript-execution)
       + [3. Long JS Tasks Block the Main Thread (UI Responsiveness)](#3-long-js-tasks-block-the-main-thread-ui-responsiveness)
       + [Summary Table of Web Performance Blockers](#summary-table-of-web-performance-blockers)
+   * [Progressive rendering](#progressive-rendering)
+      + [How Progressive Rendering Works](#how-progressive-rendering-works)
+      + [The Catch: Render-Blocking Resources](#the-catch-render-blocking-resources)
+      + [How Developers Optimize This](#how-developers-optimize-this)
 
 <!-- TOC end -->
 
@@ -650,3 +654,40 @@ Result: The page feels frozen, sluggish, and unresponsive.
 | **External `<link rel="stylesheet">`** | Visual Rendering | Browser waits for all styles to prevent a Flash of Unstyled Content (FOUC). | Inline Critical CSS; load non-critical CSS asynchronously. |
 | **Pending CSSOM Build** | JavaScript Execution | JS might query layout/styles, so the engine waits for the CSSOM to be accurate. | Optimize CSS delivery; ensure CSS loads before JS in the `<head>`. |
 | **Heavy JavaScript Logic (Long Tasks)** | Main Thread (UI Updates & Interactions) | The single thread can only do one thing at a time. A heavy loop stops the paint cycle. | Break tasks into chunks with `setTimeout` or offload to Web Workers. |
+
+## Progressive rendering
+
+**Q: Can and does the browser render the page while the HTML is still being parsed?**
+
+**Yes**, modern browsers absolutely render the page while the HTML is still being parsed. This process is known as **progressive rendering**.
+
+If browsers waited for the entire HTML document (and all its linked resources) to finish downloading and parsing before painting anything to the screen, users would be staring at blank white screens for a noticeable amount of time, especially on slower network connections.
+
+Here is a breakdown of how this process works and the exceptions that can interrupt it.
+
+### How Progressive Rendering Works
+
+Browsers process web pages in chunks. As data streams in over the network, the browser's rendering engine gets to work immediately:
+
+1. **Building the DOM (Document Object Model):** As soon as the browser receives HTML tokens, it starts constructing the DOM tree.
+2. **Building the CSSOM (CSS Object Model):** Simultaneously, it parses any CSS it encounters to figure out how elements should look.
+3. **Constructing the Render Tree:** The browser combines the DOM and CSSOM into a "Render Tree," which only includes the nodes needed to display the page (e.g., elements with `display: none` are left out).
+4. **Layout:** The browser calculates the exact size and position of every visible element on the page.
+5. **Paint:** Finally, the browser paints the pixels to the screen.
+
+Because this happens continuously, you will often see a web page load top-to-bottom. The text and layout at the top of an article might be fully visible and readable while the browser is still actively downloading and parsing the HTML for the footer.
+
+### The Catch: Render-Blocking Resources
+
+While the browser *wants* to render progressively, certain resources can force it to halt parsing or rendering. These are called **render-blocking resources**.
+
+* **CSS:** By default, CSS is treated as a render-blocking resource. The browser will not paint anything to the screen until it has constructed the CSSOM. It does this to prevent a "Flash of Unstyled Content" (FOUC), where you briefly see a messy, plain-text version of the site before the layout snaps into place.
+* **Synchronous JavaScript:** If the HTML parser encounters a standard `<script>` tag, it must immediately pause parsing the HTML, download the JavaScript file, and execute it before it can continue. This is because JavaScript has the power to alter the DOM and CSSOM (e.g., using `document.write()`), so the browser has to wait to see what the script does.
+
+### How Developers Optimize This
+
+To keep progressive rendering running smoothly, web developers use a few tricks:
+
+* **Putting CSS in the `<head>`:** This ensures the browser discovers styles as early as possible.
+* **Using `async` or `defer` on scripts:** Adding these attributes to a `<script>` tag tells the browser, "Keep parsing the HTML in the background while this script downloads."
+* **Putting scripts at the bottom:** Before `async` and `defer` were widely supported, developers traditionally placed `<script>` tags at the very end of the `<body>` so that all the HTML above it could be parsed and rendered first.
