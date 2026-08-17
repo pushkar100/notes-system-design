@@ -107,7 +107,7 @@ clientDetail {
 
 *FR 5: Work on a large distributed system* AND *FR 6 Where should the rate limiter be?*:
 1. Bad approach: On each service! Why? 
-	- Service needs to no only handle biz logic but also need to do this
+	- Service needs to only handle biz logic but also need to do this
 	- Unnecessary resource utilization on application servers
 	- Not a global approach (Bad for distributed systems): Servers don't know limits on each other. Hence, difficult to rate limit globally
 2. Good approach: A separate service. Why?
@@ -288,7 +288,7 @@ clientDetail {
 
 **If Rate Limiter i.e Redis was SHARDED:** Since rate limiting can be done on user IDs, **How do we handle "hot keys"?**
 - Example: A particular user ID bombards requests over and over. Yes, we block him but how do we not let one Redis shard take the heat until the user is blocked? (`user id -> consistently hashed -> hits Redis shard A only -> Shard is locked/hardware wears out over time`)
-- *Approach 1*: Use random prefix/suffix attachment. Ex: `<user_id>_1`, `<user_id_2` so that different shards store the limits
+- *Approach 1*: Use random prefix/suffix attachment. Ex: `<user_id>_1`, `<user_id_2>` so that different shards store the limits
 	- Drawback: We need to read the total / accurate requests for that user by collecting requests so far from different shards. That is okay if the system needs to be highly available but not consistent (Few seconds delay in knowing limit has been reached, only for this hot key, is okay)
 - *Approach 2*: Reduce the limits per user or particularly for that malicious user. Limit is reached much sooner and user is blocked even before the shard is hit
 
