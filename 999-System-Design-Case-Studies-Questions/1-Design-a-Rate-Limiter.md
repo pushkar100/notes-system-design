@@ -292,7 +292,7 @@ clientDetail {
 	- Drawback: We need to read the total / accurate requests for that user by collecting requests so far from different shards. That is okay if the system needs to be highly available but not consistent (Few seconds delay in knowing limit has been reached, only for this hot key, is okay)
 - *Approach 2*: Reduce the limits per user or particularly for that malicious user. Limit is reached much sooner and user is blocked even before the shard is hit
 
-**Hard part: How can we handle concurrenmt writes to Redis by two immediate requests? i.e Race Condition**
+**Hard part: How can we handle concurrent writes to Redis by two immediate requests? i.e Race Condition**
 - We need either (1) Locking mechanism or (2) Conflict free write/read method
 - Luckily, Redis can be used with a tool called **LuaScript** that guarantees a atomicity for a series of operations (Transaction)
   - We can also use **sorted sets data structure** in Redis
