@@ -211,7 +211,7 @@ clientDetail {
 	- ***Redis clusters can easily handle 500GB***: (However, if we needed to scale the storage, we would have used ***sharding*** along with ***consistent hashing***. *Note*: Redis has *preconfigured **slots*** for consistent hashing (~16k slots) for faster hashing)
 
 *NFR #2: Rate limiting should take less than 10ms per request as overhead*
-- Redis works in-memory: `<100ns` just for an operation. Assume 1000 operations just to rate limit, it should still be `10^5 x 10^-9 s` = `10^-4 s` = `0.1ms` and network travel time should be still in a few msecs. We might just be good
+- Redis works in-memory: `<100ns` just for an operation. Assume 1000 operations just to rate limit, it should still be `1000 operations × 100ns per operation = 10^5 ns = 10^5 x 10^-9 s` = `10^-4 s` = `0.1ms` and network travel time should be still in a few msecs. We might just be good
 - How can we speed up Redis?? 
 	1. Add **TCP Connection pooling** since requests to it will be highly frequent so no point opening and closing connections repeatedly
 	2. **Deploy API Gateways across different geographies** so that rate limiting happens closer to the edges themselves
