@@ -11,7 +11,7 @@ The **HelloInterview.com** approach
   - [Gathering Non-Functional Requirements](#gathering-non-functional-requirements)
   - [Defining our core entities](#defining-our-core-entities)
   - [Designing our API](#designing-our-api)
-  - [High Level Design to fulfil FRs](#high-level-design-to-fulfil-frs)
+  - [High Level Design to fulfil FRs](#high-level-design-to-fulfill-frs)
   - [Deep Dive to scale our design](#deep-dive-to-scale-our-design)
   - [Important HTTP verbs and status codes for API endpoints](#important-http-verbs-and-status-codes-for-api-endpoints)
   - [Data for Back Of The Envelope estimations](#data-for-back-of-the-envelope-estimations)
@@ -217,7 +217,7 @@ POST /urls -> shortUrl
 GET {shortUrl} -> Redirect to the original longUrl
 ```
 
-## High Level Design to fulfil FRs
+## High Level Design to fulfill FRs
 
 *Steps*:
 1. Start with a monolith (Simple client-server architecture): A ***client***, a ***monolith server***, a ***database***
