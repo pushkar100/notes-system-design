@@ -4960,8 +4960,9 @@ Current State (Calculated): $0 + 50 + 60 - 10 = $100
 ```
 
 **How is Event Data Stored and Read? (In Simple Terms)**:
+
 - **Where & How it is Stored**: Events are stored in an **append-only log** (called an **Event Store**) where data is strictly immutable—you only ever `INSERT` events, and you **never** `UPDATE` or `DELETE` them. Common tools include specialized event databases like **EventStoreDB**, distributed streaming logs like **Apache Kafka**, or simply an append-only table in a standard SQL database like **PostgreSQL** or **MySQL** (using columns like `aggregate_id`, `version`, `event_type`, `payload_json`, and `timestamp`).
-- **How it is Read**: To determine the current state (e.g., Bob's balance), the application fetches all events for that ID in chronological order and **replays** them in memory. To avoid replaying thousands of historical events on every read, systems take periodic **Snapshots** (e.g., saving a checkpoint: *"At event #500, balance was $1,000"*, so you only need to replay events #501 to now) or pair it with **CQRS**, where a worker automatically updates a flat, fast read database whenever a new event occurs.
+- **How it is Read**: To determine the current state (e.g., Bob's balance), the application fetches all events for that ID in chronological order and **replays** them in memory. To avoid replaying thousands of historical events on every read, systems take periodic **Snapshots** (e.g., saving a checkpoint: _"At event #500, balance was $1,000"_, so you only need to replay events #501 to now) or pair it with **CQRS**, where a worker automatically updates a flat, fast read database whenever a new event occurs.
 
 | Pattern        | Best For...                                                                                                             |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -5691,9 +5692,11 @@ The physical storage strategy **_changes drastically_** between OLTP and Big Dat
 - Why? It's fast to "Write a new User". You just append one line
 
 _OLTP (Row Store) on Disk:_
-| ID | Name | Age |
-| --- | --- | --- |
-| 1 | Alice | 25 | | 2 | Bob | 30 |
+
+| ID  | Name  | Age |
+| --- | ----- | --- |
+| 1   | Alice | 25  |
+| 2   | Bob   | 30  |
 
 ```
 [1, Alice, 25]  [2, Bob, 30] ...
