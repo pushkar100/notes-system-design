@@ -5711,10 +5711,6 @@ _(Good for fetching Alice's FULL profile)_
   - **_Big Data queries usually ask for specific fields_** (e.g., "Average Age")
   - Columnar storage lets the DB read only the "Age" column and ignore "Name," "Address," "Password," etc. This scans terabytes of data 100x faster
 
-| ID  | Name  | Age |
-| --- | ----- | --- | --- | --- | --- | --- |
-| 1   | Alice | 25  |     | 2   | Bob | 30  |
-
 ```
 [1, 2]  [Alice, Bob]  [25, 30] ...
 ```
