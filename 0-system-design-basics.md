@@ -67,6 +67,15 @@ In this setup, we maintain one server for all services! That is, it is a 3-in-1 
 2. Database server
 3. Cache server
 
+```text
++------------------------------------------+
+|          Single Physical Machine         |
+|  +------------+  +----------+  +-------+ |
+|  | Web Server |  | Database |  | Cache | |
+|  +------------+  +----------+  +-------+ |
++------------------------------------------+
+```
+
 ![basic server](https://i.imgur.com/2lFq310.png)
 
 Even for a client accessing via a different platform, the same server handles the request:
@@ -86,11 +95,21 @@ When the number of users starts to scale, one server handling all 3 functions (w
 
 First step to optimization is to split the web/mobile traffic from the database server! We will talk about cache later as it has still not been implemented.
 
+**Why separate the web server and database first?**
+
+- **Eliminates Resource Contention:** Web servers and databases fight for completely different physical resources. Web servers are **CPU and network-heavy** (processing HTTP requests, running business logic, serializing JSON), while databases are **RAM and Disk I/O-heavy** (reading/writing to disk, managing memory buffer pools, scanning indexes). On a single machine, a surge in web traffic or a heavy database query will exhaust the shared CPU or RAM, starving the other process and taking the entire site down.
+- **Independent Scaling & Specialized Hardware:** Web servers and databases have different scaling characteristics. Web servers are *stateless* and easy to scale horizontally (adding multiple small, cheap compute-optimized instances). Databases are *stateful* and scale differently (requiring memory/storage-optimized instances, read replicas, or sharding). Separating them allows you to tune, upgrade, and scale each layer independently without wasting resources.
+
 Servers needed:
 
 1. Web/Mobile traffic server
 2. Database server
    Now, these two can be scaled independently!
+
+```text
+[ Web / Mobile Server ] <=======> [ Database Server ]
+(Scale Web independently)        (Scale DB independently)
+```
 
 ![Separate DB](https://i.imgur.com/Abf6F9w.png)
 
@@ -120,6 +139,16 @@ There are two options:
    - Column stores
    - Document stores
 2. We cannot perform joins in general i. not supported
+
+```text
+Relational (SQL):                   NoSQL (Document / KV):
++----+----------+  +-----+-------+   {
+| id | name     |  | uid | order |     "id": 101,
++----+----------+  +-----+-------+     "name": "Alice",
+| 1  | Alice    |<-| 1   | #9042 |     "orders": ["#9042"]
++----+----------+  +-----+-------+   }
+   (Rigid Tables & Joins)              (Flexible Schemas)
+```
 
 **_Default choice must be a relational database_** because of its benefits. Only use non-relational DB for one of the four reasons:
 
@@ -230,6 +259,14 @@ This is the **_preferred or recommended approach_** for large scale applications
 - It allows us to scale by adding more servers into our pool of resources
 - Failover and redundancy can be made possible!
 
+```text
+Vertical Scaling (Scale-Up):          Horizontal Scaling (Scale-Out):
+    +-------------------+                 +--------+  +--------+  +--------+
+    |   Bigger Server   |        vs       | Server |  | Server |  | Server |
+    |  (More CPU / RAM) |                 +--------+  +--------+  +--------+
+    +-------------------+                 (Pool of commodity servers)
+```
+
 <a id="understanding-redundancy-spof-failover--failover-support"></a>
 #### Understanding Redundancy, SPOF, Failover & Failover Support
 
@@ -256,6 +293,12 @@ This is the **_preferred or recommended approach_** for large scale applications
 
 When simultaneous access (maybe #users or user activity) to a server increases the load on it, we will eventually reach the "load limit". Solution: Use a **_load balancer_** coupled with multiple servers behind it (i.e load balancer + horizontal web traffic server scaling)
 
+```text
+                  +---> [ Web Server 1 ]
+[ Clients ] ---> [ Load Balancer ] ---> [ Web Server 2 ]
+                  +---> [ Web Server 3 ]
+```
+
 ![load balancer](https://i.imgur.com/xC9OLdD.png)
 
 - Load balancer is the entity that interacts with the rest of the internet on behalf of your servers
@@ -280,7 +323,7 @@ It is because it can be accessed only by servers in the same network and not the
 
 To eliminate this SPOF, production architectures deploy **redundant load balancers** using one of two primary approaches:
 
-##### 1. Active-Passive Pair with Virtual IP (VIP) (Standard On-Premise / Self-Hosted)
+#### 1. Active-Passive Pair with Virtual IP (VIP) (Standard On-Premise / Self-Hosted)
 
 - **How it works:** You run two load balancer instances: **Primary (Active)** and **Secondary (Standby)**.
 - **Heartbeat & Floating IP:** Both load balancers share a single public **Virtual IP (VIP)**. They constantly exchange "heartbeat" signals over the local network (using protocols like VRRP or software like Keepalived).
@@ -304,7 +347,7 @@ To eliminate this SPOF, production architectures deploy **redundant load balance
   [ Web Server 1 ]    [ Web Server 2 ]
 ```
 
-##### 2. Active-Active with DNS Anycast or Round-Robin (High-Scale & Cloud)
+#### 2. Active-Active with DNS Anycast or Round-Robin (High-Scale & Cloud)
 
 - **Multiple active load balancers:** Two or more load balancers run simultaneously and share the incoming load.
 - **Anycast BGP / DNS Health Checks:** Routers or DNS distribute requests across multiple load balancer IPs. If one load balancer stops responding to health checks, DNS/Anycast routing automatically excludes it from the pool.
@@ -398,7 +441,7 @@ When the master database executes a write, how does it send that update to its s
 - **Asynchronous replication (Default in most DBs)**: The master commits the write locally, returns "Success" to the user immediately, and streams updates to slaves in the background.
   - _Challenge:_ **Replication Lag**. There is a small time delay (milliseconds to seconds) before slaves catch up.
 
-##### What anomalies does Replication Lag cause?
+#### What anomalies does Replication Lag cause?
 
 1. **"Read-Your-Own-Writes" Inconsistency**:
    - A user updates their profile picture or posts a comment (written to the master).
@@ -419,7 +462,7 @@ Replication Lag Anomaly:
      *User confusion: "Wait, my update didn't save?!"*
 ```
 
-##### More Common Solutions:
+#### More Common Solutions:
 
 - **Semi-Synchronous Replication:** The master waits for at least _one_ slave to acknowledge the write before returning success. This prevents data loss if the master dies without waiting for every single replica.
 - **Sticky Routing (Pinning a user to one replica):** Always send the same user's read requests to the _exact same_ replica (e.g., User 12 always reads from Replica A).
@@ -432,7 +475,7 @@ Replication Lag Anomaly:
     - **Harder to add servers:** Adding a new replica reshuffles who is assigned where, temporarily breaking the consistency.
     - **Fights statelessness:** In system design, our goal is to keep servers completely interchangeable ("stateless"). Tying a user to a specific machine takes that flexibility away.
 
-##### Why sticky routing is a bad idea in general
+#### Why sticky routing is a bad idea in general
 
 Sticky routing breaks the #1 rule of horizontal scaling: **servers should be disposable and interchangeable ("stateless")**. Tying users to specific machines introduces operational pain:
 
@@ -448,7 +491,7 @@ Problem with Sticky Routing (Traffic Skew):
    [ Replica A (99% CPU - Overloaded!) ]        [ Replica B (2% CPU - Idle) ]
 ```
 
-##### What to do instead (Better alternatives with diagrams)
+#### What to do instead (Better alternatives with diagrams)
 
 1. **Selective Master Reads (Read-Your-Own-Writes Window)**:
    - Check a user timestamp (e.g., `last_updated_at` stored in a cookie or JWT).
@@ -496,7 +539,7 @@ Read:
                         (No need to hit lagging replicas)
 ```
 
-##### The Key Difference at a Glance: Read-Your-Own-Writes vs. Sticky Routing
+#### The Key Difference at a Glance: Read-Your-Own-Writes vs. Sticky Routing
 
 | Feature                     | **Read-Your-Own-Writes Routing**                                 | **Sticky Routing (to a Replica)**                                          |
 | :-------------------------- | :--------------------------------------------------------------- | :------------------------------------------------------------------------- |
@@ -511,7 +554,7 @@ Read:
 
 When the master crashes, promoting a standby slave to become the new master sounds simple, but introduces severe operational risks:
 
-##### The Key Challenges:
+#### The Key Challenges:
 
 1. **Data Loss (Replication Gap)**:
    - If the master crashes while asynchronous writes are in-flight (committed on the master, but not yet replicated to any slave), those writes are lost when a slave is promoted.
@@ -530,7 +573,7 @@ When the master crashes, promoting a standby slave to become the new master soun
         [ Inconsistent Data A ]   |        [ Inconsistent Data B ]
 ```
 
-##### Common Solutions:
+#### Common Solutions:
 
 - **Consensus & Quorum Voting (e.g., Raft, Paxos, ZooKeeper, etcd):** Failover decisions are never made by an isolated node. A strict **majority vote (Quorum, $>50\%$)** is required to declare a master dead and elect a new one. If the partitioned old master cannot see a majority of nodes, it automatically demotes itself to read-only.
 - **Fencing (STONITH - "Shoot The Other Node In The Head"):** Before promoting a slave, an automated cluster orchestrator cuts power or isolates the network port of the old master to guarantee it can never accept another write.
@@ -622,6 +665,14 @@ Database data access is slower than reading data from a data cache. Hence:
 1. Keep a separate data cache tier i.e a separate server that sits in between the web and the database servers
 2. Maintain a caching strategy to fetch and update data (Ex: **_Read-through_** strategy is quite popular)
 
+```text
+[ Web Server ] ---- 1. Query Key ----> [ Cache Tier ]
+      |                                      |
+      | (3. Cache Miss: Read DB & Populate)  | (2. Cache Hit: Return Data)
+      v                                      v
+[ Database Tier ] <--------------------------+
+```
+
 _Note: Most cache servers provide APIs to use in multiple languages making integration easier_
 
 **When to use a cache?**
@@ -647,6 +698,14 @@ When a user visits a website:
 - Handling cache misses:
   - CDN server requests the file from the origin which is either the web server or a storage like Amazon S3
   - HTTP header Time-To-Live (TTL) descries how long the resource is cached
+
+```text
+[ Client ] --- 1. Request static asset ---> [ CDN Edge Server ]
+                                                   |
+                                                   | 2. Cache Miss (or expired TTL)
+                                                   v
+                                          [ Origin Server / S3 ]
+```
 
 _CDN for dynamic content is a new concept and a lot more difficult to make work (Ex: Storing entire HTML pages)_
 
@@ -850,7 +909,7 @@ Stage 2: Any Subsequent Click (Database is completely bypassed!)
 
 To prevent the shared session store from becoming an SPOF, production systems use three standard strategies:
 
-##### 1. Primary-Replica with Automated Failover (e.g., Redis Sentinel / AWS ElastiCache)
+#### 1. Primary-Replica with Automated Failover (e.g., Redis Sentinel / AWS ElastiCache)
 
 - **Why use it:** Guarantees high availability. If the primary session server crashes, a standby replica is promoted to become the new primary in seconds.
 - **How it works:** A cluster monitor (like Redis Sentinel or a managed cloud service) continuously pings the primary node. If the primary fails to respond, it automatically flips traffic over to the replica with zero manual intervention.
@@ -870,7 +929,7 @@ To prevent the shared session store from becoming an SPOF, production systems us
              (Auto-promotes Replica if Primary dies)
 ```
 
-##### 2. Sharding & Clustering (e.g., Redis Cluster)
+#### 2. Sharding & Clustering (e.g., Redis Cluster)
 
 - **Why use it:** Handles massive user scale and limits the "blast radius" of any single machine failure.
 - **How it works:** Instead of storing all sessions on one machine, sessions are split across multiple independent master shards based on `hash(session_id)`. Each master shard has its own replica.
@@ -884,12 +943,12 @@ To prevent the shared session store from becoming an SPOF, production systems us
 * If Shard 1 fails, only Replica 1 promotes; Shards 2 & 3 run unaffected!
 ```
 
-##### 3. Stateless Tokens: JSON Web Tokens (JWT)
+#### 3. Stateless Tokens: JSON Web Tokens (JWT)
 
 - **Why use it:** Bypasses the session database entirely for routine page requests.
 - **How it works:** Instead of storing user data in a database, session info is cryptographically signed into a **JWT** and stored in the user's browser cookie. Any web server can verify the signature mathematically using a secret key—requiring zero database lookups!
 
-###### How a JWT bypasses Redis completely (The "Digital Passport" analogy)
+#### How a JWT bypasses Redis completely (The "Digital Passport" analogy)
 
 Think of a standard Redis session like a **Coat-Check Ticket**: the ticket only has a random number (`#402`), so the attendant must walk back to the storage room (Redis) to look up which coat is yours.
 
@@ -911,7 +970,7 @@ JWT (Zero database or cache lookups):
                                       (Zero network calls, 0ms lookup latency!)
 ```
 
-###### Why is instant revocation so difficult?
+#### Why is instant revocation so difficult?
 
 Because JWTs are **self-contained and stateless**, the server has no central database row to delete!
 
@@ -922,7 +981,7 @@ Because JWTs are **self-contained and stateless**, the server has no central dat
 3. **The problem:** Web servers do not check a database—they only check if the token's signature and expiration time are valid. Because the thief's token still has a valid signature and doesn't expire until 5:00 PM, **the thief can continue using Alice's account for the next 3 hours!**
 4. With a Redis session store, you would simply delete Alice's session key from Redis, locking the thief out in milliseconds. With pure JWTs, you cannot "un-sign" a token that is already out in the wild.
 
-###### Decision Matrix: Redis Sessions vs. JWTs
+#### Decision Matrix: Redis Sessions vs. JWTs
 
 | Requirement         | **Server-Side Sessions (Redis)**                                                         | **Stateless JWTs**                                                             |
 | :------------------ | :--------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
@@ -932,7 +991,7 @@ Because JWTs are **self-contained and stateless**, the server has no central dat
 | **Payload Size**    | Small (tiny cookie ID, $\approx 32\text{ bytes}$).                                       | Larger (carries payload + signature, $\approx 500\text{ bytes}$).              |
 | **Best Used For**   | Traditional web apps, banking, SaaS dashboards where instant logout/banning is critical. | Microservices, mobile apps, single-sign-on (SSO), high-throughput public APIs. |
 
-###### When do we need both? (The Industry-Standard Hybrid Pattern)
+#### When do we need both? (The Industry-Standard Hybrid Pattern)
 
 To get the blistering speed of JWTs _and_ the security of instant revocation, production systems combine both using **Access Tokens + Refresh Tokens**:
 
@@ -1002,6 +1061,12 @@ We have already scaled the database previously to optimize for reads i.e having 
 3. We can also _split the traffic_ via geoDNS. Example: `x%` to US East and `(100-x)%` to US West
 4. In case of a data center failure, the traffic for it will be re-routed to another healthy data center (while the issue is resolved). Hence, there is _failover support_
 
+```text
+[ US User ] --- Request ---> [ GeoDNS ] ---> [ US Data Center ]
+                                 |
+[ EU User ] --- Request ---------+---------> [ EU Data Center ]
+```
+
 _(Note: The shared session state database service will be better kept outside any of the data centers since all of them need to access it)_
 
 **Challenges with multiple data centers**
@@ -1053,7 +1118,7 @@ The basic architecture of a _Message Queue_ is that of a **producer-consumer**:
 
 Production architectures ensure high availability for message queues using three standard techniques:
 
-##### 1. Broker Clustering with Leader-Follower Replication (e.g. Kafka / RabbitMQ Quorum Queues)
+#### 1. Broker Clustering with Leader-Follower Replication (e.g. Kafka / RabbitMQ Quorum Queues)
 
 - **How it works:** Run a cluster of multiple broker servers (typically 3 or 5 nodes).
 - **Replication:** When a message is sent, the **Leader Broker** receives it and immediately replicates it to **Follower Brokers**.
@@ -1077,11 +1142,11 @@ Message Queue High Availability (Leader-Follower Cluster):
 [ Consumers (Workers) ]
 ```
 
-##### 2. Disk Persistence (Write-Ahead Log / Durability)
+#### 2. Disk Persistence (Write-Ahead Log / Durability)
 
 - Messages are not just held in volatile RAM. They are appended sequentially to a persistent log on disk (e.g., disk commit log) before acknowledging the producer. If a broker machine restarts, it reloads all unacknowledged messages safely from disk.
 
-##### 3. Cloud-Managed Multi-AZ Queues (e.g., AWS SQS / GCP Pub/Sub)
+#### 3. Cloud-Managed Multi-AZ Queues (e.g., AWS SQS / GCP Pub/Sub)
 
 - Fully managed cloud queues remove the headache of running broker clusters yourself. Under the hood, **AWS SQS** automatically replicates every message across **three physically separate data centers (Availability Zones)**, guaranteeing 99.999999999% message durability with zero manual server maintenance.
 
@@ -1239,6 +1304,12 @@ There are two options to scale DBs:
 
 1. We need a **sharding key**. For example, a user id can be a sharding key. Usually, a _column_ or a _set of columns_ is taken to be the key
 2. A hash function takes in the sharding key and outputs a selection of one of the shards
+
+```text
+User ID: 1042 ---> [ hash(1042) % 3 = 1 ] ---> [ Shard 1 ]
+User ID: 1043 ---> [ hash(1043) % 3 = 2 ] ---> [ Shard 2 ]
+User ID: 1044 ---> [ hash(1044) % 3 = 0 ] ---> [ Shard 0 ]
+```
 
 It is important to find a **_sharding key that evenly distributes data_** to avoid exhaustion of one database much earlier than the others and to keep the access loads evenly distributed.
 
