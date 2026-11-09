@@ -1,88 +1,87 @@
-# 🏗️ Software Architecture of Large Scale Systems
+# Software Architecture of Large Scale Systems
 
 [Course link](https://www.udemy.com/course/software-architecture-design-of-modern-large-scale-systems)
 
-## 📑 Table of Contents
+## Table of Contents
 
-- [📐 Definition of software architecture](#definition-of-software-architecture)
-- [🔍 Levels of abstraction](#levels-of-abstraction)
-- [🌐 Advantages of distributed services](#advantages-of-distributed-services)
-- [🔄 Software architecture position in the SDLC](#software-architecture-position-in-the-sdlc)
-- [⚠️ Challenges of software architecture](#challenges-of-software-architecture)
-- [📋 Gathering requirements](#gathering-requirements)
-  - [🎯 Importance of gathering requirements](#importance-of-gathering-requirements)
-  - [📑 Types of requirements](#types-of-requirements)
-  - [✅ Right way to gather functional requirements](#right-way-to-gather-functional-requirements)
-  - [🔍 More on non-functional requirements](#more-on-non-functional-requirements)
-  - [🚧 System constraints](#system-constraints)
-- [⚡ Performance](#performance)
-  - [⏱️ Response time](#response-time)
-  - [📊 Measuring response time distribution](#measuring-response-time-distribution)
-  - [🚀 Throughput](#throughput)
-  - [📉 Identifying performance degradation](#identifying-performance-degradation)
-- [📈 Scalability](#scalability)
-  - [🏋️ Understanding load](#understanding-load)
-  - [💡 Intuition for a scalable design](#intuition-for-a-scalable-design)
-  - [📏 Note on linear scalability](#note-on-linear-scalability)
-  - [⚖️ Types of scalability](#types-of-scalability)
-- [🛡️ Availability](#availability)
-  - [🔢 Formula of availability](#formula-of-availability)
-  - [📐 Alternative formula of availability](#alternative-formula-of-availability)
-  - [❌ Myth of complete availability](#myth-of-complete-availability)
-  - [9️⃣ The 9s of availability](#the-9s-of-availability)
-  - [🛡️ Fault tolerance](#fault-tolerance)
-  - [📋 SLAs SLOs and SLIs](#slas-slos-and-slis)
-- [🔌 APIs](#apis)
-  - [📂 Categories of APIs](#categories-of-apis)
-  - [🎁 API benefits](#api-benefits)
-  - [⭐ API best practices](#api-best-practices)
-- [📡 Remote Procedure Calls](#remote-procedure-calls)
-  - [🌐 RESTful APIs](#restful-apis)
-  - [⚡ Why is gRPC popular?](#why-is-grpc-popular)
-- [🧱 Architectural blocks of large scale systems](#architectural-blocks-of-large-scale-systems)
-  - [⚖️ Load balancer](#load-balancer)
-  - [📬 Message brokers](#message-brokers)
-  - [🚪 API gateways](#api-gateways)
-  - [🌐 Content Delivery Networks](#content-delivery-networks)
-- [🗄️ Data storage at global scale](#data-storage-at-global-scale)
-  - [🗃️ Relational databases](#relational-databases)
-  - [📦 Non-relational databases](#non-relational-databases)
-  - [🔑 Key-Value Stores](#key-value-stores)
-  - [📄 Document Stores](#document-stores)
-  - [🕸️ Graph Databases](#graph-databases)
-  - [⚡ Database optimization techniques](#database-optimization-techniques)
-  - [⚖️ CAP theorem](#cap-theorem)
-  - [⏱️ PACELC Theorem](#pacelc-theorem)
-  - [📁 Scalable unstructured data storage](#scalable-unstructured-data-storage)
-- [🏛️ Software architectural patterns](#software-architectural-patterns)
-  - [🥞 Three-Tier Architecture](#three-tier-architecture)
-  - [🧩 Microservices architecture](#microservices-architecture)
-  - [🧱 Modular Monolith Architecture](#modular-monolith-architecture)
-  - [⚡ Event-Driven Architecture](#event-driven-architecture)
-  - [🔁 Event-Driven Patterns](#event-driven-patterns)
-  - [📬 Message delivery semantics and guarantees](#message-delivery-semantics-and-guarantees)
-  - [🌊 Strategy for processing infinite streams of events](#strategy-for-processing-infinite-streams-of-events)
-  - [🔭 Observability in Microservices architecture](#observability-in-microservices-architecture)
-  - [🚜 Migrating from a monolith to a microservice architecture](#migrating-from-a-monolith-to-a-microservice-architecture)
-  - [📜 Microservices principles and best practices](#microservices-principles-and-best-practices)
-- [🐘 Big Data](#big-data)
-  - [⚙️ Processing Strategies: Batch vs. Stream](#processing-strategies-batch-vs-stream)
-  - [🏗️ The Lambda Architecture](#the-lambda-architecture)
-  - [📊 OLTP vs OLAP](#oltp-vs-olap)
-  - [🗺️ Map-Reduce for Big Data processing](#map-reduce-for-big-data-processing)
-- [🛡️ Reliability, Error Handling, and Recoverability patterns](#reliability-error-handling-and-recoverability-patterns)
-  - [🛑 Throttling & Rate Limiting (The Bouncer)](#throttling-rate-limiting-the-bouncer)
-  - [🔁 Retry Pattern (The "Try Again")](#retry-pattern-the-try-again)
-  - [🔌 Circuit Breaker Pattern (The Fuse)](#circuit-breaker-pattern-the-fuse)
-  - [⚰️ Dead Letter Queue (DLQ) (The Graveyard)](#dead-letter-queue-dlq-the-graveyard)
-  - [📤 Transactional Outbox Pattern](#transactional-outbox-pattern)
-- [🚀 Deployment patterns](#deployment-patterns)
-- [🧩 Other patterns](#other-patterns)
+- [Definition of software architecture](#definition-of-software-architecture)
+- [Levels of abstraction](#levels-of-abstraction)
+- [Advantages of distributed services](#advantages-of-distributed-services)
+- [Software architecture position in the SDLC](#software-architecture-position-in-the-sdlc)
+- [Challenges of software architecture](#challenges-of-software-architecture)
+- [Gathering requirements](#gathering-requirements)
+  - [Importance of gathering requirements](#importance-of-gathering-requirements)
+  - [Types of requirements](#types-of-requirements)
+  - [Right way to gather functional requirements](#right-way-to-gather-functional-requirements)
+  - [More on non-functional requirements](#more-on-non-functional-requirements)
+  - [System constraints](#system-constraints)
+- [Performance](#performance)
+  - [Response time](#response-time)
+  - [Measuring response time distribution](#measuring-response-time-distribution)
+  - [Throughput](#throughput)
+  - [Identifying performance degradation](#identifying-performance-degradation)
+- [Scalability](#scalability)
+  - [Understanding load](#understanding-load)
+  - [Intuition for a scalable design](#intuition-for-a-scalable-design)
+  - [Note on linear scalability](#note-on-linear-scalability)
+  - [Types of scalability](#types-of-scalability)
+- [Availability](#availability)
+  - [Formula of availability](#formula-of-availability)
+  - [Alternative formula of availability](#alternative-formula-of-availability)
+  - [Myth of complete availability](#myth-of-complete-availability)
+  - [9 The 9s of availability](#9-the-9s-of-availability)
+  - [Fault tolerance](#fault-tolerance)
+  - [SLAs SLOs and SLIs](#slas-slos-and-slis)
+- [APIs](#apis)
+  - [Categories of APIs](#categories-of-apis)
+  - [API benefits](#api-benefits)
+  - [API best practices](#api-best-practices)
+- [Remote Procedure Calls](#remote-procedure-calls)
+  - [RESTful APIs](#restful-apis)
+  - [Why is gRPC popular?](#why-is-grpc-popular)
+- [Architectural blocks of large scale systems](#architectural-blocks-of-large-scale-systems)
+  - [Load balancer](#load-balancer)
+  - [Message brokers](#message-brokers)
+  - [API gateways](#api-gateways)
+  - [Content Delivery Networks](#content-delivery-networks)
+- [Data storage at global scale](#data-storage-at-global-scale)
+  - [Relational databases](#relational-databases)
+  - [Non-relational databases](#non-relational-databases)
+  - [Key-Value Stores](#key-value-stores)
+  - [Document Stores](#document-stores)
+  - [Graph Databases](#graph-databases)
+  - [Database optimization techniques](#database-optimization-techniques)
+  - [CAP theorem](#cap-theorem)
+  - [PACELC Theorem](#pacelc-theorem)
+  - [Scalable unstructured data storage](#scalable-unstructured-data-storage)
+- [Software architectural patterns](#software-architectural-patterns)
+  - [Three-Tier Architecture](#three-tier-architecture)
+  - [Microservices architecture](#microservices-architecture)
+  - [Modular Monolith Architecture](#modular-monolith-architecture)
+  - [Event-Driven Architecture](#event-driven-architecture)
+  - [Event-Driven Patterns](#event-driven-patterns)
+  - [Message delivery semantics and guarantees](#message-delivery-semantics-and-guarantees)
+  - [Strategy for processing infinite streams of events](#strategy-for-processing-infinite-streams-of-events)
+  - [Observability in Microservices architecture](#observability-in-microservices-architecture)
+  - [Migrating from a monolith to a microservice architecture](#migrating-from-a-monolith-to-a-microservice-architecture)
+  - [Microservices principles and best practices](#microservices-principles-and-best-practices)
+- [Big Data](#big-data)
+  - [Processing Strategies: Batch vs. Stream](#processing-strategies-batch-vs-stream)
+  - [The Lambda Architecture](#the-lambda-architecture)
+  - [OLTP vs OLAP](#oltp-vs-olap)
+  - [Map-Reduce for Big Data processing](#map-reduce-for-big-data-processing)
+- [Reliability, Error Handling, and Recoverability patterns](#reliability-error-handling-and-recoverability-patterns)
+  - [Throttling & Rate Limiting (The Bouncer)](#throttling-rate-limiting-the-bouncer)
+  - [Retry Pattern (The "Try Again")](#retry-pattern-the-try-again)
+  - [Circuit Breaker Pattern (The Fuse)](#circuit-breaker-pattern-the-fuse)
+  - [Dead Letter Queue (DLQ) (The Graveyard)](#dead-letter-queue-dlq-the-graveyard)
+  - [Transactional Outbox Pattern](#transactional-outbox-pattern)
+- [Deployment patterns](#deployment-patterns)
+- [Other patterns](#other-patterns)
 
 ---
 
-
-## 📐 Definition of software architecture
+## Definition of software architecture
 
 > Software Architecture of a system is a high-level description of the **system's structure**, its **different components**, and **how those components communicate with each other** to fulfil the system's requirements and constraints.
 
@@ -101,7 +100,7 @@
 - System constraints
   - What it **should not do**
 
-## 🔍 Levels of abstraction
+## Levels of abstraction
 
 We can talk about software architecture in terms of:
 
@@ -125,7 +124,7 @@ We can talk about software architecture in terms of:
 
 Services are potentially placed in a **distributed** network
 
-## 🌐 Advantages of distributed services
+## Advantages of distributed services
 
 1. Handle a large amount of requests
 2. Process and store very large amounts of data
@@ -133,7 +132,7 @@ Services are potentially placed in a **distributed** network
 
 Example applications: Ride sharing, Video on Demand (VOD), online video games, investment services and banks, etc.
 
-## 🔄 Software architecture position in the SDLC
+## Software architecture position in the SDLC
 
 Software development lifecycle consists of the following states (loop):
 
@@ -153,7 +152,7 @@ Software architecture sits _in-between_ **Design** and **Implementation**:
 - **_Software architecture is the output of the Design phase_**
 - **_Software architecture is the input to the Implementation phase_**
 
-## ⚠️ Challenges of software architecture
+## Challenges of software architecture
 
 - We **CANNOT** prove software architecture is:
 
@@ -166,7 +165,7 @@ Software architecture sits _in-between_ **Design** and **Implementation**:
 2. Use proven architectural patterns
 3. Follow best practices
 
-## 📋 Gathering requirements
+## Gathering requirements
 
 - **Requirements**: Formal description of what we need to build
   - These are generally not limited to a small function but the entire application
@@ -186,7 +185,7 @@ Clarifying questions:
 
 (**Note**: Asking these questions and narrowing down the design is important for system design interviews)
 
-### 🎯 Importance of gathering requirements
+### Importance of gathering requirements
 
 We need to gather the requirements correctly early on since:
 
@@ -197,7 +196,7 @@ We need to gather the requirements correctly early on since:
 - Contracts include financial obligations (SLAs, SLOs, etc)
 - If project is not delivered on time and matching requirements, it could lead to a loss of reputation and brand
 
-### 📑 Types of requirements
+### Types of requirements
 
 1. **Features of the system (`Functional requirements`)**
 2. **Quality attributes (`Non-Functional requirements`)**
@@ -269,7 +268,7 @@ Known as "System constraints". Examples include:
 
 System constraints _force us_ to make **tradeoffs / sacrifices** in our architecture that we would not make otherwise
 
-### ✅ Right way to gather functional requirements
+### Right way to gather functional requirements
 
 Naive way is to ask client to list all requirements hoping he will not forget any detail. This does not work for a large scale system as it is too complex
 
@@ -362,7 +361,7 @@ Passenger        App                Driver
     |             |                   |
 ```
 
-### 🔍 More on non-functional requirements
+### More on non-functional requirements
 
 Quality attributes (Non-functional attributes) are the main reason why a system needs redesign, not the functional requirements. Reasons could be that system is not fast, scalable, easy to maintain, and so on
 
@@ -423,7 +422,7 @@ Example:
 
 Sometimes the clients ask for something that is impossible to implement. It is our job to convey this to the client and with valid reasons (Ex: Unrealistic low latency expectations / 100% available system, even during maintenance / very high storage growth / full protection against hackers)
 
-### 🚧 System constraints
+### System constraints
 
 With the requirements and trade-offs, we design a system. Without constraints to the design, we have infinite degrees of freedom to design it how we like.
 
@@ -495,7 +494,7 @@ There should be a distinction v/s :
 
 Constraints when existing should be integrated in a **_loosely coupled_** way. That is, if we need to change things in the future such as changing a vendor, our architecture should support that with minimal effort and changes.
 
-## ⚡ Performance
+## Performance
 
 Performance is one of the most important quality attributes i.e non-functional requirement
 
@@ -504,7 +503,7 @@ There are two ways to measure performance:
 1. Response time
 2. Throughput
 
-### ⏱️ Response time
+### Response time
 
 **_Response time between a client sending a request and receiving a response_**. It is also referred to as "end to end latency"
 
@@ -538,7 +537,7 @@ Correct average (including waiting):
 (10 + 20) / 2 = 15ms
 ```
 
-### 📊 Measuring response time distribution
+### Measuring response time distribution
 
 It is important to measure response times correctly
 We do not benefit from simple arithmetic like average, median, etc as they don't capture the full picture for all types of requests
@@ -605,7 +604,7 @@ Explanation:
 - The **inclined line** shows how **latency increases sharply** in the tail (P95–P99.9+).
 ```
 
-### 🚀 Throughput
+### Throughput
 
 Throughput is the measure of how many requests are being serviced at a given point in time
 
@@ -626,7 +625,7 @@ Ex: A distributed log service needs to have high throughput in order to receive 
 
 **Note**: Throughput is important when we need to "keep up with the load". Whenever we are dealing with processing large amounts of data especially when collected from multiple sources (clients) then throughput is clearly more important than response time. Think of analytics, logs, data engineering, monitoring systems, etc. It is okay to send the response late but it's important to service very many requests at a given time to gather all the data
 
-### 📉 Identifying performance degradation
+### Identifying performance degradation
 
 Performance degradation can be measured by mapping either the (A) response time or (B) throughput against the load (Load can be requests per second, for example)
 
@@ -651,11 +650,11 @@ Throughput (qps)
    Low           Medium         High
 ```
 
-## 📈 Scalability
+## Scalability
 
 "Scalability is the measure of the system's ability to handle a growing amount of work, in an easy and cost efficient way, by adding resources to the system"
 
-### 🏋️ Understanding load
+### Understanding load
 
 Load is the stress on a system. It can be defined in terms of queries / requests per unit of time. The important aspect to note is that _load is never really constant._ It keeps fluctuating.
 
@@ -673,13 +672,13 @@ Load
 +--------------------------------------------------------> Time
 ```
 
-### 💡 Intuition for a scalable design
+### Intuition for a scalable design
 
 A system is scalable if provided more resources and time, it can handle more load easily and efficiently
 
 Consider two designs, A and B, for a system. Both are provided more resources (Ex: More compute, storage, etc) and time (to add these resources and the changes to make to support integration of the resources). Assume that A performs better on the response time vs load graph than B (Ex: Degradation point arrives much later). In that case, design A is said to be _more scalable_ than design B!
 
-### 📏 Note on linear scalability
+### Note on linear scalability
 
 The ideal scenario for scalability is if we simply continue to add resources then the amount of work done grows linearly too. This is wrong in practice! **_Linear scalability is not possible due to physical constraints._** There will also be a diminishing return after a point (Ex: a parabolic curve than a straight line
 
@@ -714,7 +713,7 @@ Amount of work
 +---------------------------------------------> Resources
 ```
 
-### ⚖️ Types of scalability
+### Types of scalability
 
 3 types:
 
@@ -841,7 +840,7 @@ One way to make team scalability work is to:
 
 This way of scaling relates to having a "service oriented architecture" (Refer to the "Architecture patterns" section)
 
-## 🛡️ Availability
+## Availability
 
 1. **Inconvenience**: Imagine users going to a website but it does not load. Or, they go to checkout but get an error during payment
 2. Think about **_outages_ affecting B2B** relationships. any AWS or Cloudflare outages on services like DNS or S3 affects hundreds of thousands of other services that rely on them
@@ -854,7 +853,7 @@ The above are examples of unavailability where users cannot use our system. In s
 
 Availability: **"The fraction of time or probability that our service is operationally functional and accessible to the user"**
 
-### 🔢 Formula of availability
+### Formula of availability
 
 - `Uptime = Time that our service is operationally functional and accessible to the user`
 - `Downtime = Time that our system is unavailable to the user`
@@ -864,7 +863,7 @@ Availability: **"The fraction of time or probability that our service is operati
 
 Sometimes availability and uptime are used interchangeably
 
-### 📐 Alternative formula of availability
+### Alternative formula of availability
 
 A more statistical formula
 
@@ -887,7 +886,7 @@ There is a formula based on MTBF and MTTR:
 
 ^ The main benefit of this way of calculating availability for companies is that if we can bring MTTR to zero i.e detect and recover from failures instantly, then we can achieve 100% availability since you can let failures happen as long as you recover really fast (`MTBF / (MTBF + 0)`
 
-### ❌ Myth of complete availability
+### Myth of complete availability
 
 _100% availability is a myth_. There will always some disruption (Ex: maintenance, upgrade, infra issue, natural calamity, etc). But, the goal is to move towards 100% availability even if we cannot achieve it
 
@@ -908,7 +907,7 @@ What is a good availability?
 +---------------+----------------------+------------------------+-------------------------+
 ```
 
-### 9️⃣ The 9s of availability
+### 9 The 9s of availability
 
 Availability is also measured as the number of 9's in the uptime `%`
 
@@ -919,7 +918,7 @@ We count the 9s even before the decimal point:
 - 99.999%: 5 nines (Excellent!)
 - ...
 
-### 🛡️ Fault tolerance
+### Fault tolerance
 
 What prevents us from achieving "High Availability (HA)"?
 
@@ -1096,7 +1095,7 @@ Rollback:
 - In databases: It means rolling back to the last correct state of data that does not violate DB constraints
 - In server: It means rolling back to the last stable version of the software i.e previous version
 
-### 📋 SLAs SLOs and SLIs
+### SLAs SLOs and SLIs
 
 #### SLA or Service Level Agreement
 
@@ -1170,7 +1169,7 @@ Developers have more control over SLOs! Here are the considerations to leave a _
 - [Github SLA](https://github.com/customer-terms/github-online-services-sla)
 - [Atlassian SLA](https://support.atlassian.com/subscriptions-and-billing/docs/service-level-agreement-for-atlassian-cloud-products/)
 
-## 🔌 APIs
+## APIs
 
 Once we have all requirements, the system is a "black box" with:
 
@@ -1187,7 +1186,7 @@ Who calls our APIs?
 2. Backend systems (still external)
 3. Internal systems (within the company - in order to take advantage of existing system's capabilities)
 
-### 📂 Categories of APIs
+### Categories of APIs
 
 **Public APIs**
 
@@ -1212,7 +1211,7 @@ Who calls our APIs?
 [ Internal Teams ]  ---> [ Private API ]  /
 ```
 
-### 🎁 API benefits
+### API benefits
 
 1. Clients can immediately enhance their biz by using our APIs (Biz value)
 2. Clients need not know internal implementation of the system (Black box, API contract is supreme!)
@@ -1220,7 +1219,7 @@ Who calls our APIs?
 4. **Important**: Makes it easier to design and architect the system. Why?:
    - API defines the endpoints to the different routes that the user can take to our system
 
-### ⭐ API best practices
+### API best practices
 
 There are 6 best practices:
 
@@ -1273,7 +1272,7 @@ Therefore, "limit" and "offset" values in the API request are necessary for pagi
      - Maintain two versions of the API (One new, one for the old clients)
      - Gradually deprecate the older API over time
 
-## 📡 Remote Procedure Calls
+## Remote Procedure Calls
 
 **RPCs** are methods of the system that we invoke on the client like as though it is just another local function/method. This concept is known as **_"location transparency"_**
 
@@ -1409,7 +1408,7 @@ RPCs are good for communication between _two backend systems_ (Why? Abstracts aw
 2. **Thrift**: It is a lightweight, language-independent software stack for point-to-point RPC. Created by Meta
 3. **Java Remote Method Invocation (RMI)**: RPC framework that allows one Java virtual machine to invoke methods on an object running in another Java virtual machine. RMI uses Java as the Interface Description Language.
 
-### 🌐 RESTful APIs
+### RESTful APIs
 
 REST is a _new style of API_ published as dissertation way back in 2000
 
@@ -1579,7 +1578,7 @@ Note
    - Ex: GET `/movies/movie-001` to read details of a movie
    - Repeat on all resources
 
-### ⚡ Why is gRPC popular?
+### Why is gRPC popular?
 
 gRPC is popular because:
 
@@ -1633,9 +1632,9 @@ Use REST instead of gRPC when you need:
 
 _In short_: **choose REST when accessibility, simplicity, and compatibility are more important than raw performance.**
 
-## 🧱 Architectural blocks of large scale systems
+## Architectural blocks of large scale systems
 
-### ⚖️ Load balancer
+### Load balancer
 
 A load balancer is a component / service that "_balances the load among a group of servers_" in our system
 
@@ -2053,7 +2052,7 @@ Key Points:
    2. GCP Cloud DNS
    3. Azure Traffic Manager
 
-### 📬 Message brokers
+### Message brokers
 
 **Synchronous communication:**
 
@@ -2388,7 +2387,7 @@ _Note_: **System takes a hit on performance** when message brokers are added (Th
    2. **Google Pub/Sub** & Cloud Tasks
    3. Microsoft Azure Service Bus, Event Grid, ...
 
-### 🚪 API gateways
+### API gateways
 
 A single service (Here, a service may still refer to a group of servers but we are referring to a single feature domain, such as "billing" or "product catalog") when entrusted with multiple responsibilities finds it difficult and complex. Ex: A single service doing user profile management, video storage, security (Auth), serving frontend, and so on
 
@@ -2623,7 +2622,7 @@ _Use Case_
      +-------------+   +-------------+  +-------------+   +-------------+
 ```
 
-### 🌐 Content Delivery Networks
+### Content Delivery Networks
 
 Even with distributed systems placed globally over the entire world, request response times might still take a lot of time to reach the user. The reasons are:
 
@@ -2796,9 +2795,9 @@ Data centres can be closer to the user but that is not the bottleneck for a clie
 5. GCP CDN
 6. Azure CDN
 
-## 🗄️ Data storage at global scale
+## Data storage at global scale
 
-### 🗃️ Relational databases
+### Relational databases
 
 Data is modelled as a Table i.e Rows and Columns
 
@@ -2960,7 +2959,7 @@ User 1 (Buying last ticket)     User 2 (Buying last ticket)
 2. Hard to maintain or _scale_
 3. Slower read operations
 
-### 📦 Non-relational databases
+### Non-relational databases
 
 Relatively new concept
 
@@ -2980,7 +2979,7 @@ Relatively new concept
 2. **_Analyzing multiple groups of records becomes very hard_**! Why? There are _no_ JOINs
 3. **_ACID transactions are rarely supported_**
 
-### 🔑 Key-Value Stores
+### Key-Value Stores
 
 **Concept**: The simplest NoSQL type, functioning like a **_giant dictionary or hash map_**. Every item is stored as a specific _key_ associated with a _value_ (which can be a string, number, or binary object). **_You can only retrieve data if you know the exact key_**
 
@@ -3020,7 +3019,7 @@ WHERE age=25 -> [ Key 1 ? ] -> [ Key 2 ? ] -> [ Key 3 ? ] ... (O(N) Full Cluster
   - User preferences
 - **CAP Tie-in**: **Usually AP (Available & Partition Tolerant)**. Systems like DynamoDB or Cassandra allow eventual consistency to ensure the system is always up, even if nodes disconnect
 
-### 📄 Document Stores
+### Document Stores
 
 **Concept**: Stores data in _semi-structured formats_ like JSON or XML. Unlike rows in SQL, **_each document can have a unique structure (schema-less)_**, and **_documents can contain nested structures (lists, sub-documents)_**
 
@@ -3069,7 +3068,7 @@ Document Store (Denormalized / Embedded):
   - Blogging platforms (MongoDB)
 - **CAP Tie-in**: **Often CP (Consistent & Partition Tolerant)**. MongoDB, for example, defaults to strong consistency (you always read the latest write), sacrificing availability during a primary node failure
 
-### 🕸️ Graph Databases
+### Graph Databases
 
 **Concept**: Designed to treat relationships as first-class citizens. Data is stored as Nodes (entities like People) connected by Edges (relationships like `"FRIEND_OF"`)
 
@@ -3108,7 +3107,7 @@ Graph DB (Index-Free Adjacency - Direct Pointer Traversal):
   - Knowledge graphs
 - **CAP Tie-in**: Typically CP (Consistent & Partition Tolerant) or CA (Consistent & Available). Graph databases like Neo4j prioritize data integrity (ACID compliance) over partition tolerance, making them harder to cluster across loose networks
 
-### ⚡ Database optimization techniques
+### Database optimization techniques
 
 #### Technique 1 - Database Indexing
 
@@ -3336,7 +3335,7 @@ Support for sharding:
 
 _Note: Sharding/Partitioning turns our database into a distributed system (similar to replication)!_
 
-### ⚖️ CAP theorem
+### CAP theorem
 
 _CAP theorem_: In the presence of a network partition, a distributed database cannot guarantee both **Consistency** and **Availability** and has to **_choose only one of them_**
 
@@ -3627,7 +3626,7 @@ Example 2: Ride-Sharing Platform (Uber / Lyft)
 +-----------------------------+  +------------------------------+
 ```
 
-### ⏱️ PACELC Theorem
+### PACELC Theorem
 
 While the **CAP theorem** is widely known, modern distributed systems engineers frequently point out that it is **incomplete and leaves out the most common real-world trade-off**.
 
@@ -3810,7 +3809,7 @@ Case Study: Global Trading App (Robinhood / Revolut)
 - **PACELC Analysis:** **`PA / EL`** (Acknowledge watchlist additions in <1ms; propagate asynchronously across the user's other devices).
 - **Technology Chosen:** Redis / DynamoDB.
 
-### 📁 Scalable unstructured data storage
+### Scalable unstructured data storage
 
 **Unstructured data**: Data that does NOT follow a particular **_structure, schema, or model_**
 
@@ -3969,7 +3968,7 @@ Best Use Case    |  Big Data Processing (Logs)|  Media hosting, Backups,
                  |  active working files.     |  Static Web Assets.
 ```
 
-## 🏛️ Software architectural patterns
+## Software architectural patterns
 
 Patterns are used because they save time since they have been formed after other folks in the industry faced similar issues and came up with them
 
@@ -3977,7 +3976,7 @@ Patterns also prevent us from making our architecture a "Big ball of mud" (Messy
 
 Patterns provide a vocabulary and helps other engineers follow the system
 
-### 🥞 Three-Tier Architecture
+### Three-Tier Architecture
 
 Three-Tier Architecture: The most common way to build web applications
 
@@ -4074,7 +4073,7 @@ What is a Monolith here? It means that while the code is separated into layers (
 2. **Rigidity**: If you want to change the Application tech (e.g., Java to Python), you have to rewrite the whole middle tier
 3. **Single Point of Failure**: In a Monolith, if one line of code crashes the Logic layer, the whole website goes down
 
-### 🧩 Microservices architecture
+### Microservices architecture
 
 In software, **Microservices** means _breaking one big application into many small, independent mini-applications that talk to each other_
 
@@ -4291,7 +4290,7 @@ Rule of Thumb: Don't start with microservices. Start with a monolith, and break 
 
 <a id="modular-monolith-architecture"></a>
 
-### 🧱 Modular Monolith Architecture
+### Modular Monolith Architecture
 
 In recent years, an industry-wide counter-revolution emerged in software engineering:
 
@@ -4497,7 +4496,7 @@ Use this decision flowchart when planning a new system:
 > [!TIP]
 > **The Golden Evolution Path:** Always start with a **Modular Monolith**. If one specific module (e.g., Video Transcoding or AI Image Generation) eventually outgrows the rest of the system, you can cleanly slice that single module out into an independent microservice in days—because its interfaces and boundaries were already strictly defined!
 
-### ⚡ Event-Driven Architecture
+### Event-Driven Architecture
 
 In a traditional system (**_Request-Response_**), when Service A wants Service B to do something, it calls it directly and waits on the phone until B is done
 
@@ -4582,7 +4581,7 @@ Microservices architectures use EDA primarily for **Decoupling** and **Buffering
                        [ |||||||||||||| ]
 ```
 
-### 🔁 Event-Driven Patterns
+### Event-Driven Patterns
 
 #### The SAGA Pattern or the Undo button
 
@@ -4970,7 +4969,7 @@ Current State (Calculated): $0 + 50 + 60 - 10 = $100
 | CQRS           | Systems with high read traffic and complex search requirements (e.g., Amazon Product Search vs. Amazon Inventory Admin) |
 | Event Sourcing | Systems requiring strict audit trails or "undo/replay" capability (e.g., Banking, Accounting, Legal systems)            |
 
-### 📬 Message delivery semantics and guarantees
+### Message delivery semantics and guarantees
 
 These are the "promises" a messaging system (like Kafka or RabbitMQ) makes about whether your message will arrive safely
 
@@ -5050,7 +5049,7 @@ These are the "promises" a messaging system (like Kafka or RabbitMQ) makes about
 | At-Least-Once | High        | Yes         | Medium      | Payments, Orders (Needs Idempotency) |
 | Exactly-Once  | Very High   | No          | Slow        | Stock Trading, Accounting            |
 
-### 🌊 Strategy for processing infinite streams of events
+### Strategy for processing infinite streams of events
 
 **The Problem: Infinite Data** You cannot "sum up" a stream that never ends. You can't say "Count all clicks" because new clicks keep coming forever.
 
@@ -5208,7 +5207,7 @@ def process_event(event):
 | Sliding     | **Fastest**. Alerts you immediately when a threshold is hit.                | **Expensive**. Needs huge memory to track every single event timestamp.                     | "Fraud Alert" (5 failures in any 10s)          |
 | Session     | **Human**. Tracks actual behavior (starts/stops) instead of arbitrary time. | **Unpredictable**. Hard to code because you never know when a session will end.             | "User Analytics" (How long was a user online?) |
 
-### 🔭 Observability in Microservices architecture
+### Observability in Microservices architecture
 
 **What is Observability?**
 
@@ -5281,7 +5280,7 @@ Request: "Buy Item" (Total: 5120ms)
         |-- [Inventory Service] (5000ms) <--- THE BOTTLENECK!
 ```
 
-### 🚜 Migrating from a monolith to a microservice architecture
+### Migrating from a monolith to a microservice architecture
 
 **The Goal: Moving Without Breaking**
 
@@ -5403,7 +5402,7 @@ _Summary_
 3. Don't: Share databases
 4. Don't: Rewrite from scratch
 
-### 📜 Microservices principles and best practices
+### Microservices principles and best practices
 
 **The DRY Principle (Don't Repeat Yourself) vs. Shared Libraries**
 
@@ -5519,7 +5518,7 @@ Best Practices:
    on logic)       on logic)
 ```
 
-## 🐘 Big Data
+## Big Data
 
 **What is "Big Data"?**
 
@@ -5529,7 +5528,7 @@ In System Design, "Big Data" doesn't just mean "a lot of files." It refers to da
 2. **Velocity**: Coming in too fast to write to disk (Millions of events/sec)
 3. **Variety**: It's messy (JSON, CSV, Videos, Logs all mixed together)
 
-### ⚙️ Processing Strategies: Batch vs. Stream
+### Processing Strategies: Batch vs. Stream
 
 To handle this data, we have two main approaches
 
@@ -5563,7 +5562,7 @@ Data -> [ Process ] -> Result
 (Continuous Flow)
 ```
 
-### 🏗️ The Lambda Architecture
+### The Lambda Architecture
 
 The Problem:
 
@@ -5636,7 +5635,7 @@ Cons
 - **Complexity**: You have to write code twice (once for Batch, once for Stream). This violates the DRY principle
 - **Maintenance**: You have to manage two complex distributed systems
 
-### 📊 OLTP vs OLAP
+### OLTP vs OLAP
 
 The Analogy: The **_Cashier vs The Manager_**
 
@@ -5740,7 +5739,7 @@ _(Good for calculating Average Age - just read the last block!)_
 - "Design a YouTube Analytics Dashboard": You need OLAP (BigQuery/ClickHouse). You are aggregating billions of views
 - "Design the whole system": You use OLTP to catch the user's click, and an ETL pipeline to move that click into an OLAP warehouse for the monthly report
 
-### 🗺️ Map-Reduce for Big Data processing
+### Map-Reduce for Big Data processing
 
 "MapReduce" **_splits a huge task into tiny tasks_**, **runs them in parallel on many computers**, and **_combines the results_**
 
@@ -5824,9 +5823,9 @@ The Concept: Counting a Giant Piggy Bank
 1. **Scalability**: If the file gets 2x bigger, you just add 2x more computers (Workers). The logic doesn't change
 2. **Fault Tolerance**: If "Worker 2" crashes while counting, the Master Node notices and simply gives "Worker 2's" book to "Worker 4". The whole job doesn't fail!
 
-## 🛡️ Reliability, Error Handling, and Recoverability patterns
+## Reliability, Error Handling, and Recoverability patterns
 
-### 🛑 Throttling & Rate Limiting (The Bouncer)
+### Throttling & Rate Limiting (The Bouncer)
 
 What is it? Control how many requests a user or service can make in a specific time
 
@@ -5848,7 +5847,7 @@ Why? To prevent one angry user or a bot from eating up all the server's resource
       [     Backend Service      ]
 ```
 
-### 🔁 Retry Pattern (The "Try Again")
+### Retry Pattern (The "Try Again")
 
 What is it? When a request fails, don't give up immediately. Wait a bit and try again
 
@@ -5870,7 +5869,7 @@ What is it? When a request fails, don't give up immediately. Wait a bit and try 
                                     (Success!)
 ```
 
-### 🔌 Circuit Breaker Pattern (The Fuse)
+### Circuit Breaker Pattern (The Fuse)
 
 What is it? **_If a service fails repeatedly (e.g., 10 times in a row), stop calling it entirely_**. Just **_return an error immediately_**
 
@@ -5900,7 +5899,7 @@ The 3 States:
            (Service B is not even touched)
 ```
 
-### ⚰️ Dead Letter Queue (DLQ) (The Graveyard)
+### Dead Letter Queue (DLQ) (The Graveyard)
 
 What is it? A **_special queue where we put messages that failed to process even after retries_**. Instead of deleting the message (data loss) or blocking the whole queue (clogging), we move the "poison" message aside to look at later
 
@@ -5933,7 +5932,7 @@ Why? So **_engineers can debug why that specific order failed without stopping t
 | Circuit Breaker | **Protection**. Stops the system from wasting time on dead services. | Electrical Fuse.              |
 | DLQ             | **Analysis**. Saves failed data so it isn't lost.                    | The "Undeliverable Mail" bin. |
 
-### 📤 Transactional Outbox Pattern
+### Transactional Outbox Pattern
 
 The **_gold standard for reliability_** in _microservices_
 
@@ -6040,7 +6039,7 @@ Safe write:
 - **At-Least-Once Delivery**: The Relay might send the message, crash, and restart before marking it as "SENT." It will send it again. This creates a duplicate.
   - _Requirement_: Your consumers must be **Idempotent** (handle duplicates gracefully)
 
-## 🚀 Deployment patterns
+## Deployment patterns
 
 Here are explanations for each pattern:
 
@@ -6084,7 +6083,7 @@ This is the **_practice of intentionally breaking parts of your system in produc
 
 - Goal: Build **confidence** in the system's **resilience** (e.g., Netflix's Chaos Monkey)
 
-## 🧩 Other patterns
+## Other patterns
 
 **Materialized View Pattern**
 

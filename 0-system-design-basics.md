@@ -1,44 +1,44 @@
-# 🏛️ System Design Basics
+# System Design Basics
 
 ## Table of Contents
 
-- [🎯 Goal](#goal)
-- [🖥️ The Simplest Setup (Single Server)](#the-simplest-setup)
-- [📈 Handling User Growth Better](#handling-user-growth-better)
-  - [Type of Database to Use: Relational vs. NoSQL](#type-of-database-to-use)
+- [Goal](#goal)
+- [The Simplest Setup](#the-simplest-setup)
+- [Handling User Growth Better](#handling-user-growth-better)
+  - [Type of Database to Use](#type-of-database-to-use)
   - [Vertical vs. Horizontal Scaling](#vertical-vs-horizontal-scaling)
-    - [Understanding Redundancy, SPOF, Failover & Failover Support](#understanding-redundancy-spof-failover--failover-support)
-- [⚖️ Handle Traffic Growth with Load Balancers](#handle-traffic-growth-with-load-balancers)
+    - [Understanding Redundancy, SPOF, Failover & Failover Support](#understanding-redundancy-spof-failover-failover-support)
+- [Handle Traffic Growth with Load Balancers](#handle-traffic-growth-with-load-balancers)
   - [Can a Load Balancer Be a Single Point of Failure (SPOF)?](#can-a-load-balancer-be-a-single-point-of-failure-spof)
-- [🔄 Handle Data Tier Growth with Database Replication](#handle-data-tier-growth-with-database-replication)
+- [Handle Data Tier Growth with Database Replication](#handle-data-tier-growth-with-database-replication)
   - [Replication and Failover Challenges (and Solutions)](#replication-and-failover-challenges-and-solutions)
   - [What if the System is Write-Heavy Instead of Read-Heavy?](#what-if-the-system-is-write-heavy-instead-of-read-heavy)
-- [⚡ Improve Response Times with Cache Layers](#improve-response-times-with-cache-layers)
+- [Improve Response Times with Cache Layers](#improve-response-times-with-cache-layers)
   - [Database Cache Tier](#database-cache-tier)
   - [Static Content Cache with CDNs](#static-content-cache-with-cdns)
     - [Can a CDN Be a Single Point of Failure (SPOF)?](#can-a-cdn-be-a-single-point-of-failure-spof)
   - [Cache Considerations for Both Data and Static Assets](#cache-considerations-for-both-data-and-static-assets)
-- [👤 Managing Session State in Horizontally Scaled Web Servers](#managing-session-state-in-horizontally-scaled-web-servers)
+- [Managing Session State in Horizontally Scaled Web Servers](#managing-session-state-in-horizontally-scaled-web-servers)
   - [What Happens if Session Data is Not Separated?](#what-happens-if-session-data-is-not-separated)
   - [The Recommended Approach: Stateless Web Tier with Shared Storage](#the-recommended-approach-stateless-web-tier-with-shared-storage)
     - [Can the Shared Session Storage Become an SPOF?](#can-the-shared-session-storage-become-an-spof)
-- [🏢 Complete Set of Optimizations for One Single Data Center](#complete-set-of-optimizations-for-one-single-data-center)
-- [🌐 Scaling for Users Across Multiple Geographical Areas](#scaling-for-users-across-multiple-geographical-areas)
-- [📬 Decoupling Tiers with Message Queues](#decoupling-tiers-with-message-queues)
+    - [How is this handled in production?](#how-is-this-handled-in-production)
+- [Complete Set of Optimizations for One Single Data Center](#complete-set-of-optimizations-for-one-single-data-center)
+- [Scaling for Users Across Multiple Geographical Areas](#scaling-for-users-across-multiple-geographical-areas)
+- [Decoupling Tiers with Message Queues](#decoupling-tiers-with-message-queues)
   - [Can a Message Queue Be a Single Point of Failure (SPOF)?](#can-a-message-queue-be-a-single-point-of-failure-spof)
   - [Essential Message Queue Concepts You Must Know](#essential-message-queue-concepts-you-must-know)
-- [🗄️ Scaling Databases Beyond Master-Slave Replication with Sharding](#scaling-databases-beyond-master-slave-replication-with-sharding)
+- [Scaling Databases Beyond Master-Slave Replication with Sharding](#scaling-databases-beyond-master-slave-replication-with-sharding)
   - [Why Master-Slave Replication Falls Short as Traffic Grows](#why-master-slave-replication-falls-short-as-traffic-grows)
   - [What is Database Sharding?](#what-is-database-sharding)
   - [How Sharding Works](#how-sharding-works)
   - [Benefits and Challenges of Sharding](#benefits-and-challenges-of-sharding)
-- [📊 Logging, Metrics, and Automation](#logging-metrics-and-automation)
-- [💡 Completely Scaled Fundamental Design with Tips](#completely-scaled-fundamental-design-with-tips)
+- [Logging, Metrics, and Automation](#logging-metrics-and-automation)
+- [Completely Scaled Fundamental Design with Tips](#completely-scaled-fundamental-design-with-tips)
 
 ---
 
-<a id="goal"></a>
-## 🎯 Goal
+## Goal
 
 > [!TIP]
 > **System Design Interview Framework:** Always start by clarifying functional and non-functional requirements (traffic scale, latency SLAs, read/write ratio) before drawing architecture diagrams.
@@ -54,8 +54,7 @@ About the solution:
 - The right strategy as well as knowledge are important to do well
 - We need a step-by-step framework i.e a systematic approach to find a solution
 
-<a id="the-simplest-setup"></a>
-## 🖥️ The Simplest Setup
+## The Simplest Setup
 
 The simplest setup is a setup that is used for an extremely small and finite number of users. Ex: Just one user.
 
@@ -88,8 +87,7 @@ Even for a client accessing via a different platform, the same server handles th
 |==> [Our web server]
 ```
 
-<a id="handling-user-growth-better"></a>
-## 📈 Handling User Growth Better
+## Handling User Growth Better
 
 When the number of users starts to scale, one server handling all 3 functions (web/mobile traffic, database, and cache) is not scalable!
 
@@ -113,8 +111,7 @@ Servers needed:
 
 ![Separate DB](https://i.imgur.com/Abf6F9w.png)
 
-<a id="type-of-database-to-use"></a>
-### 🗃️ Type of Database to Use
+### Type of Database to Use
 
 > [!TIP]
 > **Default to Relational (RDBMS):** Unless you have specific requirements for massive write throughput, flexible schema, or ultra-low single-key latency, always pick a battle-tested relational database (e.g., PostgreSQL, MySQL) as your baseline.
@@ -235,8 +232,7 @@ Relational (SQL):                   NoSQL (Document / KV):
        - Masterless architecture ensures zero Single Point of Failure (SPOF) at petabyte scale.
        ```
 
-<a id="vertical-vs-horizontal-scaling"></a>
-### ⚖️ Vertical vs. Horizontal Scaling
+### Vertical vs. Horizontal Scaling
 
 We have two servers (web/mobile traffic and database) we can scale up independently. What is the best way to do so when needed? There are two options:
 
@@ -267,7 +263,6 @@ Vertical Scaling (Scale-Up):          Horizontal Scaling (Scale-Out):
     +-------------------+                 (Pool of commodity servers)
 ```
 
-<a id="understanding-redundancy-spof-failover--failover-support"></a>
 #### Understanding Redundancy, SPOF, Failover & Failover Support
 
 - **Redundancy**: Having duplicate copies of critical components (e.g., multiple web servers, duplicate databases, multiple network switches). Redundancy is the prerequisite for high availability—you cannot switch to a backup if no backup exists.
@@ -285,8 +280,7 @@ Vertical Scaling (Scale-Up):          Horizontal Scaling (Scale-Out):
 3. **Preserves SLAs and Business Continuity**: Modern services promise high availability (e.g., 99.99% uptime, allowing under 53 minutes of downtime per _year_). Automated failover detects failures and reroutes requests in milliseconds, rendering server failures invisible to users.
 4. **Prevents Cascading Failures**: When one server dies without failover routing, remaining servers can easily get overwhelmed by traffic spikes, leading to a total system collapse. Automated failover support manages traffic redistribution safely.
 
-<a id="handle-traffic-growth-with-load-balancers"></a>
-## ⚖️ Handle Traffic Growth with Load Balancers
+## Handle Traffic Growth with Load Balancers
 
 > [!TIP]
 > **Managed Cloud Load Balancers:** In modern cloud platforms (AWS ALB, GCP Cloud LB), redundancy and multi-AZ failover are managed automatically. You don't need to manually configure Keepalived/VIPs unless running on-premise hardware.
@@ -314,7 +308,6 @@ It is because it can be accessed only by servers in the same network and not the
 2. No **_failover_** issues: If one server goes offline, all the traffic will be routed to one of the remaining servers (We can also add a healthy server to the pool of servers to balance the load)
 3. Improved **_availability_**: When web traffic _increases rapidly_, we only need to add more server and the load balancer will balance the traffic between them gracefully
 
-<a id="can-a-load-balancer-be-a-single-point-of-failure-spof"></a>
 ### Can a Load Balancer Be a Single Point of Failure (SPOF)?
 
 **Yes!** If you deploy only a single load balancer and it crashes, all your web servers become completely unreachable from the internet—even if every web server is healthy. The load balancer itself becomes a Single Point of Failure.
@@ -353,8 +346,7 @@ To eliminate this SPOF, production architectures deploy **redundant load balance
 - **Anycast BGP / DNS Health Checks:** Routers or DNS distribute requests across multiple load balancer IPs. If one load balancer stops responding to health checks, DNS/Anycast routing automatically excludes it from the pool.
 - **Managed Cloud Load Balancers (AWS ALB, GCP Cloud LB, Azure LB):** In modern cloud environments, cloud providers handle this redundancy automatically behind a single static IP or DNS name. Under the hood, they provision multiple load balancer instances across separate physical data centers (Availability Zones) with built-in auto-scaling and zero-downtime failover.
 
-<a id="handle-data-tier-growth-with-database-replication"></a>
-## 🔄 Handle Data Tier Growth with Database Replication
+## Handle Data Tier Growth with Database Replication
 
 Just like web traffic growth prompts scaling of web servers, the database too will need to be scaled (i.e. data tier scaling) when simultaneous queries push a single database server to its load limit.
 
@@ -427,7 +419,6 @@ The recommended approach for read-heavy systems is to use **_Database replicatio
                         [ Slave 2 (Replica) ]        [ New Slave 3 (Added) ]
    ```
 
-<a id="replication-and-failover-challenges-and-solutions"></a>
 ### Replication and Failover Challenges (and Solutions)
 
 While master-slave replication is the standard approach for read-heavy workloads, operating it in real-world production brings two major challenges:
@@ -580,7 +571,6 @@ When the master crashes, promoting a standby slave to become the new master soun
 - **Promote the Most Up-to-Date Slave:** Cluster managers (e.g., GitHub's Orchestrator, Patroni) inspect the replication log position (e.g., MySQL Binlog or Postgres LSN) across all slaves and only promote the replica with the most advanced log.
 - **Virtual IP (VIP) / Service Discovery:** Web servers connect to a virtual hostname or VIP (e.g., `db-master.internal`). Once failover is complete, the VIP or internal DNS record flips to point to the new master automatically.
 
-<a id="what-if-the-system-is-write-heavy-instead-of-read-heavy"></a>
 ### What if the System is Write-Heavy Instead of Read-Heavy?
 
 Master-slave replication **only scales read operations**. Because all writes must still hit the single master database, a write-heavy system will quickly saturate the master's CPU, disk I/O, and connection limits.
@@ -636,8 +626,7 @@ Master-slave replication **only scales read operations**. Because all writes mus
 3. _Writes originating from multiple geographic regions with low latency_:
    - **Solution:** Use **multi-master replication** with regional masters, resolving conflicts via rules like "Last-Write-Wins" (LWW) or assigning distinct key ranges per region.
 
-<a id="improve-response-times-with-cache-layers"></a>
-## ⚡ Improve Response Times with Cache Layers
+## Improve Response Times with Cache Layers
 
 > [!TIP]
 > **The 80/20 Rule in Caching:** 80% of read requests typically target 20% of your data (the "hot set"). Sizing your in-memory cache to comfortably hold that 20% hot set will satisfy the overwhelming majority of incoming traffic.
@@ -657,7 +646,6 @@ Temporary storage area **_in memory_** that stores either:
 
 Memory access is _faster_ than accessing secondary storage or data from a database. Hence, it is better for performance as it reduces the response time
 
-<a id="database-cache-tier"></a>
 ### Database Cache Tier
 
 Database data access is slower than reading data from a data cache. Hence:
@@ -681,7 +669,6 @@ Why? Cache is memory which is "_volatile_" which in turn means that if the cache
 
 ![data cache tier](https://i.imgur.com/UG96SC0.png)
 
-<a id="static-content-cache-with-cdns"></a>
 ### Static Content Cache with CDNs
 
 **What is a CDN?**
@@ -711,7 +698,6 @@ _CDN for dynamic content is a new concept and a lot more difficult to make work 
 
 ![cdn](https://i.imgur.com/UNpvhZR.png)
 
-<a id="can-a-cdn-be-a-single-point-of-failure-spof"></a>
 #### Can a CDN Be a Single Point of Failure (SPOF)?
 
 **Yes.** While an individual local edge server failing is handled automatically by routing traffic to the next nearest data center, **an entire CDN provider can experience a global outage**. Major incidents (such as global BGP routing misconfigurations, bad software deployments, or expired security certificates at providers like Cloudflare or Fastly) have famously taken down dozens of major platforms simultaneously.
@@ -758,7 +744,6 @@ In production, how you handle this depends on company size, budget, and SLA requ
                                                       [ Origin Server ]
 ```
 
-<a id="cache-considerations-for-both-data-and-static-assets"></a>
 ### Cache Considerations for Both Data and Static Assets
 
 > [!NOTE]
@@ -777,13 +762,11 @@ In production, how you handle this depends on company size, budget, and SLA requ
 6. **Cost**: _This pertains only to CDNs_. CDNs are usually 3rd party vendors (Ex: Cloudfront, Akamai, Cloudflare, etc) and caching things unnecessarily or replacing it unnecessarily can prove to be costly! (Check the point for expiration policy)
 7. **CDN fallback**: _This pertains only to CDNs_. If there is a temporary CDN outage, clients must be able to detect it and request a resource from the origin.
 
-<a id="managing-session-state-in-horizontally-scaled-web-servers"></a>
-## 👤 Managing Session State in Horizontally Scaled Web Servers
+## Managing Session State in Horizontally Scaled Web Servers
 
 > [!TIP]
 > **The Golden Rule of Web Tiers:** Keep web servers purely stateless. When web servers have zero local session state, scaling up/down or replacing crashed nodes is completely seamless.
 
-<a id="what-happens-if-session-data-is-not-separated"></a>
 ### What Happens if Session Data is Not Separated?
 
 **What is session state?**
@@ -820,7 +803,6 @@ Request 2 (Next click):
 
 ---
 
-<a id="the-recommended-approach-stateless-web-tier-with-shared-storage"></a>
 ### The Recommended Approach: Stateless Web Tier with Shared Storage
 
 To scale horizontally without friction, we must **decouple the state from the web servers**.
@@ -900,7 +882,6 @@ Stage 2: Any Subsequent Click (Database is completely bypassed!)
 
 ![Shared session state DB](https://i.imgur.com/j527SzM.png)
 
-<a id="can-the-shared-session-storage-become-an-spof"></a>
 #### Can the Shared Session Storage Become an SPOF?
 
 **Yes!** If you move all user sessions into a single Redis or database instance, and that server crashes or runs out of RAM, **every single user gets kicked out at once and no one can log in**. You eliminated the web server bottleneck, but shifted the Single Point of Failure to the shared session storage!
@@ -1016,8 +997,7 @@ Every 15 minutes (Token renewal - checks Redis):
 - **99% of user requests** fly through with $0\text{ ms}$ database latency using stateless JWT verification.
 - If a device is stolen, you immediately revoke the Refresh Token in Redis. Within at most 15 minutes, the thief is permanently locked out!
 
-<a id="complete-set-of-optimizations-for-one-single-data-center"></a>
-## 🏢 Complete Set of Optimizations for One Single Data Center
+## Complete Set of Optimizations for One Single Data Center
 
 **Start**: One single web server
 **Optimizations**:
@@ -1038,8 +1018,7 @@ Every 15 minutes (Token renewal - checks Redis):
 
 ![Single data center complete diagram](https://i.imgur.com/8pQsviO.png)
 
-<a id="scaling-for-users-across-multiple-geographical-areas"></a>
-## 🌐 Scaling for Users Across Multiple Geographical Areas
+## Scaling for Users Across Multiple Geographical Areas
 
 > [!NOTE]
 > **GeoDNS vs. Anycast Routing:** GeoDNS resolves domain names to regional IP addresses based on the user's location, while BGP Anycast routes the same public IP address to the nearest physical data center at the network routing layer.
@@ -1077,8 +1056,7 @@ _(Note: The shared session state database service will be better kept outside an
 
 ![Multiple data centers](https://i.imgur.com/CuBnKgX.png)
 
-<a id="decoupling-tiers-with-message-queues"></a>
-## 📬 Decoupling Tiers with Message Queues
+## Decoupling Tiers with Message Queues
 
 > [!TIP]
 > **Asynchronous Resilience:** Message queues prevent cascading failures by buffering bursts of traffic. If downstream workers go down, tasks remain safely queued rather than dropping user requests.
@@ -1105,7 +1083,6 @@ The basic architecture of a _Message Queue_ is that of a **producer-consumer**:
 
 ![Message queue](https://i.imgur.com/PQPR5tQ.png)
 
-<a id="can-a-message-queue-be-a-single-point-of-failure-spof"></a>
 ### Can a Message Queue Be a Single Point of Failure (SPOF)?
 
 **Yes!** If you deploy only a single message broker instance (e.g. one standalone RabbitMQ or Kafka server) and it crashes or runs out of disk space:
@@ -1152,7 +1129,6 @@ Message Queue High Availability (Leader-Follower Cluster):
 
 ---
 
-<a id="essential-message-queue-concepts-you-must-know"></a>
 ### Essential Message Queue Concepts You Must Know
 
 #### 1. Point-to-Point (Queue) vs. Publish-Subscribe (Pub/Sub)
@@ -1200,10 +1176,8 @@ Traffic Spike with Queue ("Shock Absorber"):
 - What happens if a corrupted, invalid message (a "poison pill") crashes a worker every time it tries to parse it?
 - Instead of retrying forever and repeatedly crashing workers, the queue counts failed retries (e.g., 3 attempts) and automatically reroutes the corrupted message to a **Dead Letter Queue (DLQ)**. This isolates the bad message for developer inspection while healthy traffic keeps flowing without interruption!
 
-<a id="scaling-databases-beyond-master-slave-replication-with-sharding"></a>
-## 🗄️ Scaling Databases Beyond Master-Slave Replication with Sharding
+## Scaling Databases Beyond Master-Slave Replication with Sharding
 
-<a id="why-master-slave-replication-falls-short-as-traffic-grows"></a>
 ### Why Master-Slave Replication Falls Short as Traffic Grows
 
 Up to this point, our primary tool for scaling the database tier has been **Master-Slave Replication**.
@@ -1289,14 +1263,12 @@ There are two options to scale DBs:
    3. Overall cost is higher (high capability systems cost a lot!)
 2. Horizontal scaling: Known as **"Sharding"** (Recommended)
 
-<a id="what-is-database-sharding"></a>
 ### What is Database Sharding?
 
 - It is the practice of adding more database servers.
 - It is not enough to just add more servers but we need to separate the database itself into smaller, more easily managed parts called **_"shards"_** .
 - Each shard shares the **_same schema_** but the actual data in each shard is unique to the shard
 
-<a id="how-sharding-works"></a>
 ### How Sharding Works
 
 > [!TIP]
@@ -1315,7 +1287,6 @@ It is important to find a **_sharding key that evenly distributes data_** to avo
 
 ![Database sharding](https://i.imgur.com/E7tbWhj.png)
 
-<a id="benefits-and-challenges-of-sharding"></a>
 ### Benefits and Challenges of Sharding
 
 #### Benefits of sharding
@@ -1424,8 +1395,7 @@ It introduces complexities and new challenges:
      * Full database index speed, zero cross-machine network calls!
    ```
 
-<a id="logging-metrics-and-automation"></a>
-## 📊 Logging, Metrics, and Automation
+## Logging, Metrics, and Automation
 
 > [!TIP]
 > **Observability Golden Signals:** Monitor the four golden signals: **Latency** (time to service requests), **Traffic** (demand), **Errors** (rate of failures), and **Saturation** (fraction of constrained resources like CPU/RAM used).
@@ -1440,8 +1410,7 @@ When serving a large business, investing in tools is important!
    - Key business metrics: Daily Active Users (DAUs), retention, revenue, etc
 3. **Automation**: CI/CD as a good practice to detect problems early and easily and to automate builds to improve developer productivity
 
-<a id="completely-scaled-fundamental-design-with-tips"></a>
-## 💡 Completely Scaled Fundamental Design with Tips
+## Completely Scaled Fundamental Design with Tips
 
 **8 tips to scale a system**:
 
